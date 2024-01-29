@@ -1,0 +1,895 @@
+#Efflux data analysis - last used 06/22/2023
+library(plyr)
+library(ggplot2)
+library(car)
+library(MASS)
+library(lme4)
+
+#pre monsoon season data ------------------------------------------------------------------
+bppre1.1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180606 bp.csv")
+bppre1.2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180606 bp 2.csv")
+bppre2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180621 bp.csv")
+bppre3 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180704 bp.csv")
+antpre1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180605 ant.csv")
+antpre2.1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180618 ant.csv")
+antpre2.2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180620 ant.csv")
+antpre3 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180702 ant.csv")
+bcpre1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180604 bc.csv")
+bcpre2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180620 bc.csv")
+bcpre3 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180705 bc.csv")
+arbpre1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180605 arb.csv")
+arbpre2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180619 arb.csv")
+arbpre3 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180703 arb.csv")
+ccpre1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180607 cc.csv")
+ccpre2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180619 cc.csv")
+ccpre3 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180703 cc.csv")
+
+#second pre trip -----
+antpresecond <- rbind(antpre1, antpre2)
+
+#get means for second pre trip
+#antelope
+antpre2means <- ddply(antpresecond, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(antpremeans)
+#means= data.frame(respmeans)
+
+#Arboretum
+arbpre2means <- ddply(arbpre2, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(arbpremeans)
+
+#Blue Chute
+bcpre2means <- ddply(bcpre1, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N),
+                    mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                    sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                    se_temp  = sd_temp / sqrt(N))
+#print(bcpremeans)
+
+#Black Point
+bppre1 <- rbind(bppre1.1, bppre1.2)
+bppre2means <- ddply(bppre1, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N),
+                    mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                    sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                    se_temp  = sd_temp / sqrt(N))
+#print(bppremeans)
+
+#Camp Colton
+ccpre2means <- ddply(ccpre1, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N),
+                    mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                    sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                    se_temp  = sd_temp / sqrt(N))
+#print(ccpremeans)
+
+#combine all means into one dataset
+pre2means <- rbind(antpre2means, arbpre2means, bcpre2means, bppre2means, ccpre2means)
+pre2means$SiteOrder = factor(pre2means$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Black Point","Antelope","BlueChute","Arboretum","Camp Colton")) 
+
+#graph second trip ------
+ggplot(data = pre2means, aes(x=SiteOrder, y=mean_Efflux, fill = Treatment)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Site") +
+  labs(y = "Soil CO2 Efflux (mol/m2/s)") +
+  facet_wrap(~Microsite, scales = "free_x") + #tried without facet wrap and r puts Can and IC bars on top of one another
+  scale_fill_manual(values = c("blue", "gray", "red"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.75),
+    panel.background = element_blank(),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+
+#third pre trip -------
+#get means for third pre trip
+#antelope
+antpre3means <- ddply(antpre3, c("site","Treatment","Microsite","Plot"), summarise,
+                      N    = sum(!is.na(EFFLUX)),
+                      mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                      sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                      se_Efflux  = sd_Efflux / sqrt(N),
+                      mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                      sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                      se_temp  = sd_temp / sqrt(N))
+#print(antpremeans)
+#means= data.frame(respmeans)
+
+#Arboretum
+arbpre3means <- ddply(arbpre3, c("site","Treatment","Microsite","Plot"), summarise,
+                      N    = sum(!is.na(EFFLUX)),
+                      mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                      sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                      se_Efflux  = sd_Efflux / sqrt(N),
+                      mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                      sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                      se_temp  = sd_temp / sqrt(N))
+#print(arbpremeans)
+
+#Blue Chute
+bcpre3means <- ddply(bcpre2, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(bcpremeans)
+
+#Black Point
+bppre3means <- ddply(bppre2, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(bppremeans)
+
+#Camp Colton
+ccpre3means <- ddply(ccpre2, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(ccpremeans)
+
+
+
+#overall pre measurements -----
+bppre <- rbind(bppre1.1, bppre1.2,bppre2, bppre3)
+antpre <- rbind(antpre1, antpre2.1, antpre2.2, antpre3)
+bcpre <- rbind(bcpre1, bcpre2, bcpre3)
+arbpre <- rbind(arbpre1, arbpre2, arbpre3)
+ccpre <- rbind(ccpre1, ccpre2, ccpre3)
+
+# I think we had issues with some time points allpredata <- rbind(bppre,antpre,bcpre,ccpre,bpprefirst,antprefirst,bcprefirst,arbprefirst,ccprefirst)
+allpredata <- rbind(bppre,antpre,bcpre,arbpre,ccpre)
+allpredata$Monsoon <- 'pre'
+
+#remove old dataframes
+# rm(bppre1,bppre2,antpre1,antpre2,antpre3,bcpre1,bcpre2,arbpre1,arbpre2,ccpre1,ccpre2)
+
+#obtain means of efflux per plot and cover type
+#antelope
+antpremeans <- ddply(antpre, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N), 
+                    mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                    sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                    se_temp  = sd_temp / sqrt(N))
+                    
+#print(antpremeans)
+#means= data.frame(respmeans)
+
+#Arboretum
+arbpremeans <- ddply(arbpre, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N), 
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(arbpremeans)
+
+#Blue Chute
+bcpremeans <- ddply(bcpre, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(bcpremeans)
+
+#Black Point
+bppremeans <- ddply(bppre, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(bppremeans)
+
+#Camp Colton
+ccpremeans <- ddply(ccpre, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(ccpremeans)
+
+#combine all means into one dataset
+premeans <- rbind(antpremeans, arbpremeans, bcpremeans, bppremeans, ccpremeans)
+premeans$SiteOrder = factor(premeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Black Point","Antelope","BlueChute","Arboretum","Camp Colton")) 
+premeans$TreatmentOrder = factor(premeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exl","Ctrl","Add")) 
+
+#combine all means into one dataset
+pre3means <- rbind(antpre3means, arbpre3means, bcpre3means, bppre3means, ccpre3means)
+pre3means$SiteOrder = factor(pre3means$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Black Point","Antelope","BlueChute","Arboretum","Camp Colton")) 
+
+#graph third trip ------
+ggplot(data = pre3means, aes(x=SiteOrder, y=mean_Efflux, fill = Treatment)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Site") +
+  labs(y = "Soil CO2 Efflux (mol/m2/s)") +
+  facet_wrap(~Microsite, scales = "free_x") + #tried without facet wrap and r puts Can and IC bars on top of one another
+  scale_fill_manual(values = c("blue", "gray", "red"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.75),
+    panel.background = element_blank(),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+
+
+#pre monsoon graph------
+premeans$TreatmentOrder = factor(premeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exl","Ctrl","Add")) 
+
+ggplot(data = premeans, aes(x=SiteOrder, y=mean_Efflux, fill = TreatmentOrder)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Site") +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  theme_grey(base_size = 22) +
+  ylim(0,4.25)+
+  facet_wrap(~Microsite, scales = "free_x") + #tried without facet wrap and r puts Can and IC bars on top of one another
+  scale_fill_manual(values = c("#de2d26", "#bdbdbd", "#08519c"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.75),
+    panel.background = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+
+#first pre trip -------
+bc1pre = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180604 bc.csv") 
+ant1pre = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180605 ant.csv")
+arb1pre = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180605 arb.csv")
+bp12pre = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180606 bp 2.csv")
+bp1pre = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180606 bp.csv")
+ant12pre = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180607 ant.csv")
+cc1pre = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180607 cc.csv")
+
+# combine data
+bpprefirst <- rbind(bp1pre, bp12pre)
+antprefirst <- rbind(ant1pre, ant12pre)
+bcprefirst <- bc1pre
+arbprefirst <- arb1pre
+ccprefirst <- cc1pre
+
+# remove old dataframes
+# rm(bp1pre,bp12pre,ant1pre,ant12pre,bc1pre,arb1pre,cc1pre)
+
+# obtain means of efflux per plot and cover type
+# antelope
+antpre1means <- ddply(antprefirst, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N))
+#print(antpremeans)
+#means= data.frame(respmeans)
+
+#Arboretum
+arbpr1emeans <- ddply(arbprefirst, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N))
+#print(arbpremeans)
+
+#Blue Chute
+bcpre1means <- ddply(bcprefirst, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N))
+#print(bcpremeans)
+
+#Black Point
+bppre1means <- ddply(bpprefirst, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N))
+#print(bppremeans)
+
+#Camp Colton
+ccpre1means <- ddply(ccprefirst, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N),
+                    mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                    sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                    se_temp  = sd_temp / sqrt(N))
+#print(ccpremeans)
+
+#combine all means into one dataset
+firstpremeans <- rbind(antpre1means, arbpr1emeans, bcpre1means, bppre1means, ccpre1means)
+firstpremeans$SiteOrder = factor(firstpremeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Black Point","Antelope","BlueChute","Arboretum","Camp Colton")) 
+
+#graph first pre trip ------
+ggplot(data = firstpremeans, aes(x=SiteOrder, y=mean_Efflux, fill = Treatment)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Site") +
+  labs(y = "Soil CO2 Efflux (mol/m2/s)") +
+  facet_wrap(~Microsite, scales = "free_x") + #tried without facet wrap and r puts Can and IC bars on top of one another
+  scale_fill_manual(values = c("blue", "gray", "red"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.75),
+    panel.background = element_blank(),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+
+
+#graph of pre camp colton means--------
+ccpretrips <- rbind(ccpre1means, ccpre2means,ccpre3means)
+ccpretrips$date <- as.character(ccpretrips$date)
+
+ggplot(data = ccpretrips, aes(x=date, y=mean_Efflux, fill = Treatment)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Site") +
+  labs(y = "Soil CO2 Efflux (µmol/m2/s)") +
+  facet_wrap(~Microsite, scales = "free_x") + #tried without facet wrap and r puts Can and IC bars on top of one another
+  scale_fill_manual(values = c("blue", "gray", "red"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.75),
+    panel.background = element_blank(),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+
+
+#peak monsoon data ------------------------------------------------------------------------
+
+bppeak1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180726 bp.csv")
+bppeak2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180816 bp.csv")
+antpeak1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180723 ant.csv")
+antpeak2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180814 ant.csv")
+antpeak3 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180817 ant.csv")
+bcpeak1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180725 bc.csv")
+bcpeak2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180815 bc.csv")
+arbpeak1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180724 arb.csv")
+arbpeak2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180814 arb.csv")
+ccpeak1 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180724 cc.csv")
+ccpeak2 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180725 cc.csv")
+ccpeak3 = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180815 cc.csv")
+
+#combine dataframes
+
+bppeak <- rbind(bppeak1, bppeak2)
+antpeak <- rbind(antpeak1, antpeak2, antpeak3)
+bcpeak <- rbind(bcpeak1, bcpeak2)
+arbpeak <- rbind(arbpeak1, arbpeak2)
+ccpeak <- rbind(ccpeak1, ccpeak2, ccpeak3)
+
+#remove old  files
+rm(bppeak1,bppeak2,antpeak1,antpeak2,antpeak3,bcpeak1, bcpeak2,arbpeak1,arbpeak2,ccpeak1,ccpeak2,ccpeak3)
+
+#obtain means of efflux per plot and cover type
+#antelope
+antpeakmeans <- ddply(antpeak, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(antpeakmeans)
+
+#Arboretum
+arbpeakmeans <- ddply(arbpre, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(antpremeans)
+
+#Blue Chute
+bcpeakmeans <- ddply(bcpeak, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N),
+                    mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                    sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                    se_temp  = sd_temp / sqrt(N))
+#print(bcpremeans)
+
+#Black Point
+bppeakmeans <- ddply(bppeak, c("site","Treatment","Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N),
+                    mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                    sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                    se_temp  = sd_temp / sqrt(N))
+#print(bppremeans)
+
+#Camp Colton
+ccpeakmeans <- ddply(ccpeak, c("site","Treatment", "Microsite","Plot"), summarise,
+                    N    = sum(!is.na(EFFLUX)),
+                    mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                    sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                    se_Efflux  = sd_Efflux / sqrt(N),
+                    mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                    sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                    se_temp  = sd_temp / sqrt(N))
+#print(ccpremeans)
+
+#combine all means into one dataset
+peakmeans <- rbind(antpeakmeans, arbpeakmeans, bcpeakmeans, bppeakmeans, ccpeakmeans)
+peakmeans$SiteOrder = factor(peakmeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Black Point","Antelope","Blue Chute","Arboretum","Camp Colton")) 
+
+#peak monsoon graph -----
+peakmeans$TreatmentOrder = factor(peakmeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exl","Ctrl","Add")) 
+
+ggplot(data = peakmeans, aes(x=SiteOrder, y=mean_Efflux, fill = TreatmentOrder)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Site") +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  theme_grey(base_size = 22) +
+  ylim(0,5.75)+
+  facet_wrap(~Microsite, scales = "free_x") + #tried without facet wrap and r puts Can and IC bars on top of one another
+  scale_fill_manual(values = c("red", "gray", "blue"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.75),
+    panel.background = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+theme_set(theme_grey(base_size = 30)) #increase font for session
+
+ 
+
+#Peak Monsoon vs temp graph, need to add plot to mean calculations if I want to redo this graph
+#combine all original data
+allpeakdata <- rbind (bppeak,antpeak,bcpeak,arbpeak,ccpeak)
+allpeakdata$Monsoon <- 'peak'
+ 
+ggplot(data = peakmeans, aes(x= mean_temp, y=mean_Efflux, color = Treatment)) + 
+  geom_point(position = "identity", aes(shape=site)) +
+  labs(x = "Temperature (C)") +
+  labs(y = "Soil CO2 Efflux (µmol/m2/s)") +
+  facet_wrap(~Microsite, scales = "free_x") + 
+  scale_color_manual(values = c("blue", "gray", "red"))+
+  scale_shape_manual(values=c(15,16,17,18,4)) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.9,.75),
+    panel.background = element_blank(),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment"))
+
+#CC only data by trip
+cc1peak <- rbind(ccpeak1,ccpeak2)
+ccpeak1means <- ddply(cc1peak, c("site","date","Treatment","Microsite"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N))
+ccpeak2means <- ddply(ccpeak3, c("site","date","Treatment","Microsite"), summarise,
+                      N    = sum(!is.na(EFFLUX)),
+                      mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                      sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                      se_Efflux  = sd_Efflux / sqrt(N))
+ccpeaktrips <- rbind(ccpeak1means,ccpeak2means)
+ccpeaktrips$date <- as.character(ccpeaktrips$date)
+
+ggplot(data = ccpeaktrips, aes(x=date, y=mean_Efflux, fill = Treatment)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Site") +
+  labs(y = "Soil CO2 Efflux (µmol/m2/s)") +
+  facet_wrap(~Microsite, scales = "free_x") + #tried without facet wrap and r puts Can and IC bars on top of one another
+  scale_fill_manual(values = c("blue", "gray", "red"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.9,.75),
+    panel.background = element_blank(),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+
+
+#post monsoon data -----------------------------------------------------------------------
+bppost = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180913 bp.csv")
+antpost = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180914 ant.csv")
+bcpost = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180912 bc.csv")
+arbpost = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180911 arb.csv")
+ccpost = read.csv("~/Documents/Masters/Research/Respiration Data/CSV data/180912 cc.csv")
+
+allpostdata <- rbind (bppost,antpost,bcpost,arbpost,ccpost)
+allpostdata$Monsoon <- 'post'
+
+#obtain means of efflux per plot and cover type
+#antelope
+antpostmeans <- ddply(antpost, c("site","Treatment","Microsite","Plot"), summarise,
+                      N    = sum(!is.na(EFFLUX)),
+                      mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                      sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                      se_Efflux  = sd_Efflux / sqrt(N),
+                      mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                      sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                      se_temp  = sd_temp / sqrt(N))
+                      
+#print(antpeakmeans)
+
+#Arboretum
+arbpostmeans <- ddply(arbpost, c("site","Treatment","Microsite","Plot"), summarise,
+                      N    = sum(!is.na(EFFLUX)),
+                      mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                      sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                      se_Efflux  = sd_Efflux / sqrt(N),
+                      mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                      sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                      se_temp  = sd_temp / sqrt(N))
+#print(antpremeans)
+
+#Blue Chute
+bcpostmeans <- ddply(bcpost, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(bcpremeans)
+
+#Black Point
+bppostmeans <- ddply(bppost, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(bppremeans)
+
+#Camp Colton
+ccpostmeans <- ddply(ccpost, c("site","Treatment","Microsite","Plot"), summarise,
+                     N    = sum(!is.na(EFFLUX)),
+                     mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+                     sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+                     se_Efflux  = sd_Efflux / sqrt(N),
+                     mean_temp = mean(Tsoil_C, na.rm=TRUE),
+                     sd_temp = sd(Tsoil_C, na.rm=TRUE),
+                     se_temp  = sd_temp / sqrt(N))
+#print(ccpremeans)
+
+#combine all means into one dataset
+postmeans <- rbind(antpostmeans, arbpostmeans, bcpostmeans, bppostmeans, ccpostmeans)
+postmeans$SiteOrder = factor(postmeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Black Point","Antelope","BlueChute","Arboretum","Camp Colton")) 
+
+#post monsoon graph ------
+postmeans$TreatmentOrder = factor(postmeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exl","Ctrl","Add")) 
+
+ggplot(data = postmeans, aes(x=SiteOrder, y=mean_Efflux, fill = TreatmentOrder)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Site") +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  theme_grey(base_size = 22) +
+  facet_wrap(~Microsite, scales = "free_x") + #tried without facet wrap and r puts Can and IC bars on top of one another
+  scale_fill_manual(values = c("red", "gray", "blue"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.75),
+    panel.background = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+theme_set(theme_grey(base_size = 22)) #increase font for session
+
+
+#all resp data with date and moisture-----------
+allresp <- rbind(allpredata,allpeakdata,allpostdata)
+allrespmeans<- ddply(allresp, c("site","Plot","Monsoon","date","Treatment","Microsite"), summarise,
+      N    = sum(!is.na(EFFLUX)),
+      mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+      sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+      se_Efflux  = sd_Efflux / sqrt(N),
+      mean_temp = mean(Tsoil_C, na.rm=TRUE),
+      sd_temp = sd(Tsoil_C, na.rm=TRUE),
+      se_temp  = sd_temp / sqrt(N))
+allrespmeans$N = NULL
+respandmoisture <- merge(allrespmeans,dailymoisturemeans)
+respandmoisture$SiteOrder = factor(respandmoisture$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels= c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+respandmoisture$MonsoonOrder = factor(respandmoisture$Monsoon, levels=c("pre","peak","post"), labels=c("Pre","Peak","Post")) 
+
+#graph resp vs moisture
+ggplot(data = respandmoisture, aes(x= mean_VWC, y=mean_Efflux,color = Treatment)) + 
+  geom_point(position = "identity", size = 2) +
+  facet_wrap(~SiteOrder, ncol = 5, labeller = labeller(SiteOrder = label_wrap_gen(width = 15),SiteOrder = label_wrap_gen(width = 20))) +
+  stat_smooth(aes(group = 1), color="black", method = "lm", se = FALSE, formula = y ~ x) +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  xlab(expression(paste(Volumetric~Water~Content~(m^{3}~water~m^{-3}~soil))))+
+  theme_grey(base_size = 20) +
+  scale_shape_manual(values=c(15,16,17,0,4), name = "Site") +
+  scale_color_manual(values=c("#de2d26","#bdbdbd","#08519c"  ),labels = c ("Exclusion","Ambient","Addition"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = "none",
+    panel.background = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA)) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=0, position="identity")+
+  geom_errorbarh(aes(xmin=mean_VWC-se_VWC, xmax=mean_VWC+se_VWC), width=0, position="identity")
+
+# ggsave("RespVsVWC.png",plot = last_plot(),
+#        path="~/Documents/Masters/Research/Writing/Paper/Figures for Paper/",
+#        height=7,width=12,units="in",dpi=1000)
+
+#want to try with SWP
+respandSWP <- merge(allrespmeans,dailySWPmeans)
+respandSWP$SiteOrder = factor(respandSWP$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels= c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+respandSWP$MonsoonOrder = factor(respandSWP$Monsoon, levels=c("pre","peak","post"), labels=c("Pre","Peak","Post")) 
+
+#graph resp vs SWP
+ggplot(data = respandSWP, aes(x= mean_SWP, y=mean_Efflux, color = Treatment)) + 
+  geom_point(position = "identity", aes(shape=SiteOrder)) +
+  stat_smooth(aes(group = 1), color="black", method = "lm", se = FALSE, formula = y ~ x) +
+  #facet_wrap(~MonsoonOrder, scales = "free_x") +
+  #scale_y_continuous(sec.axis = sec_axis(~.*5, name = "Temperature (C)"))+
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  xlab(expression(paste(Soil~Water~Potential~(MPa))))+
+  theme_grey(base_size = 22) +
+  #scale_color_manual(values = c("blue", "gray", "red"), labels = c("Addition","Ambient","Exclusion"))+
+  scale_shape_manual(values=c(15,16,17,0,4), name = "Site")+ #, labels = c ("Desert","Grassland","Pinyon-Juniper","Ponderosa","Mixed-Conifer")) +
+  scale_color_manual(values=c("#08519c", "#bdbdbd", "#de2d26")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.17,.85),
+    legend.box = "horizontal",
+    panel.background = element_blank(),
+    #axis.text=element_text(size=20),
+    panel.border = element_rect(color = "black", fill = NA))+
+guides(fill=guide_legend(title="Treatment"))
+
+#linear model
+rmlm <- lm(mean_Efflux ~ mean_VWC + site, data = respandmoisture)
+summary(rmlm)
+Anova(rmlm)
+
+# lmm-------
+#add seasonality columns (need to add temp to pre and post)
+premeans$season <- 'pre'
+peakmeans$season <- 'peak'
+postmeans$season <- 'post'
+
+#combine
+allseasonmeans <- rbind(premeans,peakmeans,postmeans)
+
+#all season means combining plot
+allseasonsitemeans <- ddply(allseasonmeans, c("site","Treatment","Microsite","season"), summarise,
+                     N    = sum(!is.na(mean_Efflux)),
+                     meanEfflux = mean(mean_Efflux, na.rm=TRUE),
+                     sdEfflux = sd(mean_Efflux, na.rm=TRUE),
+                     se_Efflux  = sdEfflux / sqrt(N),
+                     meantemp = mean(mean_temp, na.rm=TRUE),
+                     sdtemp = sd(mean_temp, na.rm=TRUE),
+                     se_temp  = sdtemp / sqrt(N))
+
+allseasonsitemeans$SiteOrder = factor(allseasonsitemeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("BP","ANT","BC","ARB","CC")) 
+allseasonsitemeans$MonsoonOrder = factor(allseasonsitemeans$season, levels=c("pre","peak","post"), labels=c("Pre","Peak","Post")) 
+allseasonsitemeans$TreatmentOrder = factor(allseasonsitemeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exclusion","Ambient","Addition")) 
+allseasonsitemeans$Microsite <- factor(allseasonsitemeans$Microsite, levels = c("Can", "IC"), labels = c("Canopy", "Inter Canopy"))
+
+#graph of season means by microsite
+ggplot(data = allseasonsitemeans, aes(x= SiteOrder, y=meanEfflux, fill = TreatmentOrder)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(MonsoonOrder~Microsite, scales = "free_x") +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  xlab(expression(paste(Site)))+
+  theme_grey(base_size = 22) +
+  scale_fill_manual(values=c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.85),
+    #legend.box = "horizontal",
+    panel.background = element_blank(),
+    #axis.text=element_text(size=20),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment"))
+
+
+#check normality
+shapiro.test(allmeans$mean_Efflux)
+#not normal p-value = 2.773e-09
+qqp(allmeans$mean_Efflux, "lnorm") #use log normal
+
+#linear mixed model, don't have plot in the dataframe so I can't use it as a random effect
+lmm <- lmer(mean_Efflux ~ site + Treatment + Microsite + (1 | Plot), data = allmeans,
+            REML = FALSE)
+
+#linear model
+resplm <- lm(mean_Efflux ~ site + Treatment + Microsite + season, data = allmeans)
+summary(resplm)
+aov(resplm) #Estimated effects may be unbalanced
+summary(aov(resplm))
+TukeyHSD(aov(resplm))
+
+#using respandSWP data - changed  to use VWC data
+#allmeans has resp means with microsite - use this to justify combining microsite data
+summary(lm(EFFLUX ~ site + Treatment + Tsoil_C, data=respandmoisture))
+summary(lmer(EFFLUX ~ site + Treatment + Microsite + (1 | Plot), data = respandmoisture,
+     REML = FALSE))
+#including Tsoil_C makes AIC value 3643.4 and removing it makes AIC value 3644.5
+#including mean_VWC makes AIC 3303.2
+#everything after ~ is a response variable and in () is the random variable
+summary(lmm)
+Anova(lmm)
+allresplm <- lm(mean_Efflux ~ site + Treatment + Microsite, data=respandmoisture)
+#microsite not significant
+summary(aov(mean_Efflux ~ site + Treatment + Microsite + mean_temp * mean_VWC, data=respandmoisture))
+#all data
+summary(aov(mean_Efflux ~ site + Treatment + Microsite + Monsoon, data=respandmoisture))
+#BC,ARB,and CC different than BP and ANT
+#pre different than peak and post
+#VWC significant
+TukeyHSD(aov(mean_Efflux ~ site + Treatment + Microsite + Monsoon, data=respandmoisture))
+
+#peak monsoon season
+respandVWCpeak <- subset(respandmoisture, respandmoisture[ , 4] == 'peak')  
+summary(lm(mean_Efflux ~ Treatment, data=respandVWCpeak)) 
+#treatment is not significant
+summary(lm(mean_Efflux ~ site + Treatment, data=respandVWCpeak)) 
+#BC,ARB,and CC different than BP and ANT
+#treatment is not significant
+summary(lm(mean_Efflux ~ site * Treatment, data=respandVWCpeak)) 
+#no interactions significant, only CC addition significant 
+summary(lm(mean_Efflux ~ site + Treatment + mean_VWC, data=respandVWCpeak))
+#BC,ARB,and CC different than BP and ANT
+#treatment and VWC not significant 
+summary(lm(mean_Efflux ~  Treatment + mean_VWC, data=respandVWCpeak))
+
+
+#pre monsoon season
+respandSWPpre <- subset(respandSWP, respandSWP[ , 4] == 'pre')  
+summary(lm(mean_Efflux ~ Treatment, data=respandSWPpre))
+summary(lm(mean_Efflux ~ site + Treatment, data=respandSWPpre))
+summary(lm(mean_Efflux ~ site * Treatment, data=respandSWPpre)) #don't have enough data for this to work
+summary(lm(mean_Efflux ~ site + Treatment + meanSWP, data=respandSWPpre))
+
+#site, microsite, season, treatment
+summary(aov(mean_Efflux ~ SiteOrder + Treatment + Monsoon + Microsite, data=allrespmeans))
+
+# respiration data vs time for each trip ----
+
+allrespmeans$TreatmentOrder = factor(allrespmeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exclusion","Ambient","Addition")) 
+allrespmeans$SiteOrder = factor(allrespmeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Black Point","Antelope","BlueChute","Arboretum","Camp Colton")) 
+allresptimemeans <- ddply(allrespmeans, c("site","Treatment","date"), summarise,
+                            N    = sum(!is.na(mean_Efflux)),
+                            meanEfflux = mean(mean_Efflux, na.rm=TRUE),
+                            sdEfflux = sd(mean_Efflux, na.rm=TRUE),
+                            se_Efflux  = sdEfflux / sqrt(N))
+
+allresptimemeans$TreatmentOrder = factor(allresptimemeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exclusion","Ambient","Addition")) 
+allresptimemeans$SiteOrder = factor(allresptimemeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+
+# all resp vs time ----
+ggplot(data = allresptimemeans, aes(x= date, y=meanEfflux, color = TreatmentOrder)) + 
+  geom_point(stat = "identity", position = "dodge") +
+  facet_wrap(~SiteOrder, scales = "free_x", ncol = 5, labeller = labeller(SiteOrder = label_wrap_gen(width = 15),SiteOrder = label_wrap_gen(width = 20))) +
+  stat_smooth(aes(group = TreatmentOrder), method = "lm", se = FALSE, formula = y ~ x) +
+  scale_y_continuous(limits=c(0,7.5), breaks = c(0,2,4,6))+
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  xlab(expression(paste(Time)))+
+  theme_grey(base_size = 18) +
+  annotate('rect', xmin=180606, xmax=180714, ymin=0, ymax=7.5, alpha=.2, fill='red') +
+  annotate('rect', xmin=180714.01, xmax=180829, ymin=0, ymax=7.5, alpha=.2, fill='blue') +
+  annotate('rect', xmin=180829.1, xmax=180912, ymin=0, ymax=7.5, alpha=.2, fill='green') +
+  scale_color_manual(name = "Treatment" , values=c("#de2d26", "#bdbdbd", "#08519c")) +
+   theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = "none",
+    #legend.box = "horizontal",
+    panel.background = element_blank(),
+    axis.text.x = element_blank(), #(element_text(angle = 45, vjust = 1, hjust=1)),
+    axis.text  = element_text(size=15),
+    panel.border = element_rect(color = "black", fill = NA))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=meanEfflux-se_Efflux, ymax=meanEfflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+  
+# ggsave("RespVsTime.png",plot = last_plot(),
+#        path="~/Documents/Masters/Research/Writing/Paper/Figures for Paper/",
+#        height=5,width=12,units="in",dpi=1000)
+
+#resp means by season ----
+# used this for stats in paper 
+meanseasonresp <-  ddply(allrespmeans, c("site","Treatment","Microsite","Monsoon"), summarise,
+                         N    = sum(!is.na(mean_Efflux)),
+                         mean_Efflux2 = mean(mean_Efflux, na.rm=TRUE),
+                         sd_Efflux2 = sd(mean_Efflux, na.rm=TRUE),
+                         se_Efflux2  = sd_Efflux2 / sqrt(N),
+                         mean_temp2 = mean(mean_temp, na.rm=TRUE),
+                         sd_temp2 = sd(mean_temp, na.rm=TRUE),
+                         se_temp2  = sd_temp2 / sqrt(N))
+respAOV <- (aov(mean_Efflux2 ~ site + Treatment + Monsoon + Microsite, data=meanseasonresp))
+summary(respAOV)
