@@ -13,4 +13,4 @@ The project is structured with the following folders:
 Contact Information
 
 Heather Throop: heather.throop@asu.edu 
-Brittney Monus: 
+Brittney Monus: bmonus@ufl.edu
