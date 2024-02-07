@@ -1,0 +1,45 @@
+---
+title: "Monus_GRaMPS"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Initial Set Up
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+## ANPP
+
+```{r}
+# load in 2018 ANPP data
+ANPP_df <- read_csv(here("data","ANPP.csv"))
+
+# sum ANPP data for each individual quadrat
+### CHECK WITH SETH - there is some mis-alignment with his data workup, which seems to be from ANT plot 2 listed as both control and water?
+ANPP_by_quadrat <- ANPP_df |>
+  group_by(Site, Treatment, Plot, Quadrat) |>
+  summarize(Quad_mass = sum(Mass, na.rm=TRUE))
+
+# reduce ANPP data to means for each quadrat
+### CHECK WITH SETH - not all plot have two quadrats. Not always four replicate plots per treatment x site combination (sometimes there are 3, sometimes there are 5). Note that there should be only 4 plot reps per treatment. 
+ANPP_by_plot <- ANPP_by_quadrat |>
+  group_by(Site, Treatment, Plot) |>
+  summarize(Plot_mass = mean(Quad_mass, na.rm=TRUE),
+            N_quads    = count(Site))
+
+# reduce ANPP data to means for site x treatment combination
+ANPP_by_trt <- ANPP_by_plot |>
+  group_by(Site, Treatment) |>
+  summarize(Plot_mass = mean(Plot_mass, na.rm=TRUE))
+```
+
+## Root Biomass
+
+```{r}
+
+```
