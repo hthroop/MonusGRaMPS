@@ -17,29 +17,117 @@ library(here)
 
 ```{r}
 # load in 2018 ANPP data
-ANPP_df <- read_csv(here("data","ANPP.csv"))
+ANPP_df <- read_csv(here("data","ANPP.csv"), show_col_types = FALSE)
 
-# sum ANPP data for each individual quadrat
-### CHECK WITH SETH - there is some mis-alignment with his data workup, which seems to be from ANT plot 2 listed as both control and water?
-ANPP_by_quadrat <- ANPP_df |>
+# Change treatment names to align with Monus data sets
+ANPP_df <- ANPP_df |>
+    mutate(
+    Treatment = as.factor(Treatment) |> 
+      recode_factor(C = "Ctrl", D = "Exl", W = "Add"))
+
+# calculate canopy cover for each Observation 
+# From Seth "To calculate total vegetation cover per quadrat, multiply the canopy cover value by the count, then sum all these products for every species in the quadrat....It sounds like Brittney used plot as a level of replication, so could take average of the 2 quadrats in each plot. "
+ANPP_df <- ANPP_df |>
+    mutate(
+    Canopy_coverXcount = Canopy_cover * Count)
+
+# sum Canopy_coverXcount and ANPP for each species within individual quadrats
+# note that per HT's conversation (2024-03-27) with SM, ANPP already has 'count' taken into account, no need to multiple it
+ANPP_by_spp_by_quadrat <- ANPP_df |>
+  group_by(Site, Treatment, Plot, Quadrat, Species) |>
+  summarize(
+    CanopyCoverBySpp = sum(Canopy_coverXcount, na.rm=TRUE),
+    ANPPBySpp = sum(NPP_g_m2, na.rm=TRUE)) 
+
+# sum canopy cover and ANPP data for all species within each quadrat
+ANPP_by_quadrat <- ANPP_by_spp_by_quadrat |>
   group_by(Site, Treatment, Plot, Quadrat) |>
-  summarize(Quad_mass = sum(Mass, na.rm=TRUE))
+  summarize(
+    QuadCanopyCover = sum(CanopyCoverBySpp, na.rm=TRUE),
+    QuadANPP = sum(ANPPBySpp, na.rm=TRUE)) 
 
-# reduce ANPP data to means for each quadrat
-### CHECK WITH SETH - not all plot have two quadrats. Not always four replicate plots per treatment x site combination (sometimes there are 3, sometimes there are 5). Note that there should be only 4 plot reps per treatment. 
+# reduce cover and ANPP data to means for each quadrat
 ANPP_by_plot <- ANPP_by_quadrat |>
   group_by(Site, Treatment, Plot) |>
-  summarize(Plot_mass = mean(Quad_mass, na.rm=TRUE),
-            N_quads    = count(Site))
+  summarize(
+    plot_mean_Cover = mean(QuadCanopyCover, na.rm=TRUE),
+    plot_mean_ANPP = mean(QuadANPP, na.rm=TRUE),
+    n_quadrats    = n())
 
-# reduce ANPP data to means for site x treatment combination
+# reduce ANPP and cover data to means for site x treatment combination
 ANPP_by_trt <- ANPP_by_plot |>
   group_by(Site, Treatment) |>
-  summarize(Plot_mass = mean(Plot_mass, na.rm=TRUE))
+  summarize(
+    n_plots = n(),
+    mean_ANPP = mean(plot_mean_ANPP, na.rm=TRUE),
+    sd_ANPP = sd(plot_mean_ANPP),
+    se_ANPP = sd_ANPP/sqrt(n_plots),
+    mean_Cover = mean(plot_mean_Cover, na.rm=TRUE),
+    sd_Cover = sd(plot_mean_Cover),
+    se_Cover = sd_Cover/sqrt(n_plots)
+    )
+
+# quick plot to look at mass versus cover
+plot(x = ANPP_by_trt$mean_ANPP, y = ANPP_by_trt$mean_Cover)
 ```
 
 ## Root Biomass
 
 ```{r}
+# load in root biomass data
+root_biomass_df <- read_csv(here("data","RootBiomass.csv"), show_col_types = FALSE)
 
+# Convert from long to wide format for root core depth
+root_biomass_wide_df <- root_biomass_df |>
+  pivot_wider(names_from = Depth, values_from = Root_mass,
+              names_prefix = "Root_mass_")
+
+# do a second pivot wider to separate out the two microsites
+root_biomass_wide_df <- root_biomass_wide_df |>
+  pivot_wider(names_from = Microsite, values_from = c(Root_mass_upper,
+                                                      Root_mass_lower),
+              names_sep = "_")
+
+# Add core depths together 
+# Calculate roots biomass in units of g m-2, based on the 7 cm diameter corer
+root_biomass_wide_df <- root_biomass_wide_df |>
+    mutate(
+    Root_mass_Can = Root_mass_upper_Can + Root_mass_lower_Can,
+    Root_mass_IC = Root_mass_upper_IC + Root_mass_lower_IC,
+    Root_mass_Can_gm2 = Root_mass_Can /((3.14159*3.5^2)/(100*100)),
+    Root_mass_IC_gm2 = Root_mass_IC / ((3.14159*3.5^2)/(100*100))
+    )
+
+```
+
+## Combined ANPP and Root Biomass
+
+```{r}
+# group by depth and canopy
+ANPPandRoot_df <- left_join(ANPP_by_plot, root_biomass_wide_df, by = c("Site", "Treatment", "Plot"))
+
+# calculate area-weighted root biomass
+ANPPandRoot_df <- ANPPandRoot_df |>
+    mutate(
+    Root_mass_Can_gm2_weighted = Root_mass_Can_gm2 * plot_mean_Cover/100,
+    Root_mass_IC_gm2_weighted = Root_mass_IC_gm2 * (1-plot_mean_Cover/100),
+    Root_mass_total_gm2 = Root_mass_Can_gm2_weighted + Root_mass_IC_gm2_weighted
+    )
+
+# quick plot to look at mass versus cover
+plot(x = ANPPandRoot_df$Root_mass_total_gm2, y = ANPPandRoot_df$plot_mean_ANPP)
+
+# reduce ANPP and root biomass to means for site x treatment combination
+ANPP_roots_by_trt <- ANPPandRoot_df |>
+  group_by(Site, Treatment) |>
+  summarize(
+    n_plots = sum(!is.na(plot_mean_ANPP)),
+    mean_ANPP = mean(plot_mean_ANPP, na.rm=TRUE),
+    sd_ANPP = sd(plot_mean_ANPP, na.rm=TRUE),
+    se_ANPP = sd_ANPP/sqrt(n_plots),
+    n_roots = sum(!is.na(Root_mass_total_gm2)),
+    mean_Root_gm2 = mean(Root_mass_total_gm2, na.rm=TRUE),
+    sd_Root_gm2 = sd(Root_mass_total_gm2, na.rm=TRUE),
+    se_Root_gm2 = sd_Root_gm2/sqrt(n_roots)
+    )
 ```
