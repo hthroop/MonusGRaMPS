@@ -130,4 +130,5 @@ ANPP_roots_by_trt <- ANPPandRoot_df |>
     sd_Root_gm2 = sd(Root_mass_total_gm2, na.rm=TRUE),
     se_Root_gm2 = sd_Root_gm2/sqrt(n_roots)
     )
+
 ```
