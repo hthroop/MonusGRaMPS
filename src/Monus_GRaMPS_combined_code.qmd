@@ -46,7 +46,7 @@ ANPP_by_quadrat <- ANPP_by_spp_by_quadrat |>
     QuadCanopyCover = sum(CanopyCoverBySpp, na.rm=TRUE),
     QuadANPP = sum(ANPPBySpp, na.rm=TRUE)) 
 
-# reduce cover and ANPP data to means for each quadrat
+# reduce cover and ANPP data to means for each plot
 ANPP_by_plot <- ANPP_by_quadrat |>
   group_by(Site, Treatment, Plot) |>
   summarize(
@@ -128,7 +128,51 @@ ANPP_roots_by_trt <- ANPPandRoot_df |>
     n_roots = sum(!is.na(Root_mass_total_gm2)),
     mean_Root_gm2 = mean(Root_mass_total_gm2, na.rm=TRUE),
     sd_Root_gm2 = sd(Root_mass_total_gm2, na.rm=TRUE),
-    se_Root_gm2 = sd_Root_gm2/sqrt(n_roots)
+    se_Root_gm2 = sd_Root_gm2/sqrt(n_roots),
+    root_to_ANPP = mean_Root_gm2/plot_mean_ANPP
     )
+
+```
+
+make these graphs:
+
+-   column graph of ANPP (total plot-level); factors = treatment and site
+
+-   column graph of total root biomass; factors = treatment and site
+
+-   column graph of root:ANPP; factors = treatment and site
+
+### ANPP to root biomass
+
+```{r}
+
+# ANPP Plots 
+GrampsCN$SiteOrder = factor(GrampsCN$Site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+GrampsCN$TreatmentOrder = factor(GrampsCN$Trt, levels=c("Exl","Ctrl","Add"), labels=c("Exclusion","Ambient","Addition")) 
+GrampsCN$Microsite <- factor(GrampsCN$Canopy, levels = c("Can", "IC"),
+                             labels = c("Canopy", "Inter-Canopy"))
+GrampsCN$DepthOrder <- factor(GrampsCN$Depth, levels = c("0-5","10-May"), # why did R think 5-10 was May 10th, probably an excel thing -_- 
+                              labels = c("0-5 cm","5-10 cm"))
+
+ggplot(data = GrampsCN, aes(x=SiteOrder, y=mean.C...., fill = TreatmentOrder)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_grid(DepthOrder~Microsite) +
+  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c"))+
+  scale_y_continuous(limits=c(0,6), breaks = c(0,2,4,6))+
+  labs(x = "Site") +
+  labs(y = "Soil Organic Carbon (mg Carbon/mg Soil)") +
+  ylab(expression(paste(Soil~Organic~Carbon~(mg~Carbon~g~Soil^{-1}))))+
+  scale_x_discrete(labels = label_wrap(10))+
+  theme_grey(base_size = 18) +
+theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    axis.text.x = element_text(angle=45,hjust = 1),
+    legend.position = c(0.1,.88),   
+    panel.background = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA))+
+  geom_errorbar(aes(ymin=mean.C....-SE.1, ymax=mean.C....+SE.1), width=.2, position=position_dodge(.9)
+  )
 
 ```
