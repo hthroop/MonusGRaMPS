@@ -134,14 +134,6 @@ ANPP_roots_by_trt <- ANPPandRoot_df |>
 
 ```
 
-make these graphs:
-
--   column graph of ANPP (total plot-level); factors = treatment and site
-
--   column graph of total root biomass; factors = treatment and site
-
--   column graph of root:ANPP; factors = treatment and site
-
 ### Plots - ANPP and root biomass by treatment and site
 
 ```{r}
@@ -157,7 +149,7 @@ ANPPandRoot_df <- ANPPandRoot_df |>
                         labels=c("Exclusion","Ambient","Addition")) 
   )
 
-ANPPandRoot_df |>
+ANPP <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = plot_mean_ANPP, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
   scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
@@ -174,12 +166,13 @@ ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+ggsave(here("figures", "ANPP.png"), plot = ANPP, width = 10, height = 8)
 ```
 
 ```{r}
 #|label: column-graph-rootbiomass-by-trt-and-site
 
-ANPPandRoot_df |>
+roots_total_gm2 <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = Root_mass_total_gm2, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
   scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
@@ -196,9 +189,9 @@ ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+ggsave(here("figures", "roots_total_gm2.png"), plot = roots_total_gm2, width = 10, height = 8)
 
-
-ANPPandRoot_df |>
+roots_Can_gm2 <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = Root_mass_Can_gm2, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
   scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
@@ -215,8 +208,9 @@ ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+ggsave(here("figures", "roots_Can_gm2.png"), plot = roots_Can_gm2, width = 10, height = 8)
 
-ANPPandRoot_df |>
+roots_IC_gm2 <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = Root_mass_IC_gm2, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
   scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
@@ -233,6 +227,7 @@ ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+ggsave(here("figures", "roots_IC_gm2.png"), plot = roots_IC_gm2, width = 10, height = 8)
 ```
 
 ```{r}
