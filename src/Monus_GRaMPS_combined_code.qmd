@@ -155,7 +155,7 @@ ANPP <- ANPPandRoot_df |>
   scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
 #  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
   labs(x = "Site", 
-       y = "Mean Plot ANPP (units?)") +  # need to double check Seth's units
+       y = "Mean Plot ANPP (g m-2)") +  # need to double check Seth's units
   theme_grey(base_size = 18) +
   theme(
     panel.grid.major = element_blank(),
@@ -239,7 +239,7 @@ root_shoot_plot <- ANPPandRoot_df |>
   scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
 #  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
   labs(x = "Site", 
-       y = "Root Mass (g m-2):ANPP") +  
+       y = "Root Mass:ANPP") +  
   theme_grey(base_size = 18) +
   theme(
     panel.grid.major = element_blank(),
