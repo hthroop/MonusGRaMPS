@@ -11,9 +11,12 @@ editor_options:
 ```{r}
 library(tidyverse)
 library(here)
+library(bestNormalize)
 ```
 
 ## ANPP
+
+### Calculations
 
 ```{r}
 # load in 2018 ANPP data
@@ -71,7 +74,9 @@ ANPP_by_trt <- ANPP_by_plot |>
 plot(x = ANPP_by_trt$mean_ANPP, y = ANPP_by_trt$mean_Cover)
 ```
 
-## Root Biomass
+## Root Biomass (g m-2)
+
+### Calculations
 
 ```{r}
 # load in root biomass data
@@ -99,6 +104,8 @@ root_biomass_wide_df <- root_biomass_wide_df |>
     )
 
 ```
+
+### 
 
 ## Combined ANPP and Root Biomass
 
@@ -252,3 +259,107 @@ root_shoot_plot <- ANPPandRoot_df |>
   ) 
 ggsave(here("figures", "root_to_ANPP.png"), plot = root_shoot_plot, width = 10, height = 8)
 ```
+
+## ANOVAs
+
+### Root biomass - Canopy (g m-2)
+
+```{r}
+# check normality and transform as needed
+qqnorm(ANPPandRoot_df$Root_mass_Can_gm2) 
+shapiro.test(ANPPandRoot_df$Root_mass_Can_gm2) # P < 0.05 - reject hypothesis of normality
+BN_RootCan_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_Can_gm2)
+BN_RootCan_gm2 # show options for normalizing
+ANPPandRoot_df$Root_mass_Can_gm2_norm <- predict(BN_RootCan_gm2)
+qqnorm(ANPPandRoot_df$Root_mass_Can_gm2_norm) # way better
+qqline(ANPPandRoot_df$Root_mass_Can_gm2_norm) # add line to plot
+shapiro.test(ANPPandRoot_df$Root_mass_Can_gm2_norm) # P > 0.05 - looks good!
+
+# 2-way ANOVA model with transformed data
+Root_Can_gm2_anova <- aov(Root_mass_Can_gm2_norm ~ 
+                            Site * Treatment, data=ANPPandRoot_df)
+summary(Root_Can_gm2_anova)
+## No significant treatment differences
+```
+
+### Root biomass - Intercanopy
+
+```{r}
+# check normality and transform as needed
+qqnorm(ANPPandRoot_df$Root_mass_IC_gm2) 
+shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2) # P < 0.05 - reject hypothesis of normality
+BN_RootIC_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_IC_gm2)
+BN_RootIC_gm2 # show options for normalizing
+ANPPandRoot_df$Root_mass_IC_gm2_norm <- predict(BN_RootIC_gm2)
+qqnorm(ANPPandRoot_df$Root_mass_IC_gm2_norm) # way better
+qqline(ANPPandRoot_df$Root_mass_IC_gm2_norm) # add line to plot
+shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2_norm) # P > 0.05 - looks good!
+
+# 2-way ANOVA model with transformed data
+Root_IC_gm2_anova <- aov(Root_mass_IC_gm2_norm ~ 
+                            Site * Treatment, data=ANPPandRoot_df)
+summary(Root_IC_gm2_anova)
+## Significant Site and Treatment differences (no interaction)
+
+# Perform pairwise comparisons using Tukey's HSD test
+IC_pairwise <- TukeyHSD(Root_IC_gm2_anova)
+print(IC_pairwise)
+plot(IC_pairwise)
+```
+
+### Root biomass - Combined IC and Canopy 
+
+using area-weighted values for whole plot root mass (g m-2)
+
+```{r}
+# check normality and transform as needed
+qqnorm(ANPPandRoot_df$Root_mass_total_gm2) 
+shapiro.test(ANPPandRoot_df$Root_mass_total_gm2) # P < 0.05 - reject hypothesis of normality
+BN_Root_mass_total_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_total_gm2)
+BN_Root_mass_total_gm2 # show options for normalizing
+ANPPandRoot_df$Root_mass_total_gm2_norm <- predict(BN_Root_mass_total_gm2)
+qqnorm(ANPPandRoot_df$Root_mass_total_gm2_norm) # way better
+qqline(ANPPandRoot_df$Root_mass_total_gm2_norm) # add line to plot
+shapiro.test(ANPPandRoot_df$Root_mass_total_gm2_norm) # still not normally, but improved
+
+# 2-way ANOVA model with transformed data
+Root_total_gm2_anova <- aov(Root_mass_total_gm2_norm ~ 
+                            Site * Treatment, data=ANPPandRoot_df)
+summary(Root_total_gm2_anova)
+## Significant Site and Treatment differences (no interaction)
+
+# Perform pairwise comparisons using Tukey's HSD test
+total_pairwise <- TukeyHSD(Root_total_gm2_anova)
+print(total_pairwise)
+plot(total_pairwise)
+```
+
+### ANPP
+
+```{r}
+# check normality and transform as needed
+qqnorm(ANPP_by_plot$plot_mean_ANPP) 
+shapiro.test(ANPP_by_plot$plot_mean_ANPP) # P < 0.05 - reject hypothesis of normality
+BN_ANPP <- bestNormalize(ANPP_by_plot$plot_mean_ANPP)
+BN_ANPP # show options for normalizing
+ANPP_by_plot$plot_mean_ANPP_norm <- predict(BN_ANPP)
+qqnorm(ANPP_by_plot$plot_mean_ANPP_norm) # a little better
+qqline(ANPP_by_plot$plot_mean_ANPP_norm) # add line to plot
+shapiro.test(ANPP_by_plot$plot_mean_ANPP_norm) # P > 0.05 - ok
+
+# 2-way ANOVA model with transformed data
+ANPP_anova <- aov(plot_mean_ANPP_norm ~ Site * Treatment, data=ANPP_by_plot)
+summary(ANPP_anova)
+
+# Perform pairwise comparisons using Tukey's HSD test
+ANPP_pairwise <- TukeyHSD(ANPP_anova)
+print(ANPP_pairwise)
+plot(ANPP_pairwise)
+
+```
+
+## 
+
+Area-weighted root biomass
+
+Root-to-ANPP
