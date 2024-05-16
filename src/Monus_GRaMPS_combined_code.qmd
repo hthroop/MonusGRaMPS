@@ -143,6 +143,8 @@ ANPP_roots_by_trt <- ANPPandRoot_df |>
 
 ### Plots - ANPP and root biomass by treatment and site
 
+#### Set up legends
+
 ```{r}
 #|label: column-graph-ANPP-by-trt-and-site
 
@@ -156,6 +158,13 @@ ANPPandRoot_df <- ANPPandRoot_df |>
                         labels=c("Exclusion","Ambient","Addition")) 
   )
 
+
+```
+
+#### ANPP 
+
+```{r}
+#| label: ANPP-plot
 ANPP <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = plot_mean_ANPP, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
@@ -176,8 +185,60 @@ ANPP <- ANPPandRoot_df |>
 ggsave(here("figures", "ANPP.png"), plot = ANPP, width = 10, height = 8)
 ```
 
+#### Root biomass - Canopy
+
 ```{r}
-#|label: column-graph-rootbiomass-by-trt-and-site
+#| label: boxplot-root-biomass-canopy
+roots_Can_gm2 <- ANPPandRoot_df |>
+  ggplot(aes(x = SiteOrder, y = Root_mass_Can_gm2, fill = TreatmentOrder)) + 
+  geom_boxplot(position = position_dodge(0.8)) +  
+  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+#  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
+  labs(x = "Site", 
+       y = "Root Mass in Canopy microsites (g m-2)") +  
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = c(0.3, 0.7),
+    panel.background = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA)
+  ) 
+ggsave(here("figures", "roots_Can_gm2.png"), plot = roots_Can_gm2, width = 10, height = 8)
+
+```
+
+#### Root biomass - Intercanopy
+
+```{r}
+#|label: column-graph-rootbiomass-IC-by-trt-and-site
+
+roots_IC_gm2 <- ANPPandRoot_df |>
+  ggplot(aes(x = SiteOrder, y = Root_mass_IC_gm2, fill = TreatmentOrder)) + 
+  geom_boxplot(position = position_dodge(0.8)) +  
+  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+#  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
+  labs(x = "Site", 
+       y = "Root Mass in IC microsites (g m-2)") +  
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = c(0.3, 0.7),
+    panel.background = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA)
+  ) 
+ggsave(here("figures", "roots_IC_gm2.png"), plot = roots_IC_gm2, width = 10, height = 8)
+```
+
+#### Root biomass - Combined
+
+```{r}
+#|label: column-graph-rootbiomass-total-by-trt-and-site
 
 roots_total_gm2 <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = Root_mass_total_gm2, fill = TreatmentOrder)) + 
@@ -198,43 +259,6 @@ roots_total_gm2 <- ANPPandRoot_df |>
   ) 
 ggsave(here("figures", "roots_total_gm2.png"), plot = roots_total_gm2, width = 10, height = 8)
 
-roots_Can_gm2 <- ANPPandRoot_df |>
-  ggplot(aes(x = SiteOrder, y = Root_mass_Can_gm2, fill = TreatmentOrder)) + 
-  geom_boxplot(position = position_dodge(0.8)) +  
-  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
-#  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
-  labs(x = "Site", 
-       y = "Root Mass in Canopy microsites (g m-2)") +  
-  theme_grey(base_size = 18) +
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = c(0.3, 0.7),
-    panel.background = element_blank(),
-    panel.border = element_rect(color = "black", fill = NA)
-  ) 
-ggsave(here("figures", "roots_Can_gm2.png"), plot = roots_Can_gm2, width = 10, height = 8)
-
-roots_IC_gm2 <- ANPPandRoot_df |>
-  ggplot(aes(x = SiteOrder, y = Root_mass_IC_gm2, fill = TreatmentOrder)) + 
-  geom_boxplot(position = position_dodge(0.8)) +  
-  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
-#  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
-  labs(x = "Site", 
-       y = "Root Mass in IC microsites (g m-2)") +  
-  theme_grey(base_size = 18) +
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = c(0.3, 0.7),
-    panel.background = element_blank(),
-    panel.border = element_rect(color = "black", fill = NA)
-  ) 
-ggsave(here("figures", "roots_IC_gm2.png"), plot = roots_IC_gm2, width = 10, height = 8)
 ```
 
 ```{r}
@@ -338,17 +362,17 @@ plot(total_pairwise)
 
 ```{r}
 # check normality and transform as needed
-qqnorm(ANPP_by_plot$plot_mean_ANPP) 
-shapiro.test(ANPP_by_plot$plot_mean_ANPP) # P < 0.05 - reject hypothesis of normality
-BN_ANPP <- bestNormalize(ANPP_by_plot$plot_mean_ANPP)
+qqnorm(ANPPandRoot_df$plot_mean_ANPP) 
+shapiro.test(ANPPandRoot_df$plot_mean_ANPP) # P < 0.05 - reject hypothesis of normality
+BN_ANPP <- bestNormalize(ANPPandRoot_df$plot_mean_ANPP)
 BN_ANPP # show options for normalizing
-ANPP_by_plot$plot_mean_ANPP_norm <- predict(BN_ANPP)
-qqnorm(ANPP_by_plot$plot_mean_ANPP_norm) # a little better
-qqline(ANPP_by_plot$plot_mean_ANPP_norm) # add line to plot
-shapiro.test(ANPP_by_plot$plot_mean_ANPP_norm) # P > 0.05 - ok
+ANPPandRoot_df$plot_mean_ANPP_norm <- predict(BN_ANPP)
+qqnorm(ANPPandRoot_df$plot_mean_ANPP_norm) # a little better
+qqline(ANPPandRoot_df$plot_mean_ANPP_norm) # add line to plot
+shapiro.test(ANPPandRoot_df$plot_mean_ANPP_norm) # P > 0.05 - ok
 
 # 2-way ANOVA model with transformed data
-ANPP_anova <- aov(plot_mean_ANPP_norm ~ Site * Treatment, data=ANPP_by_plot)
+ANPP_anova <- aov(plot_mean_ANPP_norm ~ Site * Treatment, data=ANPPandRoot_df)
 summary(ANPP_anova)
 
 # Perform pairwise comparisons using Tukey's HSD test
@@ -358,8 +382,26 @@ plot(ANPP_pairwise)
 
 ```
 
-## 
+### Root:ANPP
 
-Area-weighted root biomass
+```{r}
+# check normality and transform as needed
+qqnorm(ANPPandRoot_df$root_to_ANPP) 
+shapiro.test(ANPPandRoot_df$root_to_ANPP) # P < 0.05 - reject hypothesis of normality
+BN_root_to_ANPP <- bestNormalize(ANPPandRoot_df$root_to_ANPP)
+BN_root_to_ANPP # show options for normalizing
+ANPPandRoot_df$root_to_ANPP_norm <- predict(BN_root_to_ANPP)
+qqnorm(ANPPandRoot_df$root_to_ANPP_norm) # a little better
+qqline(ANPPandRoot_df$root_to_ANPP_norm) # add line to plot
+shapiro.test(ANPPandRoot_df$root_to_ANPP_norm) # P > 0.05 - ok
 
-Root-to-ANPP
+# 2-way ANOVA model with transformed data
+root_to_ANPP_anova <- aov(root_to_ANPP_norm ~ Site * Treatment, data=ANPPandRoot_df)
+summary(root_to_ANPP_anova)
+
+# Perform pairwise comparisons using Tukey's HSD test
+root_to_ANPP_pairwise <- TukeyHSD(root_to_ANPP_anova)
+print(root_to_ANPP_pairwise)
+plot(root_to_ANPP_pairwise)
+
+```
