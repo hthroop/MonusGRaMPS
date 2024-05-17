@@ -3,7 +3,7 @@ title: "Monus_GRaMPS"
 format: html
 editor: visual
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ## Initial Set Up
@@ -161,7 +161,7 @@ ANPPandRoot_df <- ANPPandRoot_df |>
 
 ```
 
-#### ANPP 
+#### ANPP
 
 ```{r}
 #| label: ANPP-plot
@@ -331,7 +331,7 @@ print(IC_pairwise)
 plot(IC_pairwise)
 ```
 
-### Root biomass - Combined IC and Canopy 
+### Root biomass - Combined IC and Canopy
 
 using area-weighted values for whole plot root mass (g m-2)
 
