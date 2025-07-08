@@ -1,0 +1,116 @@
+---
+title: "ExSituResp_HT"
+author: "Heather Throop"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## About this Code
+
+This code cleans, works up, analyzes, and plots data collected on the Throop Lab LI7000. These data were collected by Brittney Monus for her MS experiment run with the GRaMPS project.
+
+This code is based on the file "ExSituResp.R" written by Brittney Monus.
+
+## Preparation Steps
+
+```{r}
+#| label: load packages
+library(dplyr)
+library(tidyr)
+library(cowplot)
+library(patchwork)
+library(here)
+library(lubridate)
+library(stringr)
+```
+
+```{r}
+#| label: read in data files
+
+ExSituResp=read.csv(here("data","AllExSituResp.csv"))
+```
+
+```{r}
+#| label: clean up variables
+
+#calculate soil volume. Mass is in g and bulk density is g/cm^3 so we need mass/bulk density in liters
+ExSituResp <- ExSituResp |>
+  mutate(SoilVolume = ExSituResp$soilmass_g / ExSituResp$BulkDensity / 1000)
+  
+#convert CO2 from a concentration (ppm) to mass basis (ug CO2-C in a container of known volume)
+# NOTE: headspace volume is estimated as 0.473 L -- this should be adjusted as needed (need to subtract volume of 1mm glass beads)
+#40 g of glass beads is approximately 0.01891 L so headspace in each jar is 0.473 - 0.01891, which is 0.45409 L
+#calculate ug CO2-C at time T1 (ideal gas law, correcting for T)
+ExSituResp$CO2.C_ug <- ((ExSituResp$CO2.ppmv.)*(0.45409-ExSituResp$SoilVolume) 
+                        *(44/22.4)*(12/44)*(273/(273+ExSituResp$temperature))) 
+
+#convert date.time to units understandable to R
+ExSituResp <- ExSituResp |>
+  mutate(Datetime = mdy_hm(Date.time))
+
+# Parse out the pertinent information from the "Sample" variable
+ExSituResp <- ExSituResp |>
+  mutate(
+    Site = str_extract(Sample, "^(BP|ANT|BC|ARB|CC)"),
+    Treatment = str_extract(Sample, "(?<=^(BP|ANT|BC|ARB|CC))(Exl|Ctrl|Add)"),
+    Plot = str_extract(Sample, "P\\d{1,2}"),
+    Canopy = str_extract(Sample, "(Can|IC)"),
+    Depth = str_extract(Sample, "(0-5|5-10)")
+  )
+```
+
+## Flux Calculations
+
+```{r}
+#| label: calculate flux rates
+
+# Group the data by sample and time and calculate differences in time and CO2 concentration, use these to calculate flux rates
+ExSituRespRates <- ExSituResp |> 
+  group_by(Sample) |> 
+  arrange(Sample, Datetime) |> 
+  mutate(Diff_time = c(0,as.numeric(diff(Datetime), units="hours")),  #difference in time in hours
+         Diff_CO2C = CO2.C_ug - lag(CO2.C_ug), #, #difference in CO2 C
+         CO2flux = Diff_CO2C/(soilmass_g * (soil_pctC/100))/Diff_time,   #(Change in CO2C/ (soil mass * (soil %C/100)))/elapsed time
+        CO2flux_by_ppm = Diff_CO2C/Diff_time)  |> # flux calculations without soil C accounting
+  ungroup()
+View(ExSituRespRates)
+```
+
+```{r}
+#| label: flux rate cleaning
+
+ExSituRespRates <- drop_na(ExSituRespRates)
+# rename sites
+ExSituRespRates$Site = factor(ExSituRespRates$Site, 
+                              levels=c("Black Point","Antelope","Blue Chute","Arboretum","Camp               Colton"), 
+                              labels=c("Desert Scrub","Desert Grassland","Juniper Savanna",
+                                       "Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+# rename treatments
+ExSituRespRates$Treatment = factor(ExSituRespRates$Treatment, 
+                                   levels=c("Exclusion","Ambient","Addition"), 
+                                   labels=c("Exclusion","Ambient","Addition")) 
+Canexsituresp <- subset(ExSituRespRates, ExSituRespRates[ , 6] == 'Canopy')  
+Canexsituresp$ElapsedDays <-Canexsituresp$Cumulative.Elapsed.time..hours./24
+# remove any negative flux
+Canexsituresp <- subset(Canexsituresp, Canexsituresp[ , 17] > 0)  
+
+# outliers
+ggqqplot(Canexsituresp$CO2flux)
+hist(Canexsituresp$CO2flux)
+# subest addition
+addresp = subset(Canexsituresp,Treatment %in% "Addition")
+hist(addresp$CO2flux)
+ggplot(data = Canexsituresp, aes(x=CO2flux, fill=Treatment)) + 
+  geom_histogram(position = "jitter", bins=30)+ 
+  facet_grid(Treatment~Site, scales = "free_y",labeller = labeller(Site = label_wrap_gen(width = 15))) +
+  xlim(0, 100) 
+  
+# remove outliers for resp < 100 and time < 60 days
+CanexsiturespNoOutliers <- subset(Canexsituresp, CO2flux<100 & ElapsedDays<60) 
+CanexsiturespNoOutliers$SiteOrder = factor(CanexsiturespNoOutliers$Site, levels=c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow"), labels=c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+
+# save clean data
+write.csv(ExSituRespRates, here("results", "ExSituRespRates.csv"))
+```

@@ -3,8 +3,10 @@ library(dplyr)
 library(tidyr)
 library(cowplot)
 library(patchwork)
+library(here)
+library(lubridate)
 
-ExSituResp=read.csv("~/Documents/Masters/Research/Respiration Data/ex situ resp/AllExSituResp.csv")
+ExSituResp=read.csv(here("data","AllExSituResp.csv"))
 #need volume of soil - mass is in g and bulk density is g/cm^3 so I need mass/bulk density in liters
 ExSituResp$SoilVolume <- ExSituResp$soilmass_g / ExSituResp$BulkDensity / 1000
   
@@ -15,14 +17,15 @@ ExSituResp$SoilVolume <- ExSituResp$soilmass_g / ExSituResp$BulkDensity / 1000
 #calculate ug CO2-C at time T1 (ideal gas law, correcting for T)
 ExSituResp$CO2.C_ug<- ((ExSituResp$CO2.ppmv.)*(0.45409-ExSituResp$SoilVolume) *(44/22.4)*(12/44)*(273/(273+ExSituResp$temperature))) 
 #convert date.time to units understandable to R
-ExSituResp$Date.time=as.POSIXct(strptime(ExSituResp$Date.time,"%m/%d/%y %H:%M" )) 
+ExSituResp <- ExSituResp |>
+  mutate(Datetime = mdy_hm(Date.time))
 
-CO2rates <- ExSituResp %>% 
-  group_by(Sample) %>% 
-  arrange(Sample, Date.time) %>% 
-  mutate(Diff_time = c(0,as.numeric(diff(Date.time), units="hours")),  #difference in time in hours
+CO2rates <- ExSituResp |> 
+  group_by(Sample) |> 
+  arrange(Sample, Datetime) |> 
+  mutate(Diff_time = c(0,as.numeric(diff(Datetime), units="hours")),  #difference in time in hours
          Diff_CO2C = CO2.C_ug - lag(CO2.C_ug), #, #difference in CO2 C
-         CO2flux = Diff_CO2C/(soilmass_g * (soil_pctC/100))/Diff_time)  %>%   #(Change in CO2C/ (soil mass * (soil %C/100)))/elapsed time
+         CO2flux = Diff_CO2C/(soilmass_g * (soil_pctC/100))/Diff_time)  |>   #(Change in CO2C/ (soil mass * (soil %C/100)))/elapsed time
   ungroup()
 View(CO2rates)
 #write.csv(CO2rates, "~/Documents/Masters/Research/Respiration Data/ex situ resp/ExSituRespRates.csv")
