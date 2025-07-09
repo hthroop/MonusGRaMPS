@@ -3,8 +3,14 @@ title: "Monus_GRaMPS"
 format: html
 editor: visual
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
+
+# Overview
+
+This code works up and analyzes most data from Brittney Monus's MS thesis on the GRaMPS plots. This code was compiled by Heather Throop, based largely on the code written originally by Brittney Monus.
+
+At present this code includes only ANPP and root biomass data, although it may be extended to include more.
 
 ## Initial Set Up
 
@@ -13,6 +19,8 @@ library(tidyverse)
 library(here)
 library(bestNormalize)
 ```
+
+# ANPP and Root Biomass
 
 ## ANPP
 
@@ -182,6 +190,8 @@ ANPP <- ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+ANPP
+
 ggsave(here("figures", "ANPP.png"), plot = ANPP, width = 10, height = 8)
 ```
 
@@ -206,6 +216,8 @@ roots_Can_gm2 <- ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+roots_Can_gm2
+
 ggsave(here("figures", "roots_Can_gm2.png"), plot = roots_Can_gm2, width = 10, height = 8)
 
 ```
@@ -232,6 +244,8 @@ roots_IC_gm2 <- ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+roots_IC_gm2
+
 ggsave(here("figures", "roots_IC_gm2.png"), plot = roots_IC_gm2, width = 10, height = 8)
 ```
 
@@ -257,6 +271,8 @@ roots_total_gm2 <- ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+roots_total_gm2
+
 ggsave(here("figures", "roots_total_gm2.png"), plot = roots_total_gm2, width = 10, height = 8)
 
 ```
@@ -281,6 +297,8 @@ root_shoot_plot <- ANPPandRoot_df |>
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
   ) 
+root_shoot_plot
+
 ggsave(here("figures", "root_to_ANPP.png"), plot = root_shoot_plot, width = 10, height = 8)
 ```
 

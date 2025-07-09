@@ -13,6 +13,14 @@ This code cleans, works up, analyzes, and plots data collected on the Throop Lab
 
 This code is based on the file "ExSituResp.R" written by Brittney Monus.
 
+Heather's to-do list (July 8, 2025)
+
+-   check units and that fluxes are calculated correctly
+
+-   explore wehther treatments or canopy should be merged
+
+-   calculate as total CO2 rather than weighted by soil C - this might be a fairer comparison to the in situ data
+
 ## Preparation Steps
 
 ```{r}
@@ -23,6 +31,7 @@ library(patchwork)
 library(here)
 library(lubridate)
 library(stringr)
+library(purrr)
 ```
 
 ```{r}
@@ -58,6 +67,21 @@ ExSituResp <- ExSituResp |>
     Canopy = str_extract(Sample, "(Can|IC)"),
     Depth = str_extract(Sample, "(0-5|5-10)")
   )
+
+# rename sites
+ExSituResp$Site = factor(ExSituResp$Site, 
+                              levels=c("BP","ANT","BC","ARB","CC"), 
+                              labels=c("Desert Scrub","Desert Grassland","Juniper Savanna",
+                                       "Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+# rename treatments
+ExSituResp$Treatment = factor(ExSituResp$Treatment, 
+                                   levels=c("Exl","Ctrl","Add"), 
+                                   labels=c("Exclusion","Ambient","Addition")) 
+
+# rename canopy location
+ExSituResp$Canopy = factor(ExSituResp$Canopy, 
+                                   levels=c("Can","IC"), 
+                                   labels=c("Canopy","Intercanopy")) 
 ```
 
 ## Flux Calculations
@@ -89,62 +113,133 @@ ExSituRespRates <- ExSituResp |>
 ExSituRespRates <- drop_na(ExSituRespRates)
 
 # Subset data to include only canopy and exclude negative flux values (from flushing jars)
-Canexsituresp <- ExSituRespRates |>
-  filter(Canopy == "Can") |>
+ExSituRespRates <- ExSituRespRates |>
   filter(CO2flux > 0)
 
 # explore outliers
-hist(Canexsituresp$CO2flux) # nearly all data are below 150 for flux
-hist(Canexsituresp$Cum.Elapsed.days) # most data are 100 days or less, a few outliers around 200 days
+hist(ExSituRespRates$CO2flux) # nearly all data are below 150 for flux
+hist(ExSituRespRates$Cum.Elapsed.days) # most data are 100 days or less, a few outliers around 200 days
 
 # histograms by treatment and site. This show that there aver very few flux measurements above 50. 75 appears to be a reasonable cut-off.
-ggplot(data = Canexsituresp, aes(x=CO2flux, fill=Treatment)) + 
+ggplot(data = ExSituRespRates, aes(x=CO2flux, fill=Treatment)) + 
   geom_histogram(position = "jitter", bins=30)+ 
-  facet_grid(Treatment~Site, scales = "free_y",labeller = labeller(Site = label_wrap_gen(width = 15))) +
-  xlim(0, 100) 
+  facet_grid(Site~Canopy, scales = "free_y",
+             labeller = labeller(Site = label_wrap_gen(width = 15))) +
+  xlim(0, 150) 
 
   
-# remove outliers where resp > 75 and time > 100 days
-CanexsiturespNoOutliers <- subset(Canexsituresp, CO2flux<75 & Cum.Elapsed.days<100) 
+# remove outliers where resp > 75 and time > 100
+ExSituRespRatesNoOutliers <- subset(ExSituRespRates, CO2flux<75 & Cum.Elapsed.days<100) 
 
 # save clean data
-write.csv(CanexsiturespNoOutliers, here("results", "CanexsiturespNoOutliers.csv"))
+write.csv(ExSituRespRatesNoOutliers, here("results", "ExSituRespRatesNoOutliers.csv"))
 ```
 
 ```{r}
+#| label: plot flux for individual samples
 
-
-ggplot(CanexsiturespNoOutliers, aes(x = Cum.Elapsed.days, y = CO2flux, color = Sample, group = Sample)) +
+p1 <- ExSituRespRatesNoOutliers |>
+ggplot(aes(x = Cum.Elapsed.days, y = CO2flux, color = Canopy, group = Sample)) +
   geom_line(size = 1) +
   facet_grid(Treatment ~ Site) +
   labs(
     x = "Time",
     y = expression(CO[2]~Flux~(µg~C~g^{-1}~hr^{-1})),
-    title = "CO₂ Flux over Time by Site and Treatment",
+    title = "CO2 Flux over Time by Site and Treatment",
     color = "Sample"
   ) +
   theme_minimal() +
   theme(
     strip.text = element_text(face = "bold"),
-    legend.position = "bottom"
+    legend.position = "bottom"  
   )
-
+p1
 
 ```
 
 ```{r}
-# rename and reorder sites
+#| label: Loess plot flux for individual samples
 
-#CanexsiturespNoOutliers$SiteOrder = factor(CanexsiturespNoOutliers$Site, levels=c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow"), labels=c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+p2 <- ExSituRespRatesNoOutliers |>
+ggplot(aes(x = Cum.Elapsed.days, y = CO2flux, color = Canopy, group = Sample)) +
+  geom_smooth(method = "loess", se = FALSE, span = 0.75, size = 1) +
+  facet_grid(Treatment ~ Site) +
+  labs(
+    x = "Time",
+    y = expression(CO[2]~Flux~(µg~C~g^{-1}~hr^{-1})),
+    title = "Smoothed CO2 Flux over Time by Sample (LOESS)"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(face = "bold"),
+    legend.position = "bottom" 
+  )
+p2
+```
 
+```{r}
+#| label: cumm flux from loess smoothing
 
-# rename sites
-#ExSituRespRates$Site = factor(ExSituRespRates$Site, 
-#                              levels=c("Black Point","Antelope","Blue Chute","Arboretum","Camp #              Colton"), 
-#                              labels=c("Desert Scrub","Desert Grassland","Juniper Savanna",
-#                                       "Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
-# rename treatments
-#ExSituRespRates$Treatment = factor(ExSituRespRates$Treatment, 
-#                                   levels=c("Exclusion","Ambient","Addition"), 
-#                                   labels=c("Exclusion","Ambient","Addition")) 
+# Define function to calculate cumulative flux from loess-smoothed curve
+integrate_loess_flux <- function(df_sample) {
+  # Ensure data is sorted
+  df_sample <- df_sample |> arrange(Datetime)
+  
+  # Set time zero and calculate elapsed time (in hours)
+  time0 <- min(df_sample$Datetime)
+  df_sample <- df_sample |> 
+    mutate(Elapsed_hr = as.numeric(difftime(Datetime, time0, units = "hours"))) |>
+    filter(!is.na(CO2flux))
+  
+  # Fit loess model
+  loess_model <- loess(CO2flux ~ Elapsed_hr, data = df_sample, span = 0.75)
+  
+  # Generate hourly time sequence up to 960 hours (40 days)
+  new_times <- seq(0, 960, by = 1)
+  smoothed_flux <- predict(loess_model, newdata = data.frame(Elapsed_hr = new_times))
+  
+  # Remove any NA values from prediction
+  valid <- !is.na(smoothed_flux)
+  new_times <- new_times[valid]
+  smoothed_flux <- smoothed_flux[valid]
+  
+  # Trapezoidal integration
+  area <- sum(diff(new_times) * (head(smoothed_flux, -1) + tail(smoothed_flux, -1)) / 2)
+  
+  tibble(
+    Sample = unique(df_sample$Sample),
+    Site = unique(df_sample$Site),
+    Treatment = unique(df_sample$Treatment),
+    Canopy = unique(df_sample$Canopy),
+    CumFlux_Loess_1000h = area
+  )
+}
+
+# Apply to all samples
+CumulativeFlux_Loess <- ExSituRespRatesNoOutliers |>
+  group_split(Sample) |> 
+  map_dfr(integrate_loess_flux)
+
+CumulativeFlux_Loess <- CumulativeFlux_Loess |>
+  mutate(CumFlux_Loess_mg_g = CumFlux_Loess_1000h * 0.001)
+```
+
+```{r}
+#| label: plot 40 day integrated loess flux
+
+ggplot(CumulativeFlux_Loess, aes(x = Treatment, y = CumFlux_Loess_mg_g, fill = Treatment)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  geom_jitter(width = 0.2, shape = 21, color = "black", size = 2) +
+  facet_grid(Site ~ Canopy) +
+  labs(
+    x = "Treatment",
+    y = expression(Cumulative~CO[2]~Flux~(mg~C~g^{-1}~over~40~days)),
+    title = "Cumulative CO2 Flux (LOESS-smoothed)"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
 ```
