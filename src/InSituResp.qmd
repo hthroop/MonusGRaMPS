@@ -9,7 +9,9 @@ editor_options:
 
 ## Overview
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+This is a compilation, cleaning, and analysis of field-collected soil respiration data from Brittney Monus's MS research in the GRaMPS project.
+
+Code was written by Heather Throop, streamlining and updating the original analyses that Brittney did for her MS.
 
 ## SetUp
 
@@ -87,17 +89,19 @@ InSituResp_microsite_means <- InSituResp_daily_collar_means |>
   group_by(site, Treatment, Microsite, Season, Trip) |>
   summarise(
     N_plots     = n(),
-    Efflux   = mean(Efflux, na.rm = TRUE),
-    sd_Efflux   = sd(Efflux, na.rm = TRUE),
-    se_Efflux   = ifelse(N_plots > 1, sd_Efflux / sqrt(N_plots), NA_real_),
+    Efflux_micro   = mean(Efflux, na.rm = TRUE),
+    sd_Efflux_micro   = sd(Efflux, na.rm = TRUE),
+    se_Efflux_micro   = sd_Efflux_micro / sqrt(N_plots),
     RHcmbr   = mean(RHcmbr, na.rm = TRUE),
-    Tsoil_C   = mean(Tsoil_C, na.rm = TRUE),
-    sd_Tsoil_C = sd(Tsoil_C, na.rm=TRUE),
-    se_Tsoil_C  = sd_Tsoil_C / sqrt(N_plots),
+    Tsoil_C_micro   = mean(Tsoil_C, na.rm = TRUE),
+    sd_Tsoil_C_micro = sd(Tsoil_C, na.rm=TRUE),
+    se_Tsoil_C_micro  = sd_Tsoil_C_micro / sqrt(N_plots),
     Tsch_C   = mean(Tsch_C, na.rm = TRUE),
     .groups = "drop"
   )
 ```
+
+HT stopped here
 
 ![]()
 
