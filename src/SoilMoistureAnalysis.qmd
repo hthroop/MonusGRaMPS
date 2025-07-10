@@ -11,9 +11,11 @@ editor_options:
 
 This is a compilation and analysis of soil moisture data for Brittney Monus's thesis work in the GRaMPS project. Soil moisture data were provided to Brittney from GRaMPS.
 
-This code was revised by Heather Throop in July 2025, based on the code "SoilMoisture_HT.R". The code output is the same (TODO: check that this is true!) but the code is streamlined to avoid manual subsetting into sites and recombining sites into one file after site-specific calculations applie.
+This code was revised by Heather Throop in July 2025, based on the code "SoilMoisture_HT.R". The code is streamlined to avoid manual subsetting into sites and recombining sites into one file after site-specific calculations applied. In addition, this code replaces negative or 0 values for VWC with a very small number (0.0001). These are assumed to be erroneous values where the sensor is not functioning or not calibrated properly. Replacement of these erroneous values with very low values affects mean values in that 1) mean VWC is not erroneously depressed by negative numbers and 2) SWP values are not discarded during very low moisture conditions (in calculating SWP, 0 values convert to -Inf and negative values concert to NaN).
 
-Last Update \
+Daily moisture means are changed to be the mean of plot means (there are \~24 daily measurements be plot).
+
+Last Update\
 2027-07-10 Heather Throop
 
 ## Preparation Steps
@@ -36,7 +38,8 @@ soilmetdata = read.csv(here("data","SoilMoisture.csv")) # original file name in 
 df_soilmoisture <- soilmetdata |>
   filter(Measure == "VWC") |> # Remove non VWC data
   filter(Depth.Code == "Shallow") |> # Retain only 0-10 cm depth data 
-  select("site","date","Measurement","Plot","Treatment")
+  select("site","date","Measurement","Plot","Treatment") |>
+  mutate(Measurement = if_else(Measurement <= 0, 0.0001, Measurement)) # change 0 or negative VWC values to a very small positive number
 
 ```
 
@@ -50,7 +53,6 @@ df_soilmoisture <- soilmetdata |>
 #function John made comes from Crosby et al 1984
 #potentially do this before calculating mean VWC and just calculate mean SWP
 #exact texture for each site in the google drive 
-#soil information > soil texture soil pits 2015 > John Bradford Texture 2015 submission 
 
 # Function to convert VWC to SWP
 VWCtoSWP_simple <- function(vwc, sand, clay){
@@ -64,6 +66,7 @@ VWCtoSWP_simple <- function(vwc, sand, clay){
 }
 
 # Create look-up table of mean sand and clay values for each site
+# soil information > soil texture soil pits 2015 > John Bradford Texture 2015 submission 
 soil_props <- tribble(
   ~site,        ~sand,     ~clay,
   "Antelope",   0.6464444, 0.1262222,
@@ -74,31 +77,37 @@ soil_props <- tribble(
 )
 
 # Join soil properties to the measurement data
-df_soilmoisture <- df_soilmoisture %>%
-  left_join(soil_props, by = "site") %>%
-  mutate(mean_SWP = VWCtoSWP_simple(Measurement, sand, clay))
+df_soilmoisture <- df_soilmoisture |>
+  left_join(soil_props, by = "site") |>
+  mutate(SWP = VWCtoSWP_simple(Measurement, sand, clay))
 
-# Calculate SWP and VWC summary per site-date-treatment
-dailySWPmeans <- df_soilmoisture |>
-  group_by(site, date, Treatment) |>
+# Calculate SWP and VWC means per site-date-plot-treatment
+dailymoisturemeans_byplot <- df_soilmoisture |>
+  group_by(site, date, Plot, Treatment) |>
   summarise(
-    mean_SWP = mean(mean_SWP, na.rm = TRUE),
-    sd_SWP = sd(mean_SWP, na.rm = TRUE),
-    se_SWP = sd_SWP / sqrt(sum(!is.na(mean_SWP))),
+    N    = sum(!is.na(Measurement)),
+    mean_SWP = mean(SWP, na.rm = TRUE),
+    sd_SWP = sd(SWP, na.rm = TRUE),
+    se_SWP = sd_SWP / sqrt(N),
     mean_VWC = mean(Measurement, na.rm = TRUE),
     sd_VWC = sd(Measurement, na.rm = TRUE),
-    se_VWC = sd_VWC / sqrt(sum(!is.na(Measurement))),
+    se_VWC = sd_VWC / sqrt(N),
     .groups = "drop"
-  ) |>
-  mutate(SWP = -mean_SWP)
+  ) 
 
-# Calculate VWC summary per site-date-treatment
-dailymoisturemeans <- df_soilmoisture %>%
-  group_by(site, date, Treatment) %>%
+# Calculate SWP and VWC summary per site-date-treatment (mean of the plot means)
+dailymoisturemeans <- dailymoisturemeans_byplot |>
+  group_by(site, date, Treatment) |>
   summarise(
-
+    N    = sum(!is.na(mean_SWP)),
+    SWP = mean(mean_SWP, na.rm = TRUE),
+    sd_SWP = sd(mean_SWP, na.rm = TRUE),
+    se_SWP = sd_SWP / sqrt(N),
+    VWC = mean(mean_VWC, na.rm = TRUE),
+    sd_VWC = sd(mean_VWC, na.rm = TRUE),
+    se_VWC = sd_VWC / sqrt(N),
     .groups = "drop"
-  )
+  ) 
 
 ```
 
@@ -106,5 +115,17 @@ dailymoisturemeans <- df_soilmoisture %>%
 #| label: save output
 
 write_csv(dailymoisturemeans, here("results","dailymoisturemeans.csv"))
+
+```
+
+## Plot VWC Means
+
+```{r}
+
+ggplot(dailymoisturemeans, aes(x = date, y = VWC, color = Treatment)) +
+  geom_line() +
+  facet_grid( ~ site, scales = "free_y") +
+  labs(x = "Date", y = "Value", title = "Mean Volumetric Water Content") +
+  theme_minimal()
 
 ```
