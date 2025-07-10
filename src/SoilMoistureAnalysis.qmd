@@ -38,6 +38,13 @@ df_soilmoisture <- soilmetdata |>
   filter(Depth.Code == "Shallow") |> # Retain only 0-10 cm depth data 
   select("site","date","Measurement","Plot","Treatment")
 
+```
+
+## Convert VWC to SWP
+
+```{r}
+#| label: VWC-SWP Conversions
+
 #need to convert VWC to soil water potential (SWP) to account for different soil 
 #textures across sites - see Seth's email with code from John Bradford
 #function John made comes from Crosby et al 1984
@@ -92,4 +99,12 @@ dailymoisturemeans <- df_soilmoisture %>%
 
     .groups = "drop"
   )
+
+```
+
+```{r}
+#| label: save output
+
+write_csv(dailymoisturemeans, here("results","dailymoisturemeans.csv"))
+
 ```
