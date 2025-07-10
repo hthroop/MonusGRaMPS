@@ -1,0 +1,95 @@
+---
+title: "SoilMoistureAnalysis"
+author: "Heather Throop"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Overview
+
+This is a compilation and analysis of soil moisture data for Brittney Monus's thesis work in the GRaMPS project. Soil moisture data were provided to Brittney from GRaMPS.
+
+This code was revised by Heather Throop in July 2025, based on the code "SoilMoisture_HT.R". The code output is the same (TODO: check that this is true!) but the code is streamlined to avoid manual subsetting into sites and recombining sites into one file after site-specific calculations applie.
+
+Last Update \
+2027-07-10 Heather Throop
+
+## Preparation Steps
+
+```{r}
+#| label: load packages
+#| echo: false
+
+library(tidyverse)
+library(here)
+```
+
+```{r}
+#| label: read in and clean data
+
+soilmetdata = read.csv(here("data","SoilMoisture.csv")) # original file name in archive is SoilMoistureData_Request_Monus_HT.csv"
+
+# The variable "Measure" codes for several different measured variables (VWC, T, Precip, RH). VWC is volumetric water content (VWC) and units are m3/m3
+
+df_soilmoisture <- soilmetdata |>
+  filter(Measure == "VWC") |> # Remove non VWC data
+  filter(Depth.Code == "Shallow") |> # Retain only 0-10 cm depth data 
+  select("site","date","Measurement","Plot","Treatment")
+
+#need to convert VWC to soil water potential (SWP) to account for different soil 
+#textures across sites - see Seth's email with code from John Bradford
+#function John made comes from Crosby et al 1984
+#potentially do this before calculating mean VWC and just calculate mean SWP
+#exact texture for each site in the google drive 
+#soil information > soil texture soil pits 2015 > John Bradford Texture 2015 submission 
+
+# Function to convert VWC to SWP
+VWCtoSWP_simple <- function(vwc, sand, clay){
+  bar_toMPa = -0.1
+  bar_conversion = 1024
+  thetas <- -14.2 * sand - 3.7 * clay + 50.5
+  psis <- 10 ^ (-1.58 * sand - 0.63 * clay + 2.17)
+  b <- -0.3 * sand + 15.7 * clay + 3.10
+  res <- psis / ((vwc * 100 / thetas) ^ b * bar_conversion) * bar_toMPa
+  return(res)
+}
+
+# Create look-up table of mean sand and clay values for each site
+soil_props <- tribble(
+  ~site,        ~sand,     ~clay,
+  "Antelope",   0.6464444, 0.1262222,
+  "Arboretum",  0.3287,    0.2883,
+  "BlackPoint", 0.7760833, 0.1108,
+  "BlueChute",  0.3177,    0.3261,
+  "CampColton", 0.4637778, 0.2058889
+)
+
+# Join soil properties to the measurement data
+df_soilmoisture <- df_soilmoisture %>%
+  left_join(soil_props, by = "site") %>%
+  mutate(mean_SWP = VWCtoSWP_simple(Measurement, sand, clay))
+
+# Calculate SWP and VWC summary per site-date-treatment
+dailySWPmeans <- df_soilmoisture |>
+  group_by(site, date, Treatment) |>
+  summarise(
+    mean_SWP = mean(mean_SWP, na.rm = TRUE),
+    sd_SWP = sd(mean_SWP, na.rm = TRUE),
+    se_SWP = sd_SWP / sqrt(sum(!is.na(mean_SWP))),
+    mean_VWC = mean(Measurement, na.rm = TRUE),
+    sd_VWC = sd(Measurement, na.rm = TRUE),
+    se_VWC = sd_VWC / sqrt(sum(!is.na(Measurement))),
+    .groups = "drop"
+  ) |>
+  mutate(SWP = -mean_SWP)
+
+# Calculate VWC summary per site-date-treatment
+dailymoisturemeans <- df_soilmoisture %>%
+  group_by(site, date, Treatment) %>%
+  summarise(
+
+    .groups = "drop"
+  )
+```
