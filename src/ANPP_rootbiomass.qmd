@@ -10,7 +10,7 @@ editor_options:
 
 This code works up and analyzes most data from Brittney Monus's MS thesis on the GRaMPS plots. This code was compiled by Heather Throop, based largely on the code written originally by Brittney Monus.
 
-At present this code includes only ANPP and root biomass data, although it may be extended to include more.
+Data, graphing, and analysis of ANPP and root biomass data.
 
 ## Initial Set Up
 

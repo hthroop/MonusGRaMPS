@@ -13,6 +13,10 @@ This is a compilation, cleaning, and analysis of field-collected soil respiratio
 
 Code was written by Heather Throop, streamlining and updating the original analyses that Brittney did for her MS.
 
+Updated:
+
+2025-07-09 Heather Throop
+
 ## SetUp
 
 ```{r}
@@ -27,15 +31,17 @@ library(here)
 ```{r}
 #| label: prepare data
 
-# read in L1 data and combine
+## read in L1 data and combine
 
 # list of all CSV files in the folder
-csv_files <- list.files(here("data", "L1_InSituRespiration"), pattern = "\\.csv$", full.names = TRUE)
+csv_files <- list.files(here("data", "L1_InSituRespiration"), 
+                        pattern = "\\.csv$", full.names = TRUE)
 
 # Read and combine all CSV files into one dataframe
 InSituResp <- csv_files |>
   map_dfr(read_csv, show_col_types = FALSE) |>
-  rename(RHcmbr = `RHcmbr%`) # get rid of the problematic "%"
+  rename(RHcmbr = `RHcmbr%`) |> # get rid of the problematic "%"
+  rename(Site = site) # make case consistent with other variables 
 
 # Add a column for the season: pre-monsoon period (4-7 June, 18-21 June, and 2-5 July), peak-monsoon period (23-26 July and 14-17 August), and the post-monsoon period (11-14 September)
 InSituResp <- InSituResp |>
@@ -61,16 +67,42 @@ InSituResp <- InSituResp |>
            (SampleDate >= 180911 & SampleDate <= 180914) ~ "6",
            TRUE ~ NA_character_  # Set to NA if not in any defined range
          ))
+
+## data clean-up
+
+# Convert SampleDate to Date format
+InSituResp <- InSituResp |>
+  mutate(SampleDate = as.Date(as.character(SampleDate), format = "%y%m%d"))
+
+# rename and order sites
+InSituResp$Site = factor(InSituResp$Site, 
+                              levels=c("BlackPoint","Antelope","BlueChute",
+                                       "Arboretum","CampColton"), 
+                              labels=c("Desert Scrub","Desert Grassland","Juniper Savanna",
+                                       "Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+# rename and order treatments
+InSituResp$Treatment = factor(InSituResp$Treatment, 
+                                   levels=c("Exl","Ctrl","Add"), 
+                                   labels=c("Exclusion","Ambient","Addition")) 
+
+# rename canopy location
+InSituResp$Microsite = factor(InSituResp$Microsite, 
+                                   levels=c("IC", "Can"), 
+                                   labels=c("Intercanopy", "Canopy")) 
+
+# put the seasons in order
+InSituResp <- InSituResp |>
+      mutate(Season = factor(Season, levels = c("PreMonsoon", "PeakMonsoon", "PostMonsoon")))
 ```
 
-## Reduce Data to Means
+## Daily Means
 
 ```{r}
 #| label: daily collar means
 
-# calculate collar-level means for replicate respiration measurements per collar (~ 4 reps per collar) for each date x plot x site combination x treatmenet x microsite combination
+# calculate collar-level means for replicate respiration measurements per collar (~ 4 replicate Licor cycles per collar) for each date x plot x site combination x treatmenet x microsite combination
 InSituResp_daily_collar_means <- InSituResp |>
-  group_by(SampleDate, site, Plot, Treatment, Microsite, Season, Trip) |>
+  group_by(SampleDate, Site, Plot, Treatment, Microsite, Season, Trip) |>
   summarise(
     N_reps    = sum(!is.na(EFFLUX)),
     Efflux   = mean(EFFLUX, na.rm = TRUE),
@@ -82,28 +114,360 @@ InSituResp_daily_collar_means <- InSituResp |>
 ```
 
 ```{r}
-#| label: microsite x plot means for each trip
+#| label: graph plot x microsite means for each trip
 
-# calculate means for each microsite x plot x site x trip combination 
-InSituResp_microsite_means <- InSituResp_daily_collar_means |>
-  group_by(site, Treatment, Microsite, Season, Trip) |>
-  summarise(
-    N_plots     = n(),
-    Efflux_micro   = mean(Efflux, na.rm = TRUE),
-    sd_Efflux_micro   = sd(Efflux, na.rm = TRUE),
-    se_Efflux_micro   = sd_Efflux_micro / sqrt(N_plots),
-    RHcmbr   = mean(RHcmbr, na.rm = TRUE),
-    Tsoil_C_micro   = mean(Tsoil_C, na.rm = TRUE),
-    sd_Tsoil_C_micro = sd(Tsoil_C, na.rm=TRUE),
-    se_Tsoil_C_micro  = sd_Tsoil_C_micro / sqrt(N_plots),
-    Tsch_C   = mean(Tsch_C, na.rm = TRUE),
-    .groups = "drop"
-  )
+p_trt_x_microsite <- InSituResp_daily_collar_means |> 
+  ggplot(aes(x = SampleDate, y = Efflux, color = Treatment)) + 
+  geom_point(position = position_dodge(width = 0.5), size = 2) +
+  facet_grid(rows = vars(Site), cols = vars(Microsite), labeller = labeller(
+    Site = label_wrap_gen(width = 15),
+    Microsite = label_wrap_gen(width = 15))) +
+  scale_y_continuous(limits = c(0, 7.5), breaks = c(0, 2, 4, 6)) +
+  scale_x_date(date_breaks = "2 weeks", date_labels = "%b %d") +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1})))) +
+  xlab("Sample Date") +
+  theme_grey(base_size = 18) +
+  scale_color_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 10),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = "top"
+  ) +
+  guides(color = guide_legend(title = "Treatment"))
+p_trt_x_microsite
+
+```
+
+## Seasonal Means
+
+Here the data are plotted by seasons, merging the multiple sampling trips that occurred in the pre-monsoon and peak-monsoon seasons
+
+```{r}
+#| label: boxplot by season, separate microsites
+
+# separating out by microsite
+p_trt_x_microsite <- InSituResp_daily_collar_means |> 
+  ggplot(aes(x = factor(Season), y = Efflux, fill = Treatment, Microsite)) + 
+  geom_boxplot(position = position_dodge(width = 0.8), outlier.shape = NA) +
+ facet_grid(cols = vars(Site), rows = vars(Microsite), labeller = labeller(
+    site = label_wrap_gen(width = 15),
+    Microsite = label_wrap_gen(width = 15))) +
+  scale_y_continuous(limits = c(0, 7.5), breaks = c(0, 2, 4, 6)) +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1})))) +
+  xlab("Season") +
+  theme_grey(base_size = 18) +
+#  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = "top"
+  ) +
+  guides(fill = guide_legend(title = "Treatment"))
+p_trt_x_microsite
+
+```
+
+Brittney's analyses indicate no microsite differences, so here they are merged together for a simpler figure.
+
+```{r}
+#| label: boxplot by season, microsites merged
+
+# microsites merged
+
+# Create annotation data frame for facet labels
+panel_labels <- data.frame(
+  Site = unique(InSituResp_daily_collar_means$Site),
+  x = 0.6,  # Nudges left of the first x category
+  y = 7.3,
+  label = c("C.", "B.", "D.", "A.", "E.")
+)
+
+# Plot
+p_trt_x_season <- InSituResp_daily_collar_means |> 
+  ggplot(aes(x = Season, y = Efflux, fill = Treatment)) + 
+  geom_boxplot(position = position_dodge(width = 0.8), outlier.shape = NA) +
+  facet_wrap(~Site, ncol = 5, labeller = labeller(Site = label_wrap_gen(width = 20))) +
+ geom_text(
+  data = panel_labels,
+  inherit.aes = FALSE,
+  aes(x = x, y = y, label = label),
+  hjust = 0, vjust = 1,
+  size = 5) +
+  scale_y_continuous(limits = c(0, 7.5), breaks = c(0, 2, 4, 6), expand = c(0, 0)) +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*~CO[2]*~m^{-2}*~s^{-1})))) +
+  xlab("Season") +
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = c(0.02, 0.88),
+    legend.justification = c("left", "top")
+   )
+
+p_trt_x_season
+
+ggsave(
+  filename = here("figures", "ExSituFlux_by_season.png"),  
+  plot = p_trt_x_season,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
 ```
 
 HT stopped here
 
 ![]()
+
+```{r}
+#all resp data with date and moisture-----------
+allresp <- rbind(allpredata,allpeakdata,allpostdata)
+allrespmeans<- ddply(allresp, c("site","Plot","Monsoon","date","Treatment","Microsite"), summarise,
+      N    = sum(!is.na(EFFLUX)),
+      mean_Efflux = mean(EFFLUX, na.rm=TRUE),
+      sd_Efflux = sd(EFFLUX, na.rm=TRUE),
+      se_Efflux  = sd_Efflux / sqrt(N),
+      mean_temp = mean(Tsoil_C, na.rm=TRUE),
+      sd_temp = sd(Tsoil_C, na.rm=TRUE),
+      se_temp  = sd_temp / sqrt(N))
+allrespmeans$N = NULL
+respandmoisture <- merge(allrespmeans,dailymoisturemeans)
+respandmoisture$SiteOrder = factor(respandmoisture$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels= c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+respandmoisture$MonsoonOrder = factor(respandmoisture$Monsoon, levels=c("pre","peak","post"), labels=c("Pre","Peak","Post")) 
+
+#graph resp vs moisture
+ggplot(data = respandmoisture, aes(x= mean_VWC, y=mean_Efflux,color = Treatment)) + 
+  geom_point(position = "identity", size = 2) +
+  facet_wrap(~SiteOrder, ncol = 5, labeller = labeller(SiteOrder = label_wrap_gen(width = 15),SiteOrder = label_wrap_gen(width = 20))) +
+  stat_smooth(aes(group = 1), color="black", method = "lm", se = FALSE, formula = y ~ x) +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  xlab(expression(paste(Volumetric~Water~Content~(m^{3}~water~m^{-3}~soil))))+
+  theme_grey(base_size = 20) +
+  scale_shape_manual(values=c(15,16,17,0,4), name = "Site") +
+  scale_color_manual(values=c("#de2d26","#bdbdbd","#08519c"  ),labels = c ("Exclusion","Ambient","Addition"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = "none",
+    panel.background = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA)) +
+  geom_errorbar(aes(ymin=mean_Efflux-se_Efflux, ymax=mean_Efflux+se_Efflux), width=0, position="identity")+
+  geom_errorbarh(aes(xmin=mean_VWC-se_VWC, xmax=mean_VWC+se_VWC), width=0, position="identity")
+
+# ggsave("RespVsVWC.png",plot = last_plot(),
+#        path="~/Documents/Masters/Research/Writing/Paper/Figures for Paper/",
+#        height=7,width=12,units="in",dpi=1000)
+
+#want to try with SWP
+respandSWP <- merge(allrespmeans,dailySWPmeans)
+respandSWP$SiteOrder = factor(respandSWP$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels= c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+respandSWP$MonsoonOrder = factor(respandSWP$Monsoon, levels=c("pre","peak","post"), labels=c("Pre","Peak","Post")) 
+
+#graph resp vs SWP
+ggplot(data = respandSWP, aes(x= mean_SWP, y=mean_Efflux, color = Treatment)) + 
+  geom_point(position = "identity", aes(shape=SiteOrder)) +
+  stat_smooth(aes(group = 1), color="black", method = "lm", se = FALSE, formula = y ~ x) +
+  #facet_wrap(~MonsoonOrder, scales = "free_x") +
+  #scale_y_continuous(sec.axis = sec_axis(~.*5, name = "Temperature (C)"))+
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  xlab(expression(paste(Soil~Water~Potential~(MPa))))+
+  theme_grey(base_size = 22) +
+  #scale_color_manual(values = c("blue", "gray", "red"), labels = c("Addition","Ambient","Exclusion"))+
+  scale_shape_manual(values=c(15,16,17,0,4), name = "Site")+ #, labels = c ("Desert","Grassland","Pinyon-Juniper","Ponderosa","Mixed-Conifer")) +
+  scale_color_manual(values=c("#08519c", "#bdbdbd", "#de2d26")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.17,.85),
+    legend.box = "horizontal",
+    panel.background = element_blank(),
+    #axis.text=element_text(size=20),
+    panel.border = element_rect(color = "black", fill = NA))+
+guides(fill=guide_legend(title="Treatment"))
+
+#linear model
+rmlm <- lm(mean_Efflux ~ mean_VWC + site, data = respandmoisture)
+summary(rmlm)
+Anova(rmlm)
+
+# lmm-------
+#add seasonality columns (need to add temp to pre and post)
+premeans$season <- 'pre'
+peakmeans$season <- 'peak'
+postmeans$season <- 'post'
+
+#combine
+allseasonmeans <- rbind(premeans,peakmeans,postmeans)
+
+#all season means combining plot
+allseasonsitemeans <- ddply(allseasonmeans, c("site","Treatment","Microsite","season"), summarise,
+                     N    = sum(!is.na(mean_Efflux)),
+                     meanEfflux = mean(mean_Efflux, na.rm=TRUE),
+                     sdEfflux = sd(mean_Efflux, na.rm=TRUE),
+                     se_Efflux  = sdEfflux / sqrt(N),
+                     meantemp = mean(mean_temp, na.rm=TRUE),
+                     sdtemp = sd(mean_temp, na.rm=TRUE),
+                     se_temp  = sdtemp / sqrt(N))
+
+allseasonsitemeans$SiteOrder = factor(allseasonsitemeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("BP","ANT","BC","ARB","CC")) 
+allseasonsitemeans$MonsoonOrder = factor(allseasonsitemeans$season, levels=c("pre","peak","post"), labels=c("Pre","Peak","Post")) 
+allseasonsitemeans$TreatmentOrder = factor(allseasonsitemeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exclusion","Ambient","Addition")) 
+allseasonsitemeans$Microsite <- factor(allseasonsitemeans$Microsite, levels = c("Can", "IC"), labels = c("Canopy", "Inter Canopy"))
+
+#graph of season means by microsite
+ggplot(data = allseasonsitemeans, aes(x= SiteOrder, y=meanEfflux, fill = TreatmentOrder)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(MonsoonOrder~Microsite, scales = "free_x") +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  xlab(expression(paste(Site)))+
+  theme_grey(base_size = 22) +
+  scale_fill_manual(values=c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = c(0.1,.85),
+    #legend.box = "horizontal",
+    panel.background = element_blank(),
+    #axis.text=element_text(size=20),
+    axis.line = element_line(color = "black"))+
+  guides(fill=guide_legend(title="Treatment"))
+
+
+#check normality
+shapiro.test(allmeans$mean_Efflux)
+#not normal p-value = 2.773e-09
+qqp(allmeans$mean_Efflux, "lnorm") #use log normal
+
+#linear mixed model, don't have plot in the dataframe so I can't use it as a random effect
+lmm <- lmer(mean_Efflux ~ site + Treatment + Microsite + (1 | Plot), data = allmeans,
+            REML = FALSE)
+
+#linear model
+resplm <- lm(mean_Efflux ~ site + Treatment + Microsite + season, data = allmeans)
+summary(resplm)
+aov(resplm) #Estimated effects may be unbalanced
+summary(aov(resplm))
+TukeyHSD(aov(resplm))
+
+#using respandSWP data - changed  to use VWC data
+#allmeans has resp means with microsite - use this to justify combining microsite data
+summary(lm(EFFLUX ~ site + Treatment + Tsoil_C, data=respandmoisture))
+summary(lmer(EFFLUX ~ site + Treatment + Microsite + (1 | Plot), data = respandmoisture,
+     REML = FALSE))
+#including Tsoil_C makes AIC value 3643.4 and removing it makes AIC value 3644.5
+#including mean_VWC makes AIC 3303.2
+#everything after ~ is a response variable and in () is the random variable
+summary(lmm)
+Anova(lmm)
+allresplm <- lm(mean_Efflux ~ site + Treatment + Microsite, data=respandmoisture)
+#microsite not significant
+summary(aov(mean_Efflux ~ site + Treatment + Microsite + mean_temp * mean_VWC, data=respandmoisture))
+#all data
+summary(aov(mean_Efflux ~ site + Treatment + Microsite + Monsoon, data=respandmoisture))
+#BC,ARB,and CC different than BP and ANT
+#pre different than peak and post
+#VWC significant
+TukeyHSD(aov(mean_Efflux ~ site + Treatment + Microsite + Monsoon, data=respandmoisture))
+
+#peak monsoon season
+respandVWCpeak <- subset(respandmoisture, respandmoisture[ , 4] == 'peak')  
+summary(lm(mean_Efflux ~ Treatment, data=respandVWCpeak)) 
+#treatment is not significant
+summary(lm(mean_Efflux ~ site + Treatment, data=respandVWCpeak)) 
+#BC,ARB,and CC different than BP and ANT
+#treatment is not significant
+summary(lm(mean_Efflux ~ site * Treatment, data=respandVWCpeak)) 
+#no interactions significant, only CC addition significant 
+summary(lm(mean_Efflux ~ site + Treatment + mean_VWC, data=respandVWCpeak))
+#BC,ARB,and CC different than BP and ANT
+#treatment and VWC not significant 
+summary(lm(mean_Efflux ~  Treatment + mean_VWC, data=respandVWCpeak))
+
+
+#pre monsoon season
+respandSWPpre <- subset(respandSWP, respandSWP[ , 4] == 'pre')  
+summary(lm(mean_Efflux ~ Treatment, data=respandSWPpre))
+summary(lm(mean_Efflux ~ site + Treatment, data=respandSWPpre))
+summary(lm(mean_Efflux ~ site * Treatment, data=respandSWPpre)) #don't have enough data for this to work
+summary(lm(mean_Efflux ~ site + Treatment + meanSWP, data=respandSWPpre))
+
+#site, microsite, season, treatment
+summary(aov(mean_Efflux ~ SiteOrder + Treatment + Monsoon + Microsite, data=allrespmeans))
+
+# respiration data vs time for each trip ----
+
+allrespmeans$TreatmentOrder = factor(allrespmeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exclusion","Ambient","Addition")) 
+allrespmeans$SiteOrder = factor(allrespmeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Black Point","Antelope","BlueChute","Arboretum","Camp Colton")) 
+allresptimemeans <- ddply(allrespmeans, c("site","Treatment","date"), summarise,
+                            N    = sum(!is.na(mean_Efflux)),
+                            meanEfflux = mean(mean_Efflux, na.rm=TRUE),
+                            sdEfflux = sd(mean_Efflux, na.rm=TRUE),
+                            se_Efflux  = sdEfflux / sqrt(N))
+
+allresptimemeans$TreatmentOrder = factor(allresptimemeans$Treatment, levels=c("Exl","Ctrl","Add"), labels=c("Exclusion","Ambient","Addition")) 
+allresptimemeans$SiteOrder = factor(allresptimemeans$site, levels=c("BlackPoint","Antelope","BlueChute","Arboretum","CampColton"), labels=c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+
+# all resp vs time ----
+ggplot(data = allresptimemeans, aes(x= date, y=meanEfflux, color = TreatmentOrder)) + 
+  geom_point(stat = "identity", position = "dodge") +
+  facet_wrap(~SiteOrder, scales = "free_x", ncol = 5, labeller = labeller(SiteOrder = label_wrap_gen(width = 15),SiteOrder = label_wrap_gen(width = 20))) +
+  stat_smooth(aes(group = TreatmentOrder), method = "lm", se = FALSE, formula = y ~ x) +
+  scale_y_continuous(limits=c(0,7.5), breaks = c(0,2,4,6))+
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1}))))+
+  xlab(expression(paste(Time)))+
+  theme_grey(base_size = 18) +
+  annotate('rect', xmin=180606, xmax=180714, ymin=0, ymax=7.5, alpha=.2, fill='red') +
+  annotate('rect', xmin=180714.01, xmax=180829, ymin=0, ymax=7.5, alpha=.2, fill='blue') +
+  annotate('rect', xmin=180829.1, xmax=180912, ymin=0, ymax=7.5, alpha=.2, fill='green') +
+  scale_color_manual(name = "Treatment" , values=c("#de2d26", "#bdbdbd", "#08519c")) +
+   theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = "none",
+    #legend.box = "horizontal",
+    panel.background = element_blank(),
+    axis.text.x = element_blank(), #(element_text(angle = 45, vjust = 1, hjust=1)),
+    axis.text  = element_text(size=15),
+    panel.border = element_rect(color = "black", fill = NA))+
+  guides(fill=guide_legend(title="Treatment")) +
+  geom_errorbar(aes(ymin=meanEfflux-se_Efflux, ymax=meanEfflux+se_Efflux), width=.2, position=position_dodge(.9)
+  )
+  
+# ggsave("RespVsTime.png",plot = last_plot(),
+#        path="~/Documents/Masters/Research/Writing/Paper/Figures for Paper/",
+#        height=5,width=12,units="in",dpi=1000)
+
+#resp means by season ----
+# used this for stats in paper 
+meanseasonresp <-  ddply(allrespmeans, c("site","Treatment","Microsite","Monsoon"), summarise,
+                         N    = sum(!is.na(mean_Efflux)),
+                         mean_Efflux2 = mean(mean_Efflux, na.rm=TRUE),
+                         sd_Efflux2 = sd(mean_Efflux, na.rm=TRUE),
+                         se_Efflux2  = sd_Efflux2 / sqrt(N),
+                         mean_temp2 = mean(mean_temp, na.rm=TRUE),
+                         sd_temp2 = sd(mean_temp, na.rm=TRUE),
+                         se_temp2  = sd_temp2 / sqrt(N))
+respAOV <- (aov(mean_Efflux2 ~ site + Treatment + Monsoon + Microsite, data=meanseasonresp))
+summary(respAOV)
+
+```
 
 ```{r}
 #Camp Colton

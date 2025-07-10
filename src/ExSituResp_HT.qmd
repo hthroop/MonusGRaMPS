@@ -13,6 +13,9 @@ This code cleans, works up, analyzes, and plots data collected on the Throop Lab
 
 This code is based on the file "ExSituResp.R" written by Brittney Monus.
 
+Current version compiled by Heather Throop\
+Last Update 2025-07-09
+
 Heather's to-do list (July 8, 2025)
 
 -   check units and that fluxes are calculated correctly
