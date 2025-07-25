@@ -15,8 +15,8 @@ This code was revised by Heather Throop in July 2025, based on the code "SoilMoi
 
 Daily moisture means are changed to be the mean of plot means (there are \~24 daily measurements be plot).
 
-Last Update\
-2027-07-10 Heather Throop
+Written 2027-07-10 Heather Throop\
+Updated 2027-07-10 Heather Throop - updated plot
 
 ## Preparation Steps
 
@@ -38,9 +38,8 @@ soilmetdata = read.csv(here("data","SoilMoisture.csv")) # original file name in 
 df_soilmoisture <- soilmetdata |>
   filter(Measure == "VWC") |> # Remove non VWC data
   filter(Depth.Code == "Shallow") |> # Retain only 0-10 cm depth data 
-  select("site","date","Measurement","Plot","Treatment") |>
+  dplyr::select(site, date, Measurement,Plot,Treatment) |>
   mutate(Measurement = if_else(Measurement <= 0, 0.0001, Measurement)) # change 0 or negative VWC values to a very small positive number
-
 ```
 
 ## Convert VWC to SWP
@@ -95,6 +94,39 @@ dailymoisturemeans_byplot <- df_soilmoisture |>
     .groups = "drop"
   ) 
 
+
+```
+
+```{r}
+#| label: clean data and save output
+
+## data clean-up - change to naming conventions used in other files
+
+# Convert SampleDate to Date format
+dailymoisturemeans_byplot <- dailymoisturemeans_byplot |>
+  mutate(SampleDate = as.Date(as.character(date), format = "%y%m%d"))
+
+# rename and order sites
+dailymoisturemeans_byplot$Site = factor(dailymoisturemeans_byplot$site, 
+                              levels=c("BlackPoint","Antelope","BlueChute",
+                                       "Arboretum","CampColton"), 
+                              labels=c("Desert Scrub","Desert Grassland","Juniper Savanna",
+                                       "Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+# rename and order treatments
+dailymoisturemeans_byplot$Treatment = factor(dailymoisturemeans_byplot$Treatment, 
+                                   levels=c("Exl","Ctrl","Add"), 
+                                   labels=c("Exclusion","Ambient","Addition")) 
+
+write_csv(dailymoisturemeans, 
+          here("data","calculated_outputs","dailymoisturemeans_by_plot.csv"))
+
+
+```
+
+## Treatment-level VWC Means
+
+```{r}
+
 # Calculate SWP and VWC summary per site-date-treatment (mean of the plot means)
 dailymoisturemeans <- dailymoisturemeans_byplot |>
   group_by(site, date, Treatment) |>
@@ -109,22 +141,12 @@ dailymoisturemeans <- dailymoisturemeans_byplot |>
     .groups = "drop"
   ) 
 
-```
 
-```{r}
-#| label: save output
-
-write_csv(dailymoisturemeans, here("results","dailymoisturemeans.csv"))
-
-```
-
-## Plot VWC Means
-
-```{r}
+dailymoisturemeans$site <- as.factor(dailymoisturemeans$site)
 
 ggplot(dailymoisturemeans, aes(x = date, y = VWC, color = Treatment)) +
   geom_line() +
-  facet_grid( ~ site, scales = "free_y") +
+  facet_grid(site ~ Treatment) +
   labs(x = "Date", y = "Value", title = "Mean Volumetric Water Content") +
   theme_minimal()
 

@@ -49,10 +49,10 @@ InSituResp <- InSituResp |>
   mutate(Season = case_when(
            (SampleDate >= 180604 & SampleDate <= 180607) |
            (SampleDate >= 180618 & SampleDate <= 180621) |
-           (SampleDate >= 180702 & SampleDate <= 180705) ~ "PreMonsoon",
+           (SampleDate >= 180702 & SampleDate <= 180705) ~ "Pre",
            (SampleDate >= 180723 & SampleDate <= 180726) |
-           (SampleDate >= 180814 & SampleDate <= 180817) ~ "PeakMonsoon",
-           (SampleDate >= 180911 & SampleDate <= 180914) ~ "PostMonsoon",
+           (SampleDate >= 180814 & SampleDate <= 180817) ~ "Peak",
+           (SampleDate >= 180911 & SampleDate <= 180914) ~ "Post",
            TRUE ~ NA_character_  # Set to NA if not in any defined range
          ))
 
@@ -92,7 +92,7 @@ InSituResp$Microsite = factor(InSituResp$Microsite,
 
 # put the seasons in order
 InSituResp <- InSituResp |>
-      mutate(Season = factor(Season, levels = c("PreMonsoon", "PeakMonsoon", "PostMonsoon")))
+      mutate(Season = factor(Season, levels = c("Pre", "Peak", "Post")))
 ```
 
 ## Daily Means
@@ -177,7 +177,7 @@ p_trt_x_microsite
 Brittney's analyses indicate no microsite differences, so here they are merged together for a simpler figure.
 
 ```{r}
-#| label: boxplot by season, microsites merged
+#| label: boxplot: efflux by seasoen (microsites combimned)
 
 # microsites merged
 
@@ -202,7 +202,7 @@ p_trt_x_season <- InSituResp_daily_collar_means |>
   size = 5) +
   scale_y_continuous(limits = c(0, 7.5), breaks = c(0, 2, 4, 6), expand = c(0, 0)) +
   ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*~CO[2]*~m^{-2}*~s^{-1})))) +
-  xlab("Season") +
+  xlab("Monsoon Season") +
   scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
   theme_grey(base_size = 18) +
   theme(
@@ -210,7 +210,7 @@ p_trt_x_season <- InSituResp_daily_collar_means |>
     panel.grid.minor = element_blank(),
     panel.background = element_rect(fill = "white", color = NA),
     axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.x = element_text(size = 14),
     axis.text = element_text(size = 15),
     panel.border = element_rect(color = "black", fill = NA),
     legend.position = c(0.02, 0.88),
@@ -228,9 +228,162 @@ ggsave(
 )
 ```
 
-HT stopped here
+## Drivers of InSitu Respiration
 
-![]()
+We need to:
+
+combine InSituResp_daily_collar_means with dailymoisturemeans_byplot\
+Use model selection to come up with predictive relationship for InSituResp\
+Make a plot
+
+```{r}
+#| label: combine insitu resp and moisture data
+
+# combine the daily mean values for VWC (by plot) with mean values for efflux (by plot and microsite)
+# note that there are two efflux values from each plot x day combo (the two microsites) for efflux but just one VWC value
+# some plots did not have soil moisture probes, so these plots have NA for VWC
+InSituResp_combined <- InSituResp_daily_collar_means |>
+  left_join(
+    dailymoisturemeans_byplot |>
+      dplyr::select(SampleDate, Site, Plot, Treatment, 
+             SWP = mean_SWP, VWC = mean_VWC),
+    by = c("SampleDate", "Site", "Plot", "Treatment")
+  )
+```
+
+```{r}
+#| label: regression: plot-level VWC vs efflux
+# regression with plot-level VWC, with mean efflux values the mean of the two microsites for each plot
+# Use mean site x treatment x date values for VWC to fill in missing VWC values (where there is no soil moisture probe)
+
+InSituResp_combined_plotmeans <- InSituResp_combined |>
+  group_by(SampleDate, Site, Plot, Treatment, Season, Trip) |>
+  summarise(
+    N_reps    = sum(!is.na(Efflux)),
+    Efflux   = mean(Efflux, na.rm = TRUE),
+    RHcmbr   = mean(RHcmbr, na.rm = TRUE),
+    Tsoil_C   = mean(Tsoil_C, na.rm = TRUE), 
+    Tsch_C   = mean(Tsch_C, na.rm = TRUE),
+    SWP = mean(SWP, na.rm = TRUE),
+    VWC = mean(VWC, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# replace NaN with mean VWC for each site x treatment x sampledate combination
+InSituResp_combined_plotmeans <- InSituResp_combined_plotmeans |>
+  group_by(Site, Treatment, SampleDate) |>
+  mutate(VWC = ifelse(is.na(VWC), mean(VWC, na.rm = TRUE), VWC)) |>
+  ungroup()
+
+flux_v_VWC_regression_results <- InSituResp_combined_plotmeans |>
+  group_by(Site) |>
+  nest() |>
+  mutate(
+    model = map(data, ~ lm(Efflux ~ VWC, data = .x)),
+    model_summary = map(model, tidy),
+    model_stats = map(model, glance)
+  ) |>
+  unnest(model_summary, names_sep = "_") |>
+  pivot_wider(
+    names_from = model_summary_term,
+    values_from = model_summary_estimate
+  ) |>
+  unnest(model_stats, names_sep = "_") |>
+  dplyr::select(
+    Site,
+    intercept = `(Intercept)`,
+    slope = VWC,
+    r_squared = model_stats_r.squared,
+    p_value = model_stats_p.value
+  )
+
+flux_v_VWC_regression_results
+```
+
+
+```{r}
+#|label: graph: efflux vs VWC
+
+# Create annotation data frame for facet labels
+panel_labels <- data.frame(
+  Site = unique(InSituResp_combined_plotmeans$Site),
+  x = 0.01,  # Nudges left of the first x category
+  y = 8.45,
+  label = c("H.", "F.", "I.", "F.", "J.")
+)
+
+# make the plot
+resp_v_VWC_p1 <- InSituResp_combined_plotmeans |>
+  ggplot(aes(x= VWC, y=Efflux, color = Treatment)) + 
+  geom_point(position = "identity", size = 2) +
+  #facet_grid(.~Site) +
+  facet_wrap(~Site, ncol = 5, labeller = labeller(Site = label_wrap_gen(width = 20))) +
+  geom_text(
+  data = panel_labels,
+  inherit.aes = FALSE,
+  aes(x = x, y = y, label = label),
+  hjust = 0, vjust = 1,
+  size = 5) +
+  stat_smooth(aes(group = 1), color="black", method = "lm", se = FALSE, formula = y ~ x) +
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*~CO[2]*~m^{-2}*~s^{-1})))) +
+  xlab(expression(paste(Volumetric~Water~Content~(m^{3}~water~m^{-3}~soil))))+
+  theme_grey(base_size = 18) +
+  scale_shape_manual(values=c(15,16,17,0,4), name = "Site") +
+  scale_color_manual(values=c("#de2d26","#bdbdbd","#08519c"  ),labels = c ("Exclusion","Ambient","Addition"))+
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x=element_blank(),
+    legend.position = "none",
+    axis.text.x = element_text(size = 14),
+    axis.text = element_text(size = 15),
+    panel.background = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA)) 
+resp_v_VWC_p1
+
+ggsave(here("figures", "ExSituFlux_vs_VWC.png"), plot = resp_v_VWC_p1, width = 10, height = 8)
+```
+
+```{r}
+#| label: model: predictive relationship for InSituResp
+
+# Use linear mixed effects models to predict Efflux based on VWC and Tsoil_C, with a different model for each site
+library(lme4)
+
+# Make sure Site and Plot are factors
+InSituResp_combined <- InSituResp_combined |>
+  mutate(
+    Site = as.factor(Site),
+    Plot = as.factor(Plot)
+  )
+
+# Fit different mixed effects model and compare model fits with AIC
+
+# Model 1: VWC only
+m1 <- lmer(Efflux ~ VWC + (1 | Plot), data = InSituResp_combined)
+
+# Model 2: VWC + Tsoil_C
+m2 <- lmer(Efflux ~ VWC + Tsoil_C + (1 | Plot), data = InSituResp_combined)
+
+# Model 3: VWC + Site 
+m3 <- lmer(Efflux ~ VWC + Site + (1 | Plot), data = InSituResp_combined)
+
+# Model 4: VWC + Tsoil_C + Site (full model)
+m4 <- lmer(Efflux ~ VWC + Tsoil_C + Site + (1 | Plot), data = InSituResp_combined)
+
+# Compare AICs
+AIC(m1, m2, m3, m4)
+
+### The lowest AIC is m3 --> VWC and site are the best predictors of efflux.
+
+# pvalues for best fit model
+lmm_p <- lmerTest::lmer(Efflux ~ VWC + Site + (1 | Plot), data = InSituResp_combined)
+summary(lmm_p)
+
+
+```
+
+
 
 ```{r}
 #all resp data with date and moisture-----------

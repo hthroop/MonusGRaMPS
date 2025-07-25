@@ -10,11 +10,11 @@ EnzymeAnalysis.R
 
 ExSituResp_HT.qmd:
 
-ExSituResp.R:
 
 GRaMPSCN2019.R:
 
 InSituResp.qmd:
+This is a compilation, cleaning, and analysis of field-collected soil respiration data. Code was written by Heather Throop, streamlining and updating the original analyses that Brittney did for her MS. Data are ingested and collapsed to means for plots (separated by microsite or means of microsites). Flux patterns are plotted by season. Statistical analysis and plots of soil moisture, temperature, and site impacts on respiration. 
 
 MicrobialBiomass.R
 
