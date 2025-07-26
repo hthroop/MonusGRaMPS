@@ -104,7 +104,8 @@ dailymoisturemeans_byplot <- df_soilmoisture |>
 
 # Convert SampleDate to Date format
 dailymoisturemeans_byplot <- dailymoisturemeans_byplot |>
-  mutate(SampleDate = as.Date(as.character(date), format = "%y%m%d"))
+  mutate(SampleDate = as.Date(as.character(date), format = "%y%m%d")) |>
+  dplyr::select(-date)
 
 # rename and order sites
 dailymoisturemeans_byplot$Site = factor(dailymoisturemeans_byplot$site, 
@@ -112,14 +113,19 @@ dailymoisturemeans_byplot$Site = factor(dailymoisturemeans_byplot$site,
                                        "Arboretum","CampColton"), 
                               labels=c("Desert Scrub","Desert Grassland","Juniper Savanna",
                                        "Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+
+dailymoisturemeans_byplot <- dailymoisturemeans_byplot |>
+  dplyr::select(-site)
+
 # rename and order treatments
 dailymoisturemeans_byplot$Treatment = factor(dailymoisturemeans_byplot$Treatment, 
                                    levels=c("Exl","Ctrl","Add"), 
                                    labels=c("Exclusion","Ambient","Addition")) 
 
-write_csv(dailymoisturemeans, 
-          here("data","calculated_outputs","dailymoisturemeans_by_plot.csv"))
 
+
+write_csv(dailymoisturemeans_byplot, 
+          here("data","calculated_outputs","dailymoisturemeans_by_plot.csv"))
 
 ```
 
@@ -127,9 +133,9 @@ write_csv(dailymoisturemeans,
 
 ```{r}
 
-# Calculate SWP and VWC summary per site-date-treatment (mean of the plot means)
+# Calculate SWP and VWC summary per Site-date-treatment (mean of the plot means)
 dailymoisturemeans <- dailymoisturemeans_byplot |>
-  group_by(site, date, Treatment) |>
+  group_by(Site, date, Treatment) |>
   summarise(
     N    = sum(!is.na(mean_SWP)),
     SWP = mean(mean_SWP, na.rm = TRUE),
@@ -142,11 +148,11 @@ dailymoisturemeans <- dailymoisturemeans_byplot |>
   ) 
 
 
-dailymoisturemeans$site <- as.factor(dailymoisturemeans$site)
+dailymoisturemeans$Site <- as.factor(dailymoisturemeans$Site)
 
 ggplot(dailymoisturemeans, aes(x = date, y = VWC, color = Treatment)) +
   geom_line() +
-  facet_grid(site ~ Treatment) +
+  facet_grid(Site ~ Treatment) +
   labs(x = "Date", y = "Value", title = "Mean Volumetric Water Content") +
   theme_minimal()
 

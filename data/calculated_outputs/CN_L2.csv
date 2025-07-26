@@ -1,0 +1,225 @@
+"Site","Treatment","Microsite","Depth","Plot","N","mean_C","mean_N"
+"Desert Scrub","Exclusion","Intercanopy","0.5","1",1,0.743341055,0.022804238
+"Desert Scrub","Exclusion","Intercanopy","0.5","2",1,0.25836579,0.021923687
+"Desert Scrub","Exclusion","Intercanopy","0.5","4",1,0.14957965,0.016354916
+"Desert Scrub","Exclusion","Intercanopy","0.5","7",1,0.235277439,0.024342282
+"Desert Scrub","Exclusion","Intercanopy","5.10","1",1,0.645491837,0.023742684
+"Desert Scrub","Exclusion","Intercanopy","5.10","4",1,0.700846489,0.017001298
+"Desert Scrub","Exclusion","Intercanopy","5.10","7",1,0.745060728,0.021153134
+"Desert Scrub","Exclusion","Canopy","0.5","1",1,0.32887608,0.028815436
+"Desert Scrub","Exclusion","Canopy","0.5","2",1,0.85753604,0.026950922
+"Desert Scrub","Exclusion","Canopy","0.5","4",1,0.847646431,0.023859777
+"Desert Scrub","Exclusion","Canopy","0.5","7",1,0.734357098,0.021155025
+"Desert Scrub","Exclusion","Canopy","5.10","1",1,0.34179081,0.035577181
+"Desert Scrub","Exclusion","Canopy","5.10","2",2,0.840118973,0.0286221575
+"Desert Scrub","Exclusion","Canopy","5.10","4",1,0.89746686,0.029949153
+"Desert Scrub","Exclusion","Canopy","5.10","7",1,0.729709048,0.021123357
+"Desert Scrub","Ambient","Intercanopy","0.5","3",1,0.70714144,0.018393542
+"Desert Scrub","Ambient","Intercanopy","0.5","5",1,0.751109014,0.019331988
+"Desert Scrub","Ambient","Intercanopy","0.5","6",1,0.785467732,0.025994955
+"Desert Scrub","Ambient","Intercanopy","0.5","8",1,0.877773837,0.038396643
+"Desert Scrub","Ambient","Intercanopy","5.10","3",1,0.236673898,0.026838926
+"Desert Scrub","Ambient","Intercanopy","5.10","5",1,0.81773573,0.023317641
+"Desert Scrub","Ambient","Intercanopy","5.10","6",1,0.722552973,0.019238143
+"Desert Scrub","Ambient","Intercanopy","5.10","8",1,0.858093886,0.031945175
+"Desert Scrub","Ambient","Canopy","0.5","12",1,0.339015288,0.028503356
+"Desert Scrub","Ambient","Canopy","0.5","3",1,0.384187018,0.030271812
+"Desert Scrub","Ambient","Canopy","0.5","5",1,0.341550557,0.032493083
+"Desert Scrub","Ambient","Canopy","0.5","6",1,0.74836677,0.020857974
+"Desert Scrub","Ambient","Canopy","0.5","8",1,0.990866889,0.034307079
+"Desert Scrub","Ambient","Canopy","5.10","3",1,0.311350182,0.027931621
+"Desert Scrub","Ambient","Canopy","5.10","5",1,0.800364458,0.023742684
+"Desert Scrub","Ambient","Canopy","5.10","6",1,0.287924821,0.026526846
+"Desert Scrub","Ambient","Canopy","5.10","8",1,0.958654737,0.036993388
+"Desert Scrub","Addition","Intercanopy","0.5","10",1,0.296690057,0.023293918
+"Desert Scrub","Addition","Intercanopy","0.5","11",1,0.329214343,0.033106315
+"Desert Scrub","Addition","Intercanopy","0.5","12",1,0.201195068,0.022103917
+"Desert Scrub","Addition","Intercanopy","0.5","9",1,0.83861768,0.024245035
+"Desert Scrub","Addition","Intercanopy","5.10","10",1,0.244498606,0.026366107
+"Desert Scrub","Addition","Intercanopy","5.10","11",1,0.314742425,0.031093691
+"Desert Scrub","Addition","Intercanopy","5.10","12",1,0.682008393,0.02028564
+"Desert Scrub","Addition","Intercanopy","5.10","9",1,0.303278993,0.030925659
+"Desert Scrub","Addition","Canopy","0.5","10",1,0.748699901,0.022727321
+"Desert Scrub","Addition","Canopy","0.5","11",1,0.480290587,0.042755034
+"Desert Scrub","Addition","Canopy","0.5","12",1,0.235865485,0.019710238
+"Desert Scrub","Addition","Canopy","0.5","9",1,0.708275213,0.021865792
+"Desert Scrub","Addition","Canopy","5.10","10",1,0.268553085,0.026034379
+"Desert Scrub","Addition","Canopy","5.10","11",1,0.854733878,0.029864056
+"Desert Scrub","Addition","Canopy","5.10","12",1,0.652278288,0.020603077
+"Desert Scrub","Addition","Canopy","5.10","9",1,0.744945273,0.024774975
+"Desert Grassland","Exclusion","Intercanopy","0.5","12",1,1.043304807,0.087590604
+"Desert Grassland","Exclusion","Intercanopy","0.5","4",1,0.67991975,0.066681208
+"Desert Grassland","Exclusion","Intercanopy","0.5","6",1,1.216987751,0.08510309
+"Desert Grassland","Exclusion","Intercanopy","0.5","9",1,0.662996448,0.068033557
+"Desert Grassland","Exclusion","Intercanopy","5.10","12",1,0.816794912,0.075926459
+"Desert Grassland","Exclusion","Intercanopy","5.10","4",1,0.629072642,0.070619569
+"Desert Grassland","Exclusion","Intercanopy","5.10","6",1,1.242631085,0.088645265
+"Desert Grassland","Exclusion","Intercanopy","5.10","9",1,0.664438322,0.071798601
+"Desert Grassland","Exclusion","Canopy","0.5","12",1,0.996569811,0.08167546
+"Desert Grassland","Exclusion","Canopy","0.5","4",1,0.981022986,0.076671039
+"Desert Grassland","Exclusion","Canopy","0.5","9",1,1.068618982,0.091855705
+"Desert Grassland","Exclusion","Canopy","5.10","12",1,0.728714967,0.06953885
+"Desert Grassland","Exclusion","Canopy","5.10","4",1,0.751748399,0.069362602
+"Desert Grassland","Exclusion","Canopy","5.10","6",1,0.820421123,0.068946618
+"Desert Grassland","Exclusion","Canopy","5.10","9",1,0.892915177,0.082765787
+"Desert Grassland","Ambient","Intercanopy","0.5","10",1,0.909626717,0.079395683
+"Desert Grassland","Ambient","Intercanopy","0.5","3",1,1.2482971,0.09071251
+"Desert Grassland","Ambient","Intercanopy","0.5","7",1,0.800187753,0.07159049
+"Desert Grassland","Ambient","Intercanopy","0.5","8",1,1.009454196,0.093312081
+"Desert Grassland","Ambient","Intercanopy","5.10","10",1,0.677005989,0.065243077
+"Desert Grassland","Ambient","Intercanopy","5.10","3",1,0.945311561,0.089039937
+"Desert Grassland","Ambient","Intercanopy","5.10","8",1,0.761784293,0.077708054
+"Desert Grassland","Ambient","Canopy","0.5","10",1,1.160754753,0.084805759
+"Desert Grassland","Ambient","Canopy","0.5","3",1,1.543886943,0.101041807
+"Desert Grassland","Ambient","Canopy","0.5","7",1,1.031900995,0.075382851
+"Desert Grassland","Ambient","Canopy","0.5","8",1,1.043835458,0.083171486
+"Desert Grassland","Ambient","Canopy","5.10","10",1,0.706816704,0.069301259
+"Desert Grassland","Ambient","Canopy","5.10","3",1,0.858459519,0.083660979
+"Desert Grassland","Ambient","Canopy","5.10","7",1,0.712964778,0.069177852
+"Desert Grassland","Ambient","Canopy","5.10","8",1,0.853759769,0.086654362
+"Desert Grassland","Addition","Intercanopy","0.5","1",1,0.966629535,0.089696224
+"Desert Grassland","Addition","Intercanopy","0.5","11",1,0.957417906,0.076052896
+"Desert Grassland","Addition","Intercanopy","0.5","5",1,0.785758565,0.068694248
+"Desert Grassland","Addition","Intercanopy","5.10","1",1,0.691321199,0.074548355
+"Desert Grassland","Addition","Intercanopy","5.10","11",1,0.746559556,0.072194631
+"Desert Grassland","Addition","Intercanopy","5.10","2",1,0.748155098,0.078824202
+"Desert Grassland","Addition","Intercanopy","5.10","5",1,0.737249211,0.070420151
+"Desert Grassland","Addition","Canopy","0.5","1",1,0.750461172,0.074624858
+"Desert Grassland","Addition","Canopy","0.5","11",1,1.342524322,0.100508393
+"Desert Grassland","Addition","Canopy","0.5","2",1,1.076290476,0.092155399
+"Desert Grassland","Addition","Canopy","0.5","5",1,1.114535498,0.094248322
+"Desert Grassland","Addition","Canopy","5.10","1",1,0.724508915,0.072943217
+"Desert Grassland","Addition","Canopy","5.10","11",1,0.972458716,0.08454996
+"Desert Grassland","Addition","Canopy","5.10","2",1,0.85582934,0.086782657
+"Desert Grassland","Addition","Canopy","5.10","5",1,0.773435346,0.072117429
+"Juniper Savanna","Exclusion","Intercanopy","0.5","12",1,2.178674507,0.247861259
+"Juniper Savanna","Exclusion","Intercanopy","0.5","2",1,0.741213716,0.018398307
+"Juniper Savanna","Exclusion","Intercanopy","0.5","4",1,2.242433818,0.219742905
+"Juniper Savanna","Exclusion","Intercanopy","0.5","8",2,3.067157989,0.233713698
+"Juniper Savanna","Exclusion","Intercanopy","5.10","10",1,2.986724134,0.19824914
+"Juniper Savanna","Exclusion","Intercanopy","5.10","12",1,2.833954302,0.258705036
+"Juniper Savanna","Exclusion","Intercanopy","5.10","4",1,2.173718294,0.195937343
+"Juniper Savanna","Exclusion","Intercanopy","5.10","8",2,3.075099194,0.2208110055
+"Juniper Savanna","Exclusion","Canopy","0.5","10",1,3.478743104,0.246556996
+"Juniper Savanna","Exclusion","Canopy","0.5","12",2,3.1292090265,0.242139704
+"Juniper Savanna","Exclusion","Canopy","0.5","8",1,2.468175494,0.223418066
+"Juniper Savanna","Exclusion","Canopy","5.10","10",1,2.545637498,0.236799361
+"Juniper Savanna","Exclusion","Canopy","5.10","12",1,2.60156164,0.242845723
+"Juniper Savanna","Exclusion","Canopy","5.10","4",1,3.826220603,0.206237341
+"Juniper Savanna","Exclusion","Canopy","5.10","8",1,4.109733483,0.237505422
+"Juniper Savanna","Ambient","Intercanopy","0.5","2",1,2.474617388,0.241342282
+"Juniper Savanna","Ambient","Intercanopy","0.5","3",1,2.693787365,0.254938449
+"Juniper Savanna","Ambient","Intercanopy","0.5","5",1,3.131220183,0.163540898
+"Juniper Savanna","Ambient","Intercanopy","0.5","7",1,2.972987529,0.177740847
+"Juniper Savanna","Ambient","Intercanopy","5.10","2",1,2.402225221,0.238637584
+"Juniper Savanna","Ambient","Intercanopy","5.10","3",1,3.305200608,0.228151981
+"Juniper Savanna","Ambient","Intercanopy","5.10","5",1,2.179653045,0.180016783
+"Juniper Savanna","Ambient","Intercanopy","5.10","7",2,3.6409618195,0.190981172
+"Juniper Savanna","Ambient","Canopy","0.5","2",1,2.720803132,0.247306155
+"Juniper Savanna","Ambient","Canopy","0.5","3",1,3.103976423,0.232453639
+"Juniper Savanna","Ambient","Canopy","0.5","5",1,2.926136488,0.211826501
+"Juniper Savanna","Ambient","Canopy","0.5","7",1,2.19521197,0.217445032
+"Juniper Savanna","Ambient","Canopy","5.10","2",1,2.144105199,0.223512168
+"Juniper Savanna","Ambient","Canopy","5.10","3",1,1.7922,0.1963
+"Juniper Savanna","Ambient","Canopy","5.10","5",1,3.161632547,0.215663581
+"Juniper Savanna","Ambient","Canopy","5.10","7",1,2.304939026,0.209256503
+"Juniper Savanna","Addition","Intercanopy","0.5","1",1,3.074864638,0.21753934
+"Juniper Savanna","Addition","Intercanopy","0.5","11",1,2.970404602,0.211812449
+"Juniper Savanna","Addition","Intercanopy","0.5","6",1,2.01974027,0.200827972
+"Juniper Savanna","Addition","Intercanopy","0.5","9",1,3.602372367,0.217346144
+"Juniper Savanna","Addition","Intercanopy","5.10","1",1,2.170531903,0.206134825
+"Juniper Savanna","Addition","Intercanopy","5.10","11",2,2.0090384665,0.1252462315
+"Juniper Savanna","Addition","Intercanopy","5.10","6",1,2.181337393,0.217997203
+"Juniper Savanna","Addition","Canopy","0.5","1",2,2.711911962,0.218895213
+"Juniper Savanna","Addition","Canopy","0.5","11",1,2.112808283,0.200875839
+"Juniper Savanna","Addition","Canopy","0.5","6",1,2.36697454,0.212217426
+"Juniper Savanna","Addition","Canopy","0.5","9",1,3.363955776,0.205850948
+"Juniper Savanna","Addition","Canopy","5.10","11",1,2.279479182,0.224864895
+"Juniper Savanna","Addition","Canopy","5.10","9",1,2.341035337,0.227669059
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","0.5","1",1,2.083135156,0.23370965
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","0.5","10",1,2.319237117,0.159911201
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","0.5","4",1,3.062555346,0.179900101
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","0.5","7",1,1.8554528,0.151779373
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","5.10","1",1,2.543061247,0.181192646
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","5.10","10",1,2.002516293,0.149870504
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","5.10","4",1,2.776619846,0.206080134
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","5.10","7",1,2.093664427,0.143440678
+"Ponderosa Pine Meadow","Exclusion","Canopy","0.5","1",1,3.765443398,0.266634692
+"Ponderosa Pine Meadow","Exclusion","Canopy","0.5","10",1,2.789975877,0.214607383
+"Ponderosa Pine Meadow","Exclusion","Canopy","0.5","4",1,2.750961865,0.185624622
+"Ponderosa Pine Meadow","Exclusion","Canopy","0.5","7",1,2.948820289,0.214318513
+"Ponderosa Pine Meadow","Exclusion","Canopy","5.10","1",1,2.998302797,0.219453237
+"Ponderosa Pine Meadow","Exclusion","Canopy","5.10","10",1,2.091709256,0.154628297
+"Ponderosa Pine Meadow","Exclusion","Canopy","5.10","4",1,2.273246985,0.163347702
+"Ponderosa Pine Meadow","Exclusion","Canopy","5.10","7",1,2.430107163,0.17136536
+"Ponderosa Pine Meadow","Ambient","Intercanopy","0.5","2",1,3.191465056,0.236171382
+"Ponderosa Pine Meadow","Ambient","Intercanopy","0.5","5",1,2.8182643,0.230315436
+"Ponderosa Pine Meadow","Ambient","Intercanopy","0.5","6",1,2.014242518,0.138434923
+"Ponderosa Pine Meadow","Ambient","Intercanopy","5.10","11",2,2.068316254,0.1763005905
+"Ponderosa Pine Meadow","Ambient","Intercanopy","5.10","2",1,2.691375638,0.193348915
+"Ponderosa Pine Meadow","Ambient","Intercanopy","5.10","5",1,2.466153394,0.18112986
+"Ponderosa Pine Meadow","Ambient","Intercanopy","5.10","6",1,1.504513402,0.123202238
+"Ponderosa Pine Meadow","Ambient","Canopy","0.5","11",1,1.963747473,0.209360559
+"Ponderosa Pine Meadow","Ambient","Canopy","0.5","2",1,3.657894291,0.271621836
+"Ponderosa Pine Meadow","Ambient","Canopy","0.5","5",1,3.176974668,0.232095958
+"Ponderosa Pine Meadow","Ambient","Canopy","0.5","6",1,2.414045036,0.17729278
+"Ponderosa Pine Meadow","Ambient","Canopy","5.10","11",1,2.388593861,0.174614357
+"Ponderosa Pine Meadow","Ambient","Canopy","5.10","2",1,1.913184923,0.191046713
+"Ponderosa Pine Meadow","Ambient","Canopy","5.10","5",1,2.467720011,0.182999207
+"Ponderosa Pine Meadow","Ambient","Canopy","5.10","6",1,1.960780653,0.141247002
+"Ponderosa Pine Meadow","Addition","Intercanopy","0.5","12",1,2.249032316,0.161891673
+"Ponderosa Pine Meadow","Addition","Intercanopy","0.5","3",1,2.008123243,0.214043077
+"Ponderosa Pine Meadow","Addition","Intercanopy","0.5","9",1,2.163009113,0.166851908
+"Ponderosa Pine Meadow","Addition","Intercanopy","5.10","12",1,2.265145777,0.178133556
+"Ponderosa Pine Meadow","Addition","Intercanopy","5.10","3",1,2.654047528,0.191589316
+"Ponderosa Pine Meadow","Addition","Intercanopy","5.10","8",1,2.060795012,0.145513885
+"Ponderosa Pine Meadow","Addition","Intercanopy","5.10","9",1,2.001208782,0.154529177
+"Ponderosa Pine Meadow","Addition","Canopy","0.5","12",1,2.768902508,0.206270434
+"Ponderosa Pine Meadow","Addition","Canopy","0.5","3",1,2.893464885,0.21811893
+"Ponderosa Pine Meadow","Addition","Canopy","0.5","8",1,2.838307935,0.220016779
+"Ponderosa Pine Meadow","Addition","Canopy","0.5","9",1,2.556952278,0.183571543
+"Ponderosa Pine Meadow","Addition","Canopy","5.10","12",1,2.999266408,0.244255034
+"Ponderosa Pine Meadow","Addition","Canopy","5.10","3",1,2.546564268,0.183440145
+"Ponderosa Pine Meadow","Addition","Canopy","5.10","8",1,2.268804593,0.169646077
+"Ponderosa Pine Meadow","Addition","Canopy","5.10","9",1,2.224480801,0.170370618
+"Mixed Conifer Meadow","Exclusion","Intercanopy","0.5","10",1,5.425960548,0.407812748
+"Mixed Conifer Meadow","Exclusion","Intercanopy","0.5","2",1,4.138528622,0.318736683
+"Mixed Conifer Meadow","Exclusion","Intercanopy","0.5","8",1,4.705347382,0.367539568
+"Mixed Conifer Meadow","Exclusion","Intercanopy","5.10","10",1,4.577533463,0.347933132
+"Mixed Conifer Meadow","Exclusion","Intercanopy","5.10","2",1,4.863502335,0.389672459
+"Mixed Conifer Meadow","Exclusion","Intercanopy","5.10","5",1,3.999999469,0.301921663
+"Mixed Conifer Meadow","Exclusion","Intercanopy","5.10","8",1,4.316833196,0.334652437
+"Mixed Conifer Meadow","Exclusion","Canopy","0.5","10",2,5.4175276715,0.4069716685
+"Mixed Conifer Meadow","Exclusion","Canopy","0.5","2",1,4.67942826,0.37878868
+"Mixed Conifer Meadow","Exclusion","Canopy","0.5","8",2,4.3173310535,0.318901392
+"Mixed Conifer Meadow","Exclusion","Canopy","5.10","10",1,4.554537849,0.335990479
+"Mixed Conifer Meadow","Exclusion","Canopy","5.10","2",1,4.589767566,0.34066037
+"Mixed Conifer Meadow","Exclusion","Canopy","5.10","5",1,4.524481963,0.32408725
+"Mixed Conifer Meadow","Exclusion","Canopy","5.10","8",1,3.751886962,0.28041247
+"Mixed Conifer Meadow","Ambient","Intercanopy","0.5","1",1,5.618992515,0.427168614
+"Mixed Conifer Meadow","Ambient","Intercanopy","0.5","12",1,4.542097812,0.342188839
+"Mixed Conifer Meadow","Ambient","Intercanopy","0.5","3",1,5.345874209,0.393927811
+"Mixed Conifer Meadow","Ambient","Intercanopy","5.10","3",1,4.434686094,0.312205661
+"Mixed Conifer Meadow","Ambient","Intercanopy","5.10","7",1,3.8009471,0.276271098
+"Mixed Conifer Meadow","Ambient","Canopy","0.5","12",1,5.354646547,0.433355715
+"Mixed Conifer Meadow","Ambient","Canopy","0.5","3",2,4.989655722,0.37749793
+"Mixed Conifer Meadow","Ambient","Canopy","0.5","7",2,4.748820952,0.344879188
+"Mixed Conifer Meadow","Ambient","Canopy","5.10","1",1,4.941638418,0.34919796
+"Mixed Conifer Meadow","Ambient","Canopy","5.10","12",1,4.635286585,0.345435651
+"Mixed Conifer Meadow","Ambient","Canopy","5.10","3",1,2.5696,0.243
+"Mixed Conifer Meadow","Ambient","Canopy","5.10","7",1,4.346438018,0.307858738
+"Mixed Conifer Meadow","Addition","Intercanopy","0.5","11",1,5.359284744,0.384786571
+"Mixed Conifer Meadow","Addition","Intercanopy","0.5","6",1,5.163524205,0.394896882
+"Mixed Conifer Meadow","Addition","Intercanopy","0.5","9",1,5.050458117,0.340702155
+"Mixed Conifer Meadow","Addition","Intercanopy","5.10","11",1,4.777177378,0.342561151
+"Mixed Conifer Meadow","Addition","Intercanopy","5.10","4",1,3.88559001,0.318010067
+"Mixed Conifer Meadow","Addition","Intercanopy","5.10","6",1,4.203093486,0.316313145
+"Mixed Conifer Meadow","Addition","Intercanopy","5.10","9",1,4.190464386,0.301676448
+"Mixed Conifer Meadow","Addition","Canopy","0.5","11",1,4.960470097,0.37564094
+"Mixed Conifer Meadow","Addition","Canopy","0.5","4",1,5.496050551,0.397405349
+"Mixed Conifer Meadow","Addition","Canopy","0.5","6",2,5.5384162965,0.4307785775
+"Mixed Conifer Meadow","Addition","Canopy","0.5","9",1,4.749900685,0.368530775
+"Mixed Conifer Meadow","Addition","Canopy","5.10","11",1,4.620190092,0.357726619
+"Mixed Conifer Meadow","Addition","Canopy","5.10","4",1,4.444216666,0.308824721
+"Mixed Conifer Meadow","Addition","Canopy","5.10","6",1,6.034456371,0.442584435
+"Mixed Conifer Meadow","Addition","Canopy","5.10","9",1,4.364065671,0.332228183

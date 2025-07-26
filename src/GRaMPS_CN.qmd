@@ -1,0 +1,316 @@
+---
+title: "GRaMPS_CN"
+author: "Heather Throop"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+### Overview
+
+This is a compilation, cleaning, and analysis of soil carbon and nitrogen data from Brittney Monus's MS research in the GRaMPS project.
+
+Code was written by Heather Throop, streamlining and updating the original analyses that Brittney did for her MS.
+
+Updated:\
+2025-07-25 Heather Throop
+
+## SetUp
+
+```{r}
+#| label: load packages
+library(tidyverse)
+library(car)       # For Levene's test
+library(emmeans)   # For post-hoc comparisons
+library(scales)
+library(here)
+library(bestNormalize)
+library(car)
+library(broom)
+```
+
+## Ingest and Clean L1 Data
+
+This chunk can be skipped - start with ingesting L2 data (below)
+
+```{r}
+#| label: prepare data
+
+## read in L1 data - this is the daily corrected CN data for all runs. 
+CN = read.csv(here("data","Gramps_CN_L1.csv"))
+
+## pull identifying information from the string in the ID column
+
+# Define mapping vectors
+site_map <- c("BP" = "Desert Scrub",
+              "ANT" = "Desert Grassland",
+              "BC" = "Juniper Savanna",
+              "ARB" = "Ponderosa Pine Meadow",
+              "CC" = "Mixed Conifer Meadow")
+treatment_map <- c("exl" = "Exclusion",
+                   "ctrl" = "Ambient",
+                   "add" = "Addition")
+
+# Clean and parse the ID column
+CN_clean <- CN |>
+  mutate(
+    # Extract components using regular expressions
+    Site_code = str_extract(ID, "^[A-Z]{2,3}"),
+    Treatment_code = str_extract(ID, "(?<=^[A-Z]{2,3})[a-z]{3,4}"),
+    Plot = str_extract(ID, "(?<=P)\\d{1,2}"),
+    Microsite = str_extract(ID, "(CAN|IC)"),
+    Depth_raw = str_extract(ID, "(05|510)"),
+    
+    # Clean extracted values
+    Site = dplyr::recode(Site_code, !!!site_map),
+    Treatment = dplyr::recode(Treatment_code, !!!treatment_map),
+    Depth = str_remove(Depth_raw, "_") |> 
+            str_replace("05", "0.5") |> 
+            str_replace("510", "5.10") |> 
+            as.factor(),
+    Depth = as.factor(Depth)) |>
+    dplyr::select(-Site_code, -Treatment_code, -Depth_raw)  # drop intermediate columns
+
+# Preview cleaned data
+glimpse(CN_clean)
+
+# rename and order sites, treatments, and microsites
+CN_clean <- CN_clean |>
+      mutate(Site = factor(Site, levels = 
+                               c("Desert Scrub","Desert Grassland","Juniper Savanna",
+                                       "Ponderosa Pine Meadow","Mixed Conifer Meadow")),
+             Treatment = factor(Treatment, levels = 
+                                  c("Exclusion","Ambient","Addition")),
+             Microsite = factor(Microsite, 
+                                   levels=c("IC", "CAN"), 
+                                   labels=c("Intercanopy", "Canopy")) )
+
+### reduce to plot means
+# calculate mean and SE for each Site x Treatment x Microsite x Depth x Plot combination. In most cases there was only one analytical replicate per plot, but this accounts for cases where there were analytical reps.
+CN_plot.microsite_means <- CN_clean |>
+  group_by(Site, Treatment, Microsite, Depth, Plot) |>
+  summarise(
+    N = n(),
+    mean_C = mean(pctC, na.rm = TRUE),
+    mean_N = mean(pctN, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+# save clean L2 data ready for analysis
+write.csv(CN_plot.microsite_means, 
+          here("data","calculated_outputs","CN_L2.csv"), row.names = FALSE)
+
+```
+
+## Microsite Means
+
+Start here to pull in cleaned L2 data
+
+```{r}
+#| label: load L2 data & split by depth
+
+## read in L2 data - one value for each site x treatment x plot x microsite x depth combination
+CN_L2 = read.csv(here("data","calculated_outputs","CN_L2.csv"))
+
+# Ensure factors are properly coded
+CN_L2 <- CN_L2 |>
+  mutate(across(c(Site, Treatment, Microsite, Depth), as.factor))
+
+```
+
+### 0-5 cm depth
+
+```{r}
+#| label: Check ANOVA assumptions
+
+# Filter and prepare data
+CN_0.5 <- CN_L2 |>
+  filter(Depth == "0.5") |>
+  mutate(Group = interaction(Site, Treatment, Microsite))
+
+# Step 1: Check initial normality
+hist(CN_0.5$mean_C, main = "Histogram of mean_C (0–5 cm)", xlab = "mean_C")
+qqnorm(CN_0.5$mean_C); qqline(CN_0.5$mean_C)
+
+shapiro_raw <- shapiro.test(CN_0.5$mean_C)
+cat("Shapiro-Wilk p-value (raw):", shapiro_raw$p.value, "\n")
+
+# Step 2: Apply bestNormalize if needed
+if (shapiro_raw$p.value < 0.05) {
+  bn_obj <- bestNormalize(CN_0.5$mean_C, allow_orderNorm = FALSE)
+  CN_0.5 <- CN_0.5 %>%
+    mutate(C_trans = predict(bn_obj, newdata = mean_C))
+  used_var <- "C_trans"
+  transform_used <- class(bn_obj$chosen_transform)[1]
+  
+  # Check transformed normality
+  hist(CN_0.5$C_trans, main = "Histogram of Transformed C", xlab = "C_trans")
+  qqnorm(CN_0.5$C_trans); qqline(CN_0.5$C_trans)
+  
+  shapiro_trans <- shapiro.test(CN_0.5$C_trans)
+  cat("Shapiro-Wilk p-value (transformed):", shapiro_trans$p.value, "\n")
+} else {
+  used_var <- "mean_C"
+  transform_used <- "None"
+}
+
+# Step 3: Levene's Test
+levene_result <- leveneTest(reformulate("Group", used_var), data = CN_0.5)
+
+# Step 4: Summary Table
+summary_table <- tibble(
+  variable = used_var,
+  transformed = transform_used,
+  shapiro_p_raw = shapiro_raw$p.value,
+  shapiro_p_trans = if (exists("shapiro_trans")) shapiro_trans$p.value else NA,
+  levene_p = levene_result$`Pr(>F)`[1]
+)
+print(summary_table)
+
+```
+
+```{r}
+#| label: three-way ANOVA
+
+# Three-way ANOVA model
+# Step 5: Run 3-way ANOVA
+anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
+                                  "Site:Treatment",
+                                  "Site:Microsite",
+                                  "Treatment:Microsite",
+                                  "Site:Treatment:Microsite"),
+                                used_var),
+                   data = CN_0.5)
+anova_summary <- summary(anova_model)
+print(anova_summary)
+
+# Step 6: Save output to a text file
+sink(here::here("results", "anova_summary_C_0.5.txt"))
+cat("=== Transformation Summary ===\n")
+print(summary_table)
+cat("\n=== ANOVA Summary ===\n")
+print(anova_summary)
+sink()
+```
+
+```{r}
+#| label: boxplot for 0-5 cm CN
+
+
+# put the microsite, site, and treatment in order
+CN_0.5 <- CN_0.5 |>
+      mutate(
+        Microsite = factor(Microsite, levels = c("Intercanopy", "Canopy"), 
+                           labels = c("IC", "Canopy")),
+        Treatment = factor(Treatment, levels = c("Exclusion","Ambient","Addition")),
+        Site = factor(Site, levels = c("Desert Scrub","Desert Grassland",
+                                       "Juniper Savanna", "Ponderosa Pine Meadow",
+                                       "Mixed Conifer Meadow"))
+        )
+
+p_pctC_0.5 <- CN_0.5 |> 
+  ggplot(aes(x = Microsite, y = mean_C, fill = Treatment)) + 
+  geom_boxplot() +
+  facet_wrap(~ Site, nrow = 1, labeller = labeller(Site = label_wrap_gen(width = 15))) +
+  ylab("Soil Organic Carbon (%)") +
+  xlab("Microsite") +
+  theme_grey(base_size = 18) +
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(size = 14),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = c(0.001, 0.88),
+    legend.justification = c("left", "top")
+  ) +
+  guides(color = guide_legend(title = NULL))
+p_pctC_0.5
+
+ggsave(
+  filename = here("figures", "CN_0.5cm.png"),  
+  plot = p_pctC_0.5,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+```
+
+### 5-10 cm depth
+
+```{r}
+#| label: Check ANOVA assumptions
+
+# Filter and prepare data
+CN_5.10 <- CN_L2 |>
+  filter(Depth == "5.1") |>
+  mutate(Group = interaction(Site, Treatment, Microsite))
+
+# Step 1: Check initial normality
+hist(CN_5.10$mean_C, main = "Histogram of mean_C (5-10 cm)", xlab = "mean_C")
+qqnorm(CN_5.10$mean_C); qqline(CN_5.10$mean_C)
+
+shapiro_raw <- shapiro.test(CN_5.10$mean_C)
+cat("Shapiro-Wilk p-value (raw):", shapiro_raw$p.value, "\n")
+
+# Step 2: Apply bestNormalize if needed
+if (shapiro_raw$p.value < 0.05) {
+  bn_obj <- bestNormalize(CN_5.10$mean_C, allow_orderNorm = FALSE)
+  CN_5.10 <- CN_5.10 %>%
+    mutate(C_trans = predict(bn_obj, newdata = mean_C))
+  used_var <- "C_trans"
+  transform_used <- class(bn_obj$chosen_transform)[1]
+  
+  # Check transformed normality
+  hist(CN_5.10$C_trans, main = "Histogram of Transformed C", xlab = "C_trans")
+  qqnorm(CN_5.10$C_trans); qqline(CN_5.10$C_trans)
+  
+  shapiro_trans <- shapiro.test(CN_5.10$C_trans)
+  cat("Shapiro-Wilk p-value (transformed):", shapiro_trans$p.value, "\n")
+} else {
+  used_var <- "mean_C"
+  transform_used <- "None"
+}
+
+# Step 3: Levene's Test
+levene_result <- leveneTest(reformulate("Group", used_var), data = CN_5.10)
+
+# Step 4: Summary Table
+summary_table <- tibble(
+  variable = used_var,
+  transformed = transform_used,
+  shapiro_p_raw = shapiro_raw$p.value,
+  shapiro_p_trans = if (exists("shapiro_trans")) shapiro_trans$p.value else NA,
+  levene_p = levene_result$`Pr(>F)`[1]
+)
+print(summary_table)
+
+```
+
+```{r}
+#| label: three-way ANOVA
+
+# Three-way ANOVA model
+# Step 5: Run 3-way ANOVA
+anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
+                                  "Site:Treatment",
+                                  "Site:Microsite",
+                                  "Treatment:Microsite",
+                                  "Site:Treatment:Microsite"),
+                                used_var),
+                   data = CN_5.10)
+anova_summary <- summary(anova_model)
+print(anova_summary)
+
+# Step 6: Save output to a text file
+sink(here::here("results", "anova_summary_CN_5.10.txt"))
+cat("=== Transformation Summary ===\n")
+print(summary_table)
+cat("\n=== ANOVA Summary ===\n")
+print(anova_summary)
+sink()
+```
