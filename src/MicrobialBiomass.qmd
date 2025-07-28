@@ -28,6 +28,8 @@ library(car)       # For Levene's test
 library(emmeans)   # For post-hoc comparisons
 library(here)
 library(bestNormalize)
+library(cowplot)
+library(grid)
 ```
 
 ## Ingest and Clean L1 Data
@@ -97,12 +99,14 @@ MBC_df <- MBC_df |>
 
 ### 0-5 cm depth
 
+#### contrasts by microsite, site and treatment
+
 ```{r}
 #| label: Check ANOVA assumptions - MBC 0-5 cm 
 
 # Filter and prepare data
 MBC_0.5_df <- MBC_df |>
-  filter(Depth == "upper") |>
+  filter(Depth == "upper") |> 
   mutate(Group = interaction(Site, Treatment, Microsite))
 
 # Step 1: Check initial normality
@@ -174,8 +178,7 @@ sink()
 # put the microsite, site, and treatment in order
 MBC_0.5_df <- MBC_0.5_df |>
       mutate(
-        Microsite = factor(Microsite, levels = c("Intercanopy", "Canopy"), 
-                           labels = c("IC", "Canopy")),
+        Microsite = factor(Microsite, levels = c("Intercanopy","Canopy")),
         Treatment = factor(Treatment, levels = c("Exclusion","Ambient","Addition")),
         Site = factor(Site, levels = c("Desert Scrub","Desert Grassland",
                                        "Juniper Savanna", "Ponderosa Pine Meadow",
@@ -227,7 +230,46 @@ ggsave(
 )
 ```
 
+#### contrasts by site and microsite
+
+```{r}
+#| label: boxplot for 0-5 cm MBC - treatments combined
+
+p_MBC_0.5_treatments_combined <- MBC_0.5_df |> 
+  ggplot(aes(x = Site, y = MBC, fill = Microsite)) + 
+  geom_boxplot() +
+  labs(
+    x = "Site",
+    y = expression(Microbial~Biomass~(mg~DOC~kg^{-1}~dry~soil))) +
+  theme_grey(base_size = 18) +
+  scale_fill_manual(name = "", values = c("white", "grey")) +
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(size = 14),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = c(0.002, 0.88),
+    legend.justification = c("left", "top")
+  ) +
+   scale_y_continuous(limits = c(0, 750), expand = c(0, 0))# +
+   guides(color = guide_legend(title = NULL))
+p_MBC_0.5_treatments_combined
+
+ggsave(
+  filename = here("figures", "MBC_0.5cm_treatments_combined.png"),  
+  plot = p_MBC_0.5_treatments_combined,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+```
+
 ### 5-10 cm depth
+
+#### contrasts by site, treatment, and microsite
 
 ```{r}
 #| label: Check ANOVA assumptions - MBC 5-10 cm 
@@ -301,13 +343,12 @@ sink()
 ```
 
 ```{r}
-#| label: boxplot for 0-5 cm MBC
+#| label: boxplot for 5-10 cm MBC
 
 # put the microsite, site, and treatment in order
 MBC_5.10_df <- MBC_5.10_df |>
       mutate(
-        Microsite = factor(Microsite, levels = c("Intercanopy", "Canopy"), 
-                           labels = c("IC", "Canopy")),
+        Microsite = factor(Microsite, levels = c("Intercanopy","Canopy")),
         Treatment = factor(Treatment, levels = c("Exclusion","Ambient","Addition")),
         Site = factor(Site, levels = c("Desert Scrub","Desert Grassland",
                                        "Juniper Savanna", "Ponderosa Pine Meadow",
@@ -331,8 +372,9 @@ p_MBC_5.10 <- MBC_5.10_df |>
     aes(x = x, y = y, label = label),
     hjust = 0, vjust = 1,
     size = 5) +
-  ylab("Microbial Biomass Carbon (units here)") +
-  xlab("Microsite") +
+ labs(
+    x = "Site",
+    y = expression(Microbial~Biomass~(mg~DOC~kg^{-1}~dry~soil))) +
   theme_grey(base_size = 18) +
   scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
   theme_grey(base_size = 18) +
@@ -353,6 +395,110 @@ p_MBC_5.10
 ggsave(
   filename = here("figures", "MBC_5.10cm.png"),  
   plot = p_MBC_5.10,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+```
+
+#### contrasts by site and microsite
+
+```{r}
+#| label: boxplot for 5-10 cm MBC - treatments combined
+
+p_MBC_5.10_treatments_combined <- MBC_5.10_df |> 
+  ggplot(aes(x = Site, y = MBC, fill = Microsite)) + 
+  geom_boxplot() +
+  labs(
+    x = "Site",
+    y = expression(Microbial~Biomass~(mg~DOC~kg^{-1}~dry~soil))) +
+  theme_grey(base_size = 18) +
+  scale_fill_manual(name = "", values = c("white", "grey")) +
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(size = 14),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = c(0.002, 0.88),
+    legend.justification = c("left", "top")
+  ) +
+   scale_y_continuous(limits = c(0, 750), expand = c(0, 0)) +
+  guides(color = guide_legend(title = NULL))
+p_MBC_5.10_treatments_combined
+
+ggsave(
+  filename = here("figures", "MBC_5.10cm_treatments_combined.png"),  
+  plot = p_MBC_5.10_treatments_combined,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+```
+
+### Combined depths
+
+```{r}
+#| label: combined boxplot for upper and lower depths
+
+# Customize x-axis labels to add second line when needed
+site_labels <- c(
+  "Desert Scrub" = "Desert Scrub",
+  "Desert Grassland" = "Desert Grassland",
+  "Juniper Savanna" = "Juniper Savanna",
+  "Ponderosa Pine Meadow" = "Ponderosa Pine\nMeadow",
+  "Mixed Conifer Meadow" = "Mixed Conifer\nMeadow"  
+)
+
+# Remove x-axis and y-axis titles from top plot; keep legend and add label
+p_top <- p_MBC_0.5_treatments_combined +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_line(),
+    legend.position = c(0.002, 0.88),
+    legend.justification = c("left", "top")
+  ) +
+  annotate("text", x = -Inf, y = Inf, label = "A. 0–5 cm depth", 
+           hjust = -0.1, vjust = 1.5, size = 6, fontface = "plain") +
+  scale_x_discrete(labels = site_labels)
+
+# Remove both axis titles and legend from bottom plot; add label
+p_bottom <- p_MBC_5.10_treatments_combined +
+  theme(
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 16),
+    legend.position = "none"
+  ) +
+  annotate("text", x = -Inf, y = Inf, label = "B. 5–10 cm depth", 
+           hjust = -0.1, vjust = 1.5, size = 6, fontface = "plain") +
+  scale_x_discrete(labels = site_labels)
+
+# Combine vertically
+combined_plot <- plot_grid(
+  p_top, p_bottom,
+  ncol = 1,
+  align = "v",
+  axis = "lr",
+  rel_heights = c(1, 1)
+)
+
+# Draw final plot with shared y-axis label
+# Add left margin space using a blank spacer
+final_plot <- ggdraw() +
+  draw_label("Microbial Biomass (mg DOC kg-1 soil)", 
+             x = 0.02, y = 0.5, angle = 90, size = 18, fontface = "plain") +
+  draw_plot(combined_plot, x = 0.05, y = 0, width = 0.95, height = 1)
+
+# Display the final plot
+final_plot
+
+ggsave(
+  filename = here("figures", "MBC_treatments_combined_depth_panels.png"),  
+  plot = final_plot,
   width = 12,       # width in inches
   height = 6,       # height in inches
   dpi = 300         # high-resolution PNG
