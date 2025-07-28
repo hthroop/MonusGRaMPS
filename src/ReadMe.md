@@ -9,7 +9,7 @@ Compiled by Heather Throop
 EnzymeAnalysis.R
 
 ExSituResp_HT.qmd:
-
+Analysis of lab-based soil respiration data. 
 
 GRaMPSCN2019.R:
 

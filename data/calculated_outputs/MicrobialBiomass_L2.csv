@@ -1,0 +1,233 @@
+"Site","Treatment","Microsite","Depth","Plot","N","extractable.MBC","MBC"
+"Desert Scrub","Exclusion","Intercanopy","lower","1",1,7.867562912,17.48347314
+"Desert Scrub","Exclusion","Intercanopy","lower","2",1,18.36993258,40.82207239
+"Desert Scrub","Exclusion","Intercanopy","lower","4",1,8.781904892,19.5153442
+"Desert Scrub","Exclusion","Intercanopy","lower","7",1,27.87894315,61.953207
+"Desert Scrub","Exclusion","Intercanopy","upper","1",3,40.5353465166667,90.07854781
+"Desert Scrub","Exclusion","Intercanopy","upper","2",1,3.641249289,8.091665088
+"Desert Scrub","Exclusion","Intercanopy","upper","4",1,19.21888072,42.70862382
+"Desert Scrub","Exclusion","Intercanopy","upper","7",1,21.14798307,46.99551792
+"Desert Scrub","Exclusion","Canopy","lower","1",1,44.97297521,99.93994491
+"Desert Scrub","Exclusion","Canopy","lower","2",3,21.2413181666667,47.20292926
+"Desert Scrub","Exclusion","Canopy","lower","4",2,54.54599357,121.21331904
+"Desert Scrub","Exclusion","Canopy","lower","7",1,19.21751916,42.70559812
+"Desert Scrub","Exclusion","Canopy","upper","1",1,33.17059744,73.71243875
+"Desert Scrub","Exclusion","Canopy","upper","2",1,53.85626487,119.6805886
+"Desert Scrub","Exclusion","Canopy","upper","4",1,42.09590735,93.54646078
+"Desert Scrub","Exclusion","Canopy","upper","7",1,24.04395572,53.43101272
+"Desert Scrub","Ambient","Intercanopy","lower","9",1,10.25368106,22.7859579
+"Desert Scrub","Ambient","Intercanopy","lower","10",1,18.79960263,41.77689474
+"Desert Scrub","Ambient","Intercanopy","lower","11",1,13.8865542,30.85900934
+"Desert Scrub","Ambient","Intercanopy","lower","12",1,16.61847287,36.92993971
+"Desert Scrub","Ambient","Intercanopy","upper","9",3,35.5307565733333,78.9572368333333
+"Desert Scrub","Ambient","Intercanopy","upper","10",1,15.82475519,35.16612264
+"Desert Scrub","Ambient","Intercanopy","upper","11",1,36.75948516,81.68774479
+"Desert Scrub","Ambient","Intercanopy","upper","12",1,18.63613331,41.41362958
+"Desert Scrub","Ambient","Canopy","lower","9",3,21.64285805,48.0952401133333
+"Desert Scrub","Ambient","Canopy","lower","10",1,30.77381355,68.38625234
+"Desert Scrub","Ambient","Canopy","lower","11",3,40.87507504,90.8335000933333
+"Desert Scrub","Ambient","Canopy","lower","12",2,32.33046953,71.845487835
+"Desert Scrub","Ambient","Canopy","upper","9",3,23.8751136416667,53.0558080933333
+"Desert Scrub","Ambient","Canopy","upper","10",1,1.050992991,2.33553998
+"Desert Scrub","Ambient","Canopy","upper","11",1,34.73810663,77.1957925
+"Desert Scrub","Ambient","Canopy","upper","12",1,31.13364929,69.1858873
+"Desert Scrub","Addition","Intercanopy","lower","3",1,11.59538077,25.76751283
+"Desert Scrub","Addition","Intercanopy","lower","6",1,9.927719055,22.0615979
+"Desert Scrub","Addition","Intercanopy","lower","8",1,31.96373961,71.03053247
+"Desert Scrub","Addition","Intercanopy","upper","3",4,13.3031783635,29.562618585
+"Desert Scrub","Addition","Intercanopy","upper","5",2,28.74108892,63.869086485
+"Desert Scrub","Addition","Intercanopy","upper","6",3,14.5053886553333,32.2341970066667
+"Desert Scrub","Addition","Intercanopy","upper","8",3,32.1244361946667,71.387635983
+"Desert Scrub","Addition","Canopy","lower","3",1,52.51778141,116.7061809
+"Desert Scrub","Addition","Canopy","lower","5",3,22.9636853616667,51.0304119123333
+"Desert Scrub","Addition","Canopy","lower","6",1,38.4672586,85.48279689
+"Desert Scrub","Addition","Canopy","upper","3",1,7.657483938,17.01663097
+"Desert Scrub","Addition","Canopy","upper","5",1,53.19399894,118.2088865
+"Desert Scrub","Addition","Canopy","upper","6",1,28.57801295,63.50669545
+"Desert Scrub","Addition","Canopy","upper","8",1,59.73262266,132.7391615
+"Desert Grassland","Exclusion","Intercanopy","lower","4",1,43.29987681,96.22194847
+"Desert Grassland","Exclusion","Intercanopy","lower","6",1,64.89056936,144.2012652
+"Desert Grassland","Exclusion","Intercanopy","lower","9",3,66.2750899333333,147.2779776
+"Desert Grassland","Exclusion","Intercanopy","lower","12",1,52.60743052,116.9054012
+"Desert Grassland","Exclusion","Intercanopy","upper","4",1,71.74310505,159.4291223
+"Desert Grassland","Exclusion","Intercanopy","upper","6",1,75.53711923,167.860265
+"Desert Grassland","Exclusion","Intercanopy","upper","9",1,68.84213193,152.9825154
+"Desert Grassland","Exclusion","Intercanopy","upper","12",1,82.64519974,183.6559994
+"Desert Grassland","Exclusion","Canopy","lower","4",1,37.29412573,82.87583495
+"Desert Grassland","Exclusion","Canopy","lower","6",1,98.95262974,219.8947327
+"Desert Grassland","Exclusion","Canopy","lower","9",1,70.31768045,156.2615121
+"Desert Grassland","Exclusion","Canopy","lower","12",2,92.34766897,205.21704215
+"Desert Grassland","Exclusion","Canopy","upper","4",3,128.732423,286.0720511
+"Desert Grassland","Exclusion","Canopy","upper","6",1,114.8056638,255.1236972
+"Desert Grassland","Exclusion","Canopy","upper","9",1,68.98799134,153.3066474
+"Desert Grassland","Exclusion","Canopy","upper","12",1,93.71022193,208.2449376
+"Desert Grassland","Ambient","Intercanopy","lower","1",1,50.09689745,111.3264388
+"Desert Grassland","Ambient","Intercanopy","lower","2",1,75.30152377,167.3367195
+"Desert Grassland","Ambient","Intercanopy","lower","5",1,60.56711149,134.5935811
+"Desert Grassland","Ambient","Intercanopy","lower","11",1,52.0133351,115.5851891
+"Desert Grassland","Ambient","Intercanopy","upper","1",3,80.0065171433333,177.792260333333
+"Desert Grassland","Ambient","Intercanopy","upper","2",1,72.63438134,161.4097363
+"Desert Grassland","Ambient","Intercanopy","upper","5",1,55.37095916,123.0465759
+"Desert Grassland","Ambient","Intercanopy","upper","11",1,22.82418979,50.72042176
+"Desert Grassland","Ambient","Canopy","lower","1",3,24.9050841576667,55.34463146
+"Desert Grassland","Ambient","Canopy","lower","2",1,53.53673204,118.9705156
+"Desert Grassland","Ambient","Canopy","lower","5",1,39.96187762,88.8041725
+"Desert Grassland","Ambient","Canopy","lower","11",1,71.02709451,157.8379878
+"Desert Grassland","Ambient","Canopy","upper","1",1,96.96268849,215.4726411
+"Desert Grassland","Ambient","Canopy","upper","2",3,64.2415421966667,142.758982633333
+"Desert Grassland","Ambient","Canopy","upper","5",1,86.62059131,192.4902029
+"Desert Grassland","Ambient","Canopy","upper","11",1,117.6530163,261.4511474
+"Desert Grassland","Addition","Intercanopy","lower","3",1,51.2494445,113.8876544
+"Desert Grassland","Addition","Intercanopy","lower","7",1,43.50003544,96.66674542
+"Desert Grassland","Addition","Intercanopy","lower","8",1,71.64042138,159.2009364
+"Desert Grassland","Addition","Intercanopy","lower","10",2,55.218535025,122.7078556
+"Desert Grassland","Addition","Intercanopy","upper","3",1,37.67717198,83.72704883
+"Desert Grassland","Addition","Intercanopy","upper","7",3,40.0885676833333,89.08570596
+"Desert Grassland","Addition","Intercanopy","upper","8",1,88.64625506,196.9916779
+"Desert Grassland","Addition","Intercanopy","upper","10",1,69.75815574,155.0181239
+"Desert Grassland","Addition","Canopy","lower","3",3,89.19335045,198.207445466667
+"Desert Grassland","Addition","Canopy","lower","7",1,49.50506409,110.0112535
+"Desert Grassland","Addition","Canopy","lower","8",1,59.89223734,133.0938608
+"Desert Grassland","Addition","Canopy","lower","10",3,59.0451975766667,131.2115502
+"Desert Grassland","Addition","Canopy","upper","3",1,61.82084009,137.3796446
+"Desert Grassland","Addition","Canopy","upper","7",1,64.7558505,143.90189
+"Desert Grassland","Addition","Canopy","upper","8",1,99.74447079,221.6543795
+"Desert Grassland","Addition","Canopy","upper","10",1,71.97485228,159.9441162
+"Juniper Savanna","Exclusion","Intercanopy","lower","4",1,134.0039057,297.786457
+"Juniper Savanna","Exclusion","Intercanopy","lower","8",1,108.6593853,241.4653007
+"Juniper Savanna","Exclusion","Intercanopy","lower","12",3,165.5429341,367.8731869
+"Juniper Savanna","Exclusion","Intercanopy","upper","4",1,188.1186476,418.041439
+"Juniper Savanna","Exclusion","Intercanopy","upper","8",3,123.403903477667,274.230896654
+"Juniper Savanna","Exclusion","Intercanopy","upper","10",1,197.4929962,438.873325
+"Juniper Savanna","Exclusion","Intercanopy","upper","12",3,293.903726366667,653.1193919
+"Juniper Savanna","Exclusion","Canopy","lower","4",3,133.280786266667,296.1795251
+"Juniper Savanna","Exclusion","Canopy","lower","8",1,179.6837687,399.2972637
+"Juniper Savanna","Exclusion","Canopy","lower","10",1,228.975922,508.8353823
+"Juniper Savanna","Exclusion","Canopy","lower","12",1,248.5534963,552.3411029
+"Juniper Savanna","Exclusion","Canopy","upper","4",1,167.7981519,372.8847819
+"Juniper Savanna","Exclusion","Canopy","upper","8",1,237.4568315,527.6818477
+"Juniper Savanna","Exclusion","Canopy","upper","10",1,489.0237256,1086.71939
+"Juniper Savanna","Exclusion","Canopy","upper","12",3,303.949600866667,675.443557433333
+"Juniper Savanna","Ambient","Intercanopy","lower","1",3,276.415681033333,614.257068966667
+"Juniper Savanna","Ambient","Intercanopy","lower","6",2,301.1582482,669.2405516
+"Juniper Savanna","Ambient","Intercanopy","lower","9",1,141.0073996,313.3497768
+"Juniper Savanna","Ambient","Intercanopy","lower","11",1,174.6398887,388.0886416
+"Juniper Savanna","Ambient","Intercanopy","upper","1",1,172.9202954,384.2673231
+"Juniper Savanna","Ambient","Intercanopy","upper","9",1,171.1632063,380.3626807
+"Juniper Savanna","Ambient","Intercanopy","upper","11",1,157.4715076,349.9366834
+"Juniper Savanna","Ambient","Canopy","lower","6",1,155.3355009,345.190002
+"Juniper Savanna","Ambient","Canopy","lower","9",1,163.1778111,362.6173581
+"Juniper Savanna","Ambient","Canopy","lower","11",3,204.346615833333,454.1035908
+"Juniper Savanna","Ambient","Canopy","upper","1",5,143.761124858,319.4691664
+"Juniper Savanna","Ambient","Canopy","upper","6",1,184.6768356,410.3929679
+"Juniper Savanna","Ambient","Canopy","upper","9",1,261.7767597,581.7261326
+"Juniper Savanna","Ambient","Canopy","upper","11",1,143.2426396,318.3169768
+"Juniper Savanna","Addition","Intercanopy","lower","2",1,157.1458954,349.2131008
+"Juniper Savanna","Addition","Intercanopy","lower","3",3,198.1810149,440.402255366667
+"Juniper Savanna","Addition","Intercanopy","lower","5",3,256.302301066667,569.560669066667
+"Juniper Savanna","Addition","Intercanopy","lower","7",3,153.945757666667,342.101683666667
+"Juniper Savanna","Addition","Intercanopy","upper","2",1,158.6336147,352.5191437
+"Juniper Savanna","Addition","Intercanopy","upper","3",1,209.9872829,466.6384065
+"Juniper Savanna","Addition","Intercanopy","upper","5",1,137.1670301,304.8156223
+"Juniper Savanna","Addition","Intercanopy","upper","7",1,217.2902091,482.8671314
+"Juniper Savanna","Addition","Canopy","lower","3",1,180.0268412,400.0596471
+"Juniper Savanna","Addition","Canopy","lower","5",1,176.2597903,391.6884228
+"Juniper Savanna","Addition","Canopy","lower","7",3,314.1513838,698.114186166667
+"Juniper Savanna","Addition","Canopy","upper","2",1,256.4291437,569.8425415
+"Juniper Savanna","Addition","Canopy","upper","3",1,242.3631611,538.5848024
+"Juniper Savanna","Addition","Canopy","upper","5",1,196.5138698,436.6974883
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","lower","1",1,119.3281161,265.1735914
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","lower","4",1,129.763262,288.3628045
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","lower","7",1,107.7582511,239.4627803
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","lower","10",1,114.6819374,254.8487497
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","upper","1",1,194.3922745,431.9828323
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","upper","4",1,171.3299418,380.7332039
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","upper","7",1,131.9095716,293.1323814
+"Ponderosa Pine Meadow","Exclusion","Intercanopy","upper","10",3,233.3013869,518.447526466667
+"Ponderosa Pine Meadow","Exclusion","Canopy","lower","1",1,174.4110609,387.5801353
+"Ponderosa Pine Meadow","Exclusion","Canopy","lower","4",1,101.6418529,225.8707843
+"Ponderosa Pine Meadow","Exclusion","Canopy","lower","7",1,137.170495,304.8233222
+"Ponderosa Pine Meadow","Exclusion","Canopy","lower","10",1,98.5770323,219.0600718
+"Ponderosa Pine Meadow","Exclusion","Canopy","upper","1",1,253.784404,563.9653422
+"Ponderosa Pine Meadow","Exclusion","Canopy","upper","4",3,314.0437486,697.874996866667
+"Ponderosa Pine Meadow","Exclusion","Canopy","upper","7",3,196.554618433333,436.788040966667
+"Ponderosa Pine Meadow","Exclusion","Canopy","upper","10",1,185.8677007,413.0393348
+"Ponderosa Pine Meadow","Ambient","Intercanopy","lower","3",1,86.8144216,192.9209369
+"Ponderosa Pine Meadow","Ambient","Intercanopy","lower","8",1,108.5631714,241.2514921
+"Ponderosa Pine Meadow","Ambient","Intercanopy","lower","9",1,82.83621528,184.0804784
+"Ponderosa Pine Meadow","Ambient","Intercanopy","lower","12",1,94.14995066,209.2221126
+"Ponderosa Pine Meadow","Ambient","Intercanopy","upper","3",3,226.271352966667,502.825228833333
+"Ponderosa Pine Meadow","Ambient","Intercanopy","upper","8",1,155.6614918,345.9144262
+"Ponderosa Pine Meadow","Ambient","Intercanopy","upper","9",1,140.4660161,312.1467024
+"Ponderosa Pine Meadow","Ambient","Intercanopy","upper","12",3,150.447762433333,334.328361
+"Ponderosa Pine Meadow","Ambient","Canopy","lower","3",1,133.8815668,297.514593
+"Ponderosa Pine Meadow","Ambient","Canopy","lower","8",1,90.06247477,200.1388328
+"Ponderosa Pine Meadow","Ambient","Canopy","lower","9",1,59.03395839,131.1865742
+"Ponderosa Pine Meadow","Ambient","Canopy","lower","12",1,173.5903998,385.7564441
+"Ponderosa Pine Meadow","Ambient","Canopy","upper","3",1,220.2114174,489.3587053
+"Ponderosa Pine Meadow","Ambient","Canopy","upper","8",1,181.5702767,403.4895038
+"Ponderosa Pine Meadow","Ambient","Canopy","upper","9",1,157.616795,350.2595445
+"Ponderosa Pine Meadow","Ambient","Canopy","upper","12",4,119.0525570775,264.56123795
+"Ponderosa Pine Meadow","Addition","Intercanopy","lower","2",1,97.96634013,217.7029781
+"Ponderosa Pine Meadow","Addition","Intercanopy","lower","5",1,156.1405516,346.9790035
+"Ponderosa Pine Meadow","Addition","Intercanopy","lower","6",3,98.87259393,219.7168754
+"Ponderosa Pine Meadow","Addition","Intercanopy","lower","11",1,83.18115811,184.847018
+"Ponderosa Pine Meadow","Addition","Intercanopy","upper","2",1,189.8059599,421.791022
+"Ponderosa Pine Meadow","Addition","Intercanopy","upper","5",1,184.0239973,408.9422162
+"Ponderosa Pine Meadow","Addition","Intercanopy","upper","6",3,206.718344233333,459.374098366667
+"Ponderosa Pine Meadow","Addition","Intercanopy","upper","11",3,160.478353966667,356.618564333333
+"Ponderosa Pine Meadow","Addition","Canopy","lower","2",3,258.4040942,574.231320433333
+"Ponderosa Pine Meadow","Addition","Canopy","lower","5",1,165.6407636,368.0905858
+"Ponderosa Pine Meadow","Addition","Canopy","lower","6",1,84.11910149,186.9313366
+"Ponderosa Pine Meadow","Addition","Canopy","lower","11",1,112.1878178,249.3062617
+"Ponderosa Pine Meadow","Addition","Canopy","upper","2",1,234.495939,521.1020867
+"Ponderosa Pine Meadow","Addition","Canopy","upper","5",1,186.613347,414.6963268
+"Ponderosa Pine Meadow","Addition","Canopy","upper","6",1,194.0468099,431.2151331
+"Ponderosa Pine Meadow","Addition","Canopy","upper","11",3,345.021972166667,766.715493666667
+"Mixed Conifer Meadow","Exclusion","Intercanopy","lower","2",1,115.7429334,257.2065186
+"Mixed Conifer Meadow","Exclusion","Intercanopy","lower","5",1,58.62993261,130.2887391
+"Mixed Conifer Meadow","Exclusion","Intercanopy","lower","8",1,109.1528849,242.5619665
+"Mixed Conifer Meadow","Exclusion","Intercanopy","lower","10",1,131.3666922,291.9259827
+"Mixed Conifer Meadow","Exclusion","Intercanopy","upper","2",1,102.7291733,228.2870518
+"Mixed Conifer Meadow","Exclusion","Intercanopy","upper","5",1,154.5699408,343.4887574
+"Mixed Conifer Meadow","Exclusion","Intercanopy","upper","8",1,183.6557953,408.1239894
+"Mixed Conifer Meadow","Exclusion","Intercanopy","upper","10",1,193.3574373,429.6831941
+"Mixed Conifer Meadow","Exclusion","Canopy","lower","2",1,125.2247975,278.2773278
+"Mixed Conifer Meadow","Exclusion","Canopy","lower","5",3,187.238906566667,416.086459066667
+"Mixed Conifer Meadow","Exclusion","Canopy","lower","8",1,100.1685357,222.596746
+"Mixed Conifer Meadow","Exclusion","Canopy","lower","10",1,157.8010707,350.6690459
+"Mixed Conifer Meadow","Exclusion","Canopy","upper","2",1,171.2300976,380.5113279
+"Mixed Conifer Meadow","Exclusion","Canopy","upper","8",1,55.02867247,122.2859388
+"Mixed Conifer Meadow","Exclusion","Canopy","upper","10",2,201.70609195,448.2357599
+"Mixed Conifer Meadow","Ambient","Intercanopy","lower","4",1,91.00216508,202.2270335
+"Mixed Conifer Meadow","Ambient","Intercanopy","lower","6",1,91.29351859,202.8744858
+"Mixed Conifer Meadow","Ambient","Intercanopy","lower","9",3,156.357381166667,347.460847066667
+"Mixed Conifer Meadow","Ambient","Intercanopy","lower","11",1,91.72667299,203.8370511
+"Mixed Conifer Meadow","Ambient","Intercanopy","upper","4",1,146.8520906,326.3379792
+"Mixed Conifer Meadow","Ambient","Intercanopy","upper","6",1,194.8749405,433.0554233
+"Mixed Conifer Meadow","Ambient","Intercanopy","upper","9",3,371.132066766667,824.7379261
+"Mixed Conifer Meadow","Ambient","Intercanopy","upper","11",1,166.0295314,368.9545142
+"Mixed Conifer Meadow","Ambient","Canopy","lower","4",1,118.0853609,262.4119131
+"Mixed Conifer Meadow","Ambient","Canopy","lower","6",1,242.293303,538.4295622
+"Mixed Conifer Meadow","Ambient","Canopy","lower","9",1,134.9179713,299.817714
+"Mixed Conifer Meadow","Ambient","Canopy","lower","11",1,73.34693571,162.9931905
+"Mixed Conifer Meadow","Ambient","Canopy","upper","4",1,150.8127533,335.1394518
+"Mixed Conifer Meadow","Ambient","Canopy","upper","6",2,192.68496765,428.188817
+"Mixed Conifer Meadow","Ambient","Canopy","upper","9",1,39.28625909,87.30279798
+"Mixed Conifer Meadow","Ambient","Canopy","upper","11",1,143.1351814,318.078181
+"Mixed Conifer Meadow","Addition","Intercanopy","lower","1",1,102.7375419,228.3056486
+"Mixed Conifer Meadow","Addition","Intercanopy","lower","3",3,217.304517366667,482.898927533333
+"Mixed Conifer Meadow","Addition","Intercanopy","lower","7",3,146.2525999,325.005777466667
+"Mixed Conifer Meadow","Addition","Intercanopy","lower","12",1,166.3798722,369.7330494
+"Mixed Conifer Meadow","Addition","Intercanopy","upper","1",1,159.5657395,354.5905323
+"Mixed Conifer Meadow","Addition","Intercanopy","upper","3",3,264.9303284,588.734063066667
+"Mixed Conifer Meadow","Addition","Intercanopy","upper","7",1,163.9783778,364.396395
+"Mixed Conifer Meadow","Addition","Intercanopy","upper","12",1,112.4684469,249.9298821
+"Mixed Conifer Meadow","Addition","Canopy","lower","1",1,38.00412613,84.45361363
+"Mixed Conifer Meadow","Addition","Canopy","lower","3",1,130.7651076,290.5891279
+"Mixed Conifer Meadow","Addition","Canopy","lower","7",1,123.3352561,274.0783469
+"Mixed Conifer Meadow","Addition","Canopy","lower","12",1,144.9008151,322.0018112
+"Mixed Conifer Meadow","Addition","Canopy","upper","1",1,214.2842031,476.187118
+"Mixed Conifer Meadow","Addition","Canopy","upper","3",3,265.436647433333,589.859216533333
+"Mixed Conifer Meadow","Addition","Canopy","upper","7",3,733.3646568,1629.69923733333
+"Mixed Conifer Meadow","Addition","Canopy","upper","12",1,194.1827352,431.5171893

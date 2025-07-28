@@ -1,0 +1,18 @@
+=== Transformation Summary ===
+# A tibble: 1 × 5
+  variable  transformed  shapiro_p_raw shapiro_p_trans levene_p
+  <chr>     <chr>                <dbl>           <dbl>    <dbl>
+1 MBC_trans center_scale 0.00000000465   0.00000000465    0.295
+
+=== ANOVA Summary ===
+                         Df Sum Sq Mean Sq F value Pr(>F)    
+Site                      4  60.18  15.045  35.125 <2e-16 ***
+Treatment                 2   1.83   0.913   2.132 0.1248    
+Microsite                 1   2.62   2.615   6.106 0.0154 *  
+Site:Treatment            8   5.77   0.721   1.683 0.1139    
+Site:Microsite            4   0.65   0.162   0.377 0.8244    
+Treatment:Microsite       2   2.32   1.158   2.702 0.0727 .  
+Site:Treatment:Microsite  8   5.39   0.673   1.572 0.1451    
+Residuals                87  37.26   0.428                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

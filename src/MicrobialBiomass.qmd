@@ -1,0 +1,360 @@
+---
+title: "Microbial Biomass C"
+author: "Heather Throop"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+### Overview
+
+This is a compilation, cleaning, and analysis of microbial biomass C data from Brittney Monus's MS research in the GRaMPS project.
+
+MBC = extractable.MBC/0.45 per Jenkinson et al. (2004). Soil Biology and Biochemistry 36(1): 5-7. Some people think this number is somewhat arbitrary and prefer report extractable MBC.\
+All concentrations are in mg C per kg dry soil
+
+Code was written by Heather Throop, streamlining and updating the original analyses that Brittney did for her MS.
+
+Written:\
+2025-07-27 Heather Throop
+
+## SetUp
+
+```{r}
+#| label: load packages
+library(tidyverse)
+library(car)       # For Levene's test
+library(emmeans)   # For post-hoc comparisons
+library(here)
+library(bestNormalize)
+```
+
+## Ingest and Clean L1 Data
+
+This chunk can be skipped - start with ingesting L2 data (below)
+
+```{r}
+#| label: prepare data
+
+# list of all CSV files in the folder
+csv_files <- list.files(here("data","L1_MicrobialBiomass"), 
+                        pattern = "\\.csv$", full.names = TRUE)
+
+# Read and combine all CSV files into one dataframe
+MicrobBio <- csv_files |>
+  map_dfr(read_csv, show_col_types = FALSE) 
+
+# rename and order sites, treatments, and microsites
+MicrobBio <- MicrobBio |>
+      mutate(Site = factor(Site, levels = c("BP","ANT","BC","ARB","CC"), 
+                              labels = c("Desert Scrub","Desert Grassland",
+                                       "Juniper Savanna",
+                                       "Ponderosa Pine Meadow","Mixed Conifer Meadow")),
+             Treatment = factor(Treatment, levels = c("Exl", "Add", "Ctrl"),
+                                labels = c("Exclusion","Ambient","Addition")),
+             Microsite = factor(Microsite, 
+                                   levels=c("IC", "Can"), 
+                                   labels=c("Intercanopy", "Canopy")),
+             Plot = factor(Plot),
+             Depth = factor(Depth))
+
+# Clean data to remove 0 values for extractable.MBC and MBC
+MicrobBio <- MicrobBio |>
+  filter(extractable.MBC > 0)
+
+### reduce to depth x plot means
+# calculate mean and SE for each Site x Treatment x Microsite x Depth x Plot combination. In most cases there was only one analytical replicate per plot, but this accounts for cases where there were analytical reps.
+MicrobBio_clean <- MicrobBio |>
+  group_by(Site, Treatment, Microsite, Depth, Plot) |>
+  summarise(
+    N = n(),
+    extractable.MBC = mean(extractable.MBC, na.rm = TRUE),
+    MBC = mean(MBC, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+# save clean L2 data ready for analysis
+write.csv(MicrobBio_clean, 
+          here("data","calculated_outputs","MicrobialBiomass_L2.csv"), row.names = FALSE)
+
+```
+
+## MBC patterns by Depth
+
+Start here to pull in cleaned L2 data
+
+```{r}
+#| label: load L2 data
+
+## read in L2 data - one value for each site x treatment x plot x microsite x depth combination
+MBC_df = read.csv(here("data","calculated_outputs","MicrobialBiomass_L2.csv"))
+
+# Ensure factors are properly coded
+MBC_df <- MBC_df |>
+  mutate(across(c(Site, Treatment, Plot, Microsite, Depth), as.factor))
+```
+
+### 0-5 cm depth
+
+```{r}
+#| label: Check ANOVA assumptions - MBC 0-5 cm 
+
+# Filter and prepare data
+MBC_0.5_df <- MBC_df |>
+  filter(Depth == "upper") |>
+  mutate(Group = interaction(Site, Treatment, Microsite))
+
+# Step 1: Check initial normality
+hist(MBC_0.5_df$MBC, main = "Histogram of mean_C (0–5 cm)", xlab = "mean_C")
+qqnorm(MBC_0.5_df$MBC); qqline(MBC_0.5_df$MBC)
+
+shapiro_raw <- shapiro.test(MBC_0.5_df$MBC)
+cat("Shapiro-Wilk p-value (raw):", shapiro_raw$p.value, "\n")
+
+# Step 2: Apply bestNormalize if needed
+if (shapiro_raw$p.value < 0.05) {
+  bn_obj <- bestNormalize(MBC_0.5_df$MBC, allow_orderNorm = FALSE)
+  MBC_0.5_df <- MBC_0.5_df |>
+    mutate(MBC_trans = predict(bn_obj, newdata = MBC))
+  used_var <- "MBC_trans"
+  transform_used <- class(bn_obj$chosen_transform)[1]
+  
+  # Check transformed normality
+  hist(MBC_0.5_df$MBC_trans, main = "Histogram of Transformed C", xlab = "MBC_trans")
+  qqnorm(MBC_0.5_df$MBC_trans); qqline(MBC_0.5_df$MBC_trans)
+  
+  shapiro_trans <- shapiro.test(MBC_0.5_df$MBC_trans)
+  cat("Shapiro-Wilk p-value (transformed):", shapiro_trans$p.value, "\n")
+} else {
+  used_var <- "MBC"
+  transform_used <- "None"
+}
+
+# Step 3: Levene's Test
+levene_result <- leveneTest(reformulate("Group", used_var), data = MBC_0.5_df)
+
+# Step 4: Summary Table
+summary_table <- tibble(
+  variable = used_var,
+  transformed = transform_used,
+  shapiro_p_raw = shapiro_raw$p.value,
+  shapiro_p_trans = if (exists("shapiro_trans")) shapiro_trans$p.value else NA,
+  levene_p = levene_result$`Pr(>F)`[1]
+)
+print(summary_table)
+```
+
+```{r}
+#| label: three-way ANOVA
+
+# Three-way ANOVA model
+anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
+                                  "Site:Treatment",
+                                  "Site:Microsite",
+                                  "Treatment:Microsite",
+                                  "Site:Treatment:Microsite"),
+                                used_var),
+                   data = MBC_0.5_df)
+anova_summary <- summary(anova_model)
+print(anova_summary)
+
+# Step 6: Save output to a text file
+sink(here::here("results", "anova_summary_MBC_0.5_df.txt"))
+cat("=== Transformation Summary ===\n")
+print(summary_table)
+cat("\n=== ANOVA Summary ===\n")
+print(anova_summary)
+sink()
+```
+
+```{r}
+#| label: boxplot for 0-5 cm MBC
+
+# put the microsite, site, and treatment in order
+MBC_0.5_df <- MBC_0.5_df |>
+      mutate(
+        Microsite = factor(Microsite, levels = c("Intercanopy", "Canopy"), 
+                           labels = c("IC", "Canopy")),
+        Treatment = factor(Treatment, levels = c("Exclusion","Ambient","Addition")),
+        Site = factor(Site, levels = c("Desert Scrub","Desert Grassland",
+                                       "Juniper Savanna", "Ponderosa Pine Meadow",
+                                       "Mixed Conifer Meadow"))
+        )
+
+panel_labels <- data.frame(
+  Site = unique(MBC_0.5_df$Site),
+  x = 0.6,  # Nudges left of the first x category
+  y = 1650,
+  label = c("A.", "B.", "C.", "D.", "E.")
+)
+
+p_MBC_0.5 <- MBC_0.5_df |> 
+  ggplot(aes(x = Microsite, y = MBC, fill = Treatment)) + 
+  geom_boxplot() +
+  facet_wrap(~ Site, nrow = 1, labeller = labeller(Site = label_wrap_gen(width = 15))) +
+    geom_text(
+    data = panel_labels,
+    inherit.aes = FALSE,
+    aes(x = x, y = y, label = label),
+    hjust = 0, vjust = 1,
+    size = 5) +
+  ylab("Microbial Biomass Carbon (units here)") +
+  xlab("Microsite") +
+  theme_grey(base_size = 18) +
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(size = 14),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = c(0.002, 0.88),
+    legend.justification = c("left", "top")
+  ) +
+   scale_y_continuous(limits = c(0, 1700), expand = c(0, 0)) +
+  guides(color = guide_legend(title = NULL))
+p_MBC_0.5
+
+ggsave(
+  filename = here("figures", "MBC_0.5cm.png"),  
+  plot = p_MBC_0.5,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+```
+
+### 5-10 cm depth
+
+```{r}
+#| label: Check ANOVA assumptions - MBC 5-10 cm 
+
+# Filter and prepare data
+MBC_5.10_df <- MBC_df |>
+  filter(Depth == "lower") |>
+  mutate(Group = interaction(Site, Treatment, Microsite))
+
+# Step 1: Check initial normality
+hist(MBC_5.10_df$MBC, main = "Histogram of mean_C (0–5 cm)", xlab = "mean_C")
+qqnorm(MBC_5.10_df$MBC); qqline(MBC_5.10_df$MBC)
+
+shapiro_raw <- shapiro.test(MBC_5.10_df$MBC)
+cat("Shapiro-Wilk p-value (raw):", shapiro_raw$p.value, "\n")
+
+# Step 2: Apply bestNormalize if needed
+if (shapiro_raw$p.value < 0.05) {
+  bn_obj <- bestNormalize(MBC_5.10_df$MBC, allow_orderNorm = FALSE)
+  MBC_5.10_df <- MBC_5.10_df |>
+    mutate(MBC_trans = predict(bn_obj, newdata = MBC))
+  used_var <- "MBC_trans"
+  transform_used <- class(bn_obj$chosen_transform)[1]
+  
+  # Check transformed normality
+  hist(MBC_5.10_df$MBC_trans, main = "Histogram of Transformed C", xlab = "MBC_trans")
+  qqnorm(MBC_5.10_df$MBC_trans); qqline(MBC_5.10_df$MBC_trans)
+  
+  shapiro_trans <- shapiro.test(MBC_5.10_df$MBC_trans)
+  cat("Shapiro-Wilk p-value (transformed):", shapiro_trans$p.value, "\n")
+} else {
+  used_var <- "MBC"
+  transform_used <- "None"
+}
+
+# Step 3: Levene's Test
+levene_result <- leveneTest(reformulate("Group", used_var), data = MBC_5.10_df)
+
+# Step 4: Summary Table
+summary_table <- tibble(
+  variable = used_var,
+  transformed = transform_used,
+  shapiro_p_raw = shapiro_raw$p.value,
+  shapiro_p_trans = if (exists("shapiro_trans")) shapiro_trans$p.value else NA,
+  levene_p = levene_result$`Pr(>F)`[1]
+)
+print(summary_table)
+```
+
+```{r}
+#| label: three-way ANOVA
+
+# Three-way ANOVA model
+anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
+                                  "Site:Treatment",
+                                  "Site:Microsite",
+                                  "Treatment:Microsite",
+                                  "Site:Treatment:Microsite"),
+                                used_var),
+                   data = MBC_5.10_df)
+anova_summary <- summary(anova_model)
+print(anova_summary)
+
+# Save output to a text file
+sink(here::here("results", "anova_summary_MBC_5.10_df.txt"))
+cat("=== Transformation Summary ===\n")
+print(summary_table)
+cat("\n=== ANOVA Summary ===\n")
+print(anova_summary)
+sink()
+```
+
+```{r}
+#| label: boxplot for 0-5 cm MBC
+
+# put the microsite, site, and treatment in order
+MBC_5.10_df <- MBC_5.10_df |>
+      mutate(
+        Microsite = factor(Microsite, levels = c("Intercanopy", "Canopy"), 
+                           labels = c("IC", "Canopy")),
+        Treatment = factor(Treatment, levels = c("Exclusion","Ambient","Addition")),
+        Site = factor(Site, levels = c("Desert Scrub","Desert Grassland",
+                                       "Juniper Savanna", "Ponderosa Pine Meadow",
+                                       "Mixed Conifer Meadow"))
+        )
+
+panel_labels <- data.frame(
+  Site = unique(MBC_5.10_df$Site),
+  x = 0.6,  # Nudges left of the first x category
+  y = 725,
+  label = c("F.", "G.", "H.", "I.", "J.")
+)
+
+p_MBC_5.10 <- MBC_5.10_df |> 
+  ggplot(aes(x = Microsite, y = MBC, fill = Treatment)) + 
+  geom_boxplot() +
+  facet_wrap(~ Site, nrow = 1, labeller = labeller(Site = label_wrap_gen(width = 15))) +
+    geom_text(
+    data = panel_labels,
+    inherit.aes = FALSE,
+    aes(x = x, y = y, label = label),
+    hjust = 0, vjust = 1,
+    size = 5) +
+  ylab("Microbial Biomass Carbon (units here)") +
+  xlab("Microsite") +
+  theme_grey(base_size = 18) +
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(size = 14),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = c(0.002, 0.88),
+    legend.justification = c("left", "top")
+  ) +
+   scale_y_continuous(limits = c(0, 750), expand = c(0, 0)) +
+  guides(color = guide_legend(title = NULL))
+p_MBC_5.10
+
+ggsave(
+  filename = here("figures", "MBC_5.10cm.png"),  
+  plot = p_MBC_5.10,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+```
