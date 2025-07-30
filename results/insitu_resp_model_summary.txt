@@ -1,0 +1,25 @@
+
+Call:
+lm(formula = Efflux ~ VWC + Site + C_0.5 + plot_mean_ANPP, data = InSituResp_combined)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.6501 -0.4139 -0.0273  0.3360  4.7281 
+
+Coefficients:
+                           Estimate Std. Error t value Pr(>|t|)    
+(Intercept)               -0.293521   0.132920  -2.208 0.027681 *  
+VWC                        7.216751   0.700952  10.296  < 2e-16 ***
+SiteDesert Grassland       0.392055   0.134478   2.915 0.003713 ** 
+SiteJuniper Savanna        1.918735   0.256764   7.473 3.56e-13 ***
+SitePonderosa Pine Meadow  1.290550   0.240530   5.365 1.24e-07 ***
+SiteMixed Conifer Meadow   3.742893   0.467261   8.010 8.17e-15 ***
+C_0.5                     -0.348701   0.098325  -3.546 0.000427 ***
+plot_mean_ANPP             0.006296   0.001525   4.129 4.27e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.8753 on 498 degrees of freedom
+Multiple R-squared:  0.7085,	Adjusted R-squared:  0.7044 
+F-statistic: 172.9 on 7 and 498 DF,  p-value: < 2.2e-16
+

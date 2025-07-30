@@ -413,56 +413,56 @@ InSituResp_combined <- InSituResp_combined |>
 ```
 
 ```{r}
-#| label: regression: microsite-level CN vs efflux
+#| label: combine insitu resp and ANPP data
 
-#### COPY PASTED FOR VWC< NOT RUN FOR CN YET
+## read in L2 ANPP and root biomass data - there is one value for each site x treatment x plot combination for ANPP. Roots mass is separated out by microsite type. 
+ANPP_L2 = read.csv(here("data", "calculated_outputs", "ANPPandRootBiomass_L2.csv"))
 
-# regression with microsite-level CN versus efflux values 
-# Use mean site x treatment x microsite values for CN to fill in missing CN values (where one of the two core depths was missing)
-
-InSituResp_combined_plotmeans <- InSituResp_combined |>
-  group_by(SampleDate, Site, Plot, Treatment, Season, Trip) |>
-  summarise(
-    N_reps    = sum(!is.na(Efflux)),
-    Efflux   = mean(Efflux, na.rm = TRUE),
-    RHcmbr   = mean(RHcmbr, na.rm = TRUE),
-    Tsoil_C   = mean(Tsoil_C, na.rm = TRUE), 
-    Tsch_C   = mean(Tsch_C, na.rm = TRUE),
-    SWP = mean(SWP, na.rm = TRUE),
-    VWC = mean(VWC, na.rm = TRUE),
-    .groups = "drop"
-  )
-
-# replace NaN with mean VWC for each site x treatment x sampledate combination
-InSituResp_combined_plotmeans <- InSituResp_combined_plotmeans |>
-  group_by(Site, Treatment, SampleDate) |>
-  mutate(VWC = ifelse(is.na(VWC), mean(VWC, na.rm = TRUE), VWC)) |>
-  ungroup()
-
-# regression model for each site (note that this is oddly printed with two lines per site)
-flux_v_VWC_regression_results <- InSituResp_combined_plotmeans |>
-  group_by(Site) |>
-  nest() |>
+# convert ANPP to long form data to pull out root biomass by microsite
+ANPP_long <- ANPP_L2 |>
+  pivot_longer(
+    cols = c(Root_mass_IC_gm2, Root_mass_Can_gm2),
+    names_to = "Microsite",
+    values_to = "Root_mass_gm2"
+  ) |>
   mutate(
-    model = map(data, ~ lm(Efflux ~ VWC, data = .x)),
-    model_summary = map(model, tidy),
-    model_stats = map(model, glance)
+    Microsite = case_when(
+      Microsite == "Root_mass_IC_gm2" ~ "Intercanopy",
+      Microsite == "Root_mass_Can_gm2" ~ "Canopy",
+      TRUE ~ Microsite
+    )
   ) |>
-  unnest(model_summary, names_sep = "_") |>
-  pivot_wider(
-    names_from = model_summary_term,
-    values_from = model_summary_estimate
-  ) |>
-  unnest(model_stats, names_sep = "_") |>
-  dplyr::select(
-    Site,
-    intercept = `(Intercept)`,
-    slope = VWC,
-    r_squared = model_stats_r.squared,
-    p_value = model_stats_p.value
-  )
+  dplyr::select(SiteOrder, TreatmentOrder, Plot, Microsite, Root_mass_gm2, plot_mean_ANPP)
 
-flux_v_VWC_regression_results
+# Ensure columns are properly coded as factors to allow combining of dfs
+ANPP_long <- ANPP_long |>
+  mutate(across(c(SiteOrder, Plot, TreatmentOrder, Microsite), as.factor)) |>
+  rename(Site = SiteOrder, Treatment = TreatmentOrder)
+
+# combine ANPP and root data with resp data
+InSituResp_combined <- InSituResp_combined |>
+  left_join(
+    ANPP_long |>
+      dplyr::select(Site, Plot, Treatment, Microsite, plot_mean_ANPP, Root_mass_gm2),
+    by = c("Site", "Plot", "Treatment", "Microsite")
+  )
+```
+
+```{r}
+#| label: data gap filling
+
+# There are missing values for many of the predictor values (e.g., missing CN values, soil moisture probes not present in all plots). This will cause problems due to unequal sample sizes. Gap fill with the mean Site x Treatment x Microsite value.
+
+
+InSituResp_combined <- InSituResp_combined |>
+  group_by(Site, Treatment, Microsite) |>
+  mutate(
+    VWC = if_else(is.na(VWC), mean(VWC, na.rm = TRUE), VWC),
+    C_0.5 = if_else(is.na(C_0.5), mean(C_0.5, na.rm = TRUE), C_0.5),
+    plot_mean_ANPP = if_else(is.na(plot_mean_ANPP), mean(plot_mean_ANPP, na.rm = TRUE), plot_mean_ANPP),
+    Root_mass_gm2 = if_else(is.na(Root_mass_gm2), mean(Root_mass_gm2, na.rm = TRUE), Root_mass_gm2)
+  ) |>
+  ungroup()
 ```
 
 ```{r}
@@ -479,40 +479,29 @@ InSituResp_combined <- InSituResp_combined |>
   )
 
 # Fit different mixed effects model and compare model fits with AIC
-
-# Model 1: VWC only
-m1 <- lmer(Efflux ~ VWC + (1 | Plot), data = InSituResp_combined)
-
-# Model 2: VWC + C + Tsoil_C
-m2 <- lmer(Efflux ~ VWC + C_0.5 + Tsoil_C + (1 | Plot), data = InSituResp_combined)
-
-# Model 3: VWC + Site 
-m3 <- lmer(Efflux ~ VWC + Site + (1 | Plot), data = InSituResp_combined)
-
-# Model 4: VWC + Site + Microsite
-m4 <- lmer(Efflux ~ VWC + Site + Microsite + (1 | Plot), data = InSituResp_combined)
-
-# Model 5: VWC + C + Site 
-m5 <- lmer(Efflux ~ VWC + C_0.5 + Site + (1 | Plot), data = InSituResp_combined)
-
-# Model 6: VWC + Tsoil_C + Site (full model)
-m6 <- lmer(Efflux ~ VWC + Tsoil_C + Site + (1 | Plot), data = InSituResp_combined)
-
-# Model 7: VWC + Tsoil_C + C + Site (full model)
-m7 <- lmer(Efflux ~ VWC + Tsoil_C + Site + C_0.5 +(1 | Plot), data = InSituResp_combined)
-
-# Compare AICs
-AIC(m1, m2, m3, m4, m5, m6, m7)
-
-### The lowest AIC is m5 --> VWC, C, and site are the best predictors of efflux.
-
-# pvalues for best fit model
-lmm_p <- lmerTest::lmer(Efflux ~ VWC + Site + C_0.5 + (1 | Plot), data = InSituResp_combined)
-summary(lmm_p)
+library(lme4)
+library(lmerTest)  # for stepwise methods with p-values (optional)
+library(performance)
 
 
-```
+# Full model with all fixed effects
+full_model <- lmer(
+  Efflux ~ VWC + Treatment + Site + Tsoil_C + C_0.5 + 
+    Microsite + plot_mean_ANPP + Root_mass_gm2 + (1 | Plot),
+  data = InSituResp_combined,
+  REML = FALSE
+)
 
-```{THINK ABOUT HOW TO SEPARATE OUT MICROSITES SINCE VWC COMBINED - MORE ASSESSMENT OF SOIL C IMPACT ON RESPIRATIONS}
+
+# Uses Satterthwaite's method to calculate p-values
+stepwise_model <- step(full_model)
+summary(stepwise_model)
+
+final_model <- get_model(stepwise_model)
+summary(final_model)
+
+sink(here("results","insitu_resp_model_summary.txt"))
+summary(final_model)
+sink()
 
 ```

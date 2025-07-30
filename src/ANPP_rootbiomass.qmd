@@ -154,7 +154,7 @@ ANPP_roots_by_trt <- ANPPandRoot_df |>
 #### Set up legends
 
 ```{r}
-#|label: column-graph-ANPP-by-trt-and-site
+#|label: export L2 data
 
 # ANPP Plots 
 ANPPandRoot_df <- ANPPandRoot_df |>
@@ -167,9 +167,13 @@ ANPPandRoot_df <- ANPPandRoot_df |>
   )
 
 
+# export L2 data as csv
+write.csv(ANPPandRoot_df, here("data", "calculated_outputs", "ANPPandRootBiomass_L2.csv"))
 ```
 
 #### ANPP
+
+Note: Analyses can be started here with the L2 data saved in last chunk
 
 ```{r}
 #| label: ANPP-plot
