@@ -18,6 +18,7 @@ Data, graphing, and analysis of ANPP and root biomass data.
 library(tidyverse)
 library(here)
 library(bestNormalize)
+library(cowplot)
 ```
 
 # ANPP and Root Biomass
@@ -177,19 +178,35 @@ Note: Analyses can be started here with the L2 data saved in last chunk
 
 ```{r}
 #| label: ANPP-plot
+
+# Define site labels and levels
+site_labels <- c(
+  "Desert Scrub" = "Desert Scrub",
+  "Desert Grassland" = "Desert Grassland",
+  "Juniper Savanna" = "Juniper Savanna",
+  "Ponderosa Pine Meadow" = "Ponderosa Pine\nMeadow",
+  "Mixed Conifer Meadow" = "Mixed Conifer\nMeadow"
+)
+site_levels <- names(site_labels)
+
+ANPPandRoot_df <- ANPPandRoot_df |>
+  mutate(SiteOrder = factor(SiteOrder, levels = names(site_labels)))
+
 ANPP <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = plot_mean_ANPP, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
-  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
-#  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
-  labs(x = "Site", 
-       y = "Mean Plot ANPP (g m-2)") +  # need to double check Seth's units
+  scale_fill_manual(name = NULL, values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  scale_y_continuous(limits = c(0, 220), expand = c(0, 0)) +
+  scale_x_discrete(labels = site_labels) +
+  labs(
+   x = "Site", 
+   y = expression("Mean Plot ANPP (g " * m^{-2} * ")")) +
   theme_grey(base_size = 18) +
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1),
+  #  axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = c(0.3, 0.7),
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
@@ -197,6 +214,7 @@ ANPP <- ANPPandRoot_df |>
 ANPP
 
 ggsave(here("figures", "ANPP.png"), plot = ANPP, width = 10, height = 8)
+
 ```
 
 #### Root biomass - Canopy
@@ -206,7 +224,7 @@ ggsave(here("figures", "ANPP.png"), plot = ANPP, width = 10, height = 8)
 roots_Can_gm2 <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = Root_mass_Can_gm2, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
-  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
 #  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
   labs(x = "Site", 
        y = "Root Mass in Canopy microsites (g m-2)") +  
@@ -261,16 +279,17 @@ ggsave(here("figures", "roots_IC_gm2.png"), plot = roots_IC_gm2, width = 10, hei
 roots_total_gm2 <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = Root_mass_total_gm2, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
-  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
-#  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
-  labs(x = "Site", 
-       y = "Root Mass (g m-2)") +  
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  scale_y_continuous(limits = c(0, 1100), expand = c(0, 0)) +
+ labs(
+   x = "Site", 
+   y = expression("Root Mass (g " * m^{-2} * ")")) +
+  scale_x_discrete(labels = site_labels) +
   theme_grey(base_size = 18) +
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = c(0.3, 0.7),
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
@@ -287,16 +306,17 @@ ggsave(here("figures", "roots_total_gm2.png"), plot = roots_total_gm2, width = 1
 root_shoot_plot <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = root_to_ANPP, fill = TreatmentOrder)) + 
   geom_boxplot(position = position_dodge(0.8)) +  
-  scale_fill_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
-#  scale_y_continuous(limits = c(0, 6), breaks = c(0, 2, 4, 6)) +
-  labs(x = "Site", 
-       y = "Root Mass:ANPP") +  
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  scale_y_continuous(limits = c(0, 26), expand = c(0, 0)) +
+labs(
+   x = "Site", 
+   y = expression("Root Mass:ANPP")) +
+  scale_x_discrete(labels = site_labels) +
   theme_grey(base_size = 18) +
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = c(0.3, 0.7),
     panel.background = element_blank(),
     panel.border = element_rect(color = "black", fill = NA)
@@ -425,5 +445,67 @@ summary(root_to_ANPP_anova)
 root_to_ANPP_pairwise <- TukeyHSD(root_to_ANPP_anova)
 print(root_to_ANPP_pairwise)
 plot(root_to_ANPP_pairwise)
+
+```
+
+## Combined Plots
+
+```{r}
+library(patchwork)
+
+# Label plots directly using patchwork tag system
+library(patchwork)
+
+# Common theme for alignment
+base_theme <- theme(
+  axis.title.y = element_text(size = 16),
+  plot.margin = margin(t = 5.5, r = 5.5, b = 5.5, l = 14),
+  panel.border = element_rect(color = "black", fill = NA)
+)
+
+# Apply base theme
+p_top <- ANPP +
+  scale_x_discrete(labels = site_labels) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_line(),
+    legend.position = c(0.2, 0.7),
+  ) + base_theme
+
+p_middle <- roots_total_gm2 +
+  scale_x_discrete(labels = site_labels) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_line(),
+    legend.position = "none"
+  ) + base_theme
+
+p_bottom <- root_shoot_plot +
+  scale_x_discrete(labels = site_labels) +
+  theme(
+    axis.title.x = element_text(size = 16),
+    axis.ticks.x = element_line(),
+    legend.position = "none"
+  ) + base_theme
+
+# Combine plots with letter tags in upper left, with "." after letters
+combined_plot <- (p_top / p_middle / p_bottom) +
+  plot_annotation(tag_levels = 'A', tag_suffix = ".", tag_prefix = "") &
+  theme(
+    plot.tag = element_text(size = 16, face = "plain", hjust = 0, vjust = 1),
+    plot.tag.position = c(0.1, 0.95)  # upper-left corner
+  )
+
+combined_plot
+
+ggsave(
+  filename = here("figures", "ANPP_rootbiomass.png"),  
+  plot = combined_plot,
+  width = 12,       # width in inches
+  height = 8,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
 
 ```

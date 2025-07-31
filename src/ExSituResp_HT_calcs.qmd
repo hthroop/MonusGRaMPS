@@ -1,0 +1,386 @@
+---
+title: "ExSituResp_HT"
+author: "Heather Throop"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## About this Code
+
+This code cleans, works up, analyzes, and plots data collected on the Throop Lab LI7000. These data were collected by Brittney Monus for her MS experiment run with the GRaMPS project.
+
+This code is based on the file "ExSituResp.R" written by Brittney Monus.
+
+Current version compiled by Heather Throop\
+Last Update 2025-07-09
+
+Heather's to-do list (July 8, 2025)
+
+-   check units and that fluxes are calculated correctly
+
+-   explore wehther treatments or canopy should be merged
+
+-   calculate as total CO2 rather than weighted by soil C - this might be a fairer comparison to the in situ data
+
+## Preparation Steps
+
+```{r}
+#| label: load packages
+library(tidyverse)
+library(cowplot)
+library(patchwork)
+library(here)
+library(lubridate)
+library(stringr)
+library(purrr)
+library(car)       # For Levene's test
+library(emmeans)   # For post-hoc comparisons
+```
+
+```{r}
+#| label: read in data files
+
+ExSituResp=read.csv(here("data","AllExSituResp.csv"))
+```
+
+```{r}
+#| label: clean up variables
+
+#convert date.time to units understandable to R
+ExSituResp <- ExSituResp |>
+  mutate(Datetime = mdy_hm(Date.time))
+
+# Parse out the pertinent information from the "Sample" variable
+ExSituResp <- ExSituResp |>
+  mutate(
+    Site = str_extract(Sample, "^(BP|ANT|BC|ARB|CC)"),
+    Treatment = str_extract(Sample, "(?<=^(BP|ANT|BC|ARB|CC))(Exl|Ctrl|Add)"),
+    Plot = str_extract(Sample, "P\\d{1,2}"),
+    Canopy = str_extract(Sample, "(Can|IC)"),
+    Depth = str_extract(Sample, "(0-5|5-10)")
+  )
+
+# rename and reorder sites, treatments, and microsites
+ExSituResp <- ExSituResp |>
+  mutate(
+    Site = Site |> 
+      fct_relevel("BP", "ANT", "BC", "ARB", "CC") |> 
+      fct_recode(
+        "Desert Scrub" = "BP",
+        "Desert Grassland" = "ANT",
+        "Juniper Savanna" = "BC",
+        "Ponderosa Pine Meadow" = "ARB",
+        "Mixed Conifer Meadow" = "CC"
+      ),
+    Treatment = Treatment |> 
+      fct_relevel("Exl", "Ctrl", "Add") |> 
+      fct_recode(
+        "Exclusion" = "Exl",
+        "Ambient" = "Ctrl",
+        "Addition" = "Add"
+      ),
+    Canopy = Canopy |> 
+      fct_relevel("Can", "IC") |> 
+      fct_recode(
+        "Canopy" = "Can",
+        "Intercanopy" = "IC"
+      )
+  )
+
+```
+
+## Flux Calculations
+
+```{r}
+#| label: convert ppm to mass units
+
+#calculate soil volume. Mass is in g and bulk density is g/cm^3 so we need mass/bulk density in liters
+ExSituResp <- ExSituResp |>
+  mutate(SoilVolume = ExSituResp$soilmass_g / ExSituResp$BulkDensity / 1000)
+  
+# Conversion of CO2 from concentration (ppm) to mass units (ug CO2-C per L headspace)
+# See details in Robertson et al. 1999. Standaard Soil Methods for Long-Term Ecological Research. Oxford University Press
+# Cm = (Cv x M x P)/(R x T)      ## defined as variable ugCO2_C.L
+# where Cm = ug CO2-C/L headspace
+#       Cv = ppmv CO2
+#       M = molecular weight of CO2-C (12 ug/umol)
+#       P = barometric pressure (in atmospheres, 1 atm)
+#       R = universal gas constant (0.0820575 L atm K mole)
+#       T = incubation temperature in K (K = C + 273.15)
+
+R <- 0.0820575  # L·atm/mol·K
+M_C <- 12       # µg C/µmol CO2
+T_K <- 273.15 + ExSituResp$temperature
+P <- 1          # 1 atm
+
+ExSituResp <- ExSituResp |>
+  mutate(ugCO2_C.L = (CO2_ppmv * M_C * P) / (R * T_K))
+```
+
+```{r}
+#| label: calculate flux rates
+
+# Calculation of flux rates on a per mass basis is based on the equation
+# F = Cr x V/W
+# where F = C mineralization, in units of ug CO2-C per g soil per hour
+#       Cr = change in CO2 concentration over the incubation period (calculated by regressing          Cm versus incubation time)
+#       V = headspace volume of jar minus soil and bead volume
+#       W = dry mass equivalent of soil in flask (g)
+
+# Constants
+# NOTE: headspace volume is estimated as 0.473 L but 40 g of glass beads is approximately 
+# 0.01891 L so headspace in each jar is 0.473 - 0.01891, which is 0.45409 L
+V_headspace <- 0.45409  # L, after subtracting glass beads
+
+# Calculate Cr from headspace CO2 concentration
+ExSituRespRates1 <- ExSituResp |> 
+  group_by(Sample) |> 
+  arrange(Sample, Datetime) |> 
+   mutate(
+    Diff_time_hr = c(NA, as.numeric(diff(Datetime), units = "hours")),
+    Diff_ugCO2_C.L = ugCO2_C.L - lag(ugCO2_C.L),
+    Cr = Diff_ugCO2_C.L / Diff_time_hr,  # µg CO2-C / L / hr
+    Cum.Elapsed.time.hr = as.numeric(difftime(Datetime, min(Datetime), units = "hours")),
+    Cum.Elapsed.days = Cum.Elapsed.time.hr / 24
+  ) |> 
+  ungroup() 
+  
+# Calculate flux: ug CO2-C / g soil / hr or / day
+ExSituRespRates1 <- ExSituRespRates1 |> 
+  mutate(
+    Flux_ugCO2_C.gsoil.hr = Cr * (V_headspace / soilmass_g),
+    Flux_ugCO2_C.gsoil.day = Flux_ugCO2_C.gsoil.hr * 24
+  )
+```
+
+```{r}
+#| label: flux rate cleaning
+
+# drop NA values
+ExSituRespRates1 <- drop_na(ExSituRespRates1)
+
+# Subset data to exclude negative flux values (from flushing jars)
+ExSituRespRates1 <- ExSituRespRates1 |>
+  filter(Flux_ugCO2_C.gsoil.day > 0)
+
+# explore outliers
+hist(ExSituRespRates1$Flux_ugCO2_C.gsoil.day) # nearly all data are below 250 for flux
+hist(ExSituRespRates1$Cum.Elapsed.days) # most data are 100 days or less, a few outliers around 200 days
+
+# histograms by treatment and site. This show that there aver very few flux measurements above 50. 75 appears to be a reasonable cut-off.
+ggplot(data = ExSituRespRates1, aes(x=Flux_ugCO2_C.gsoil.day, fill=Treatment)) + 
+  geom_histogram(position = "jitter", bins=30)+ 
+  facet_grid(Site~Canopy, scales = "free_y",
+             labeller = labeller(Site = label_wrap_gen(width = 15))) +
+  xlim(0, 150) 
+
+# remove outliers where resp > 75 and time > 100
+ExSituRespRatesNoOutliers <- subset(ExSituRespRates1, Flux_ugCO2_C.gsoil.day<75 & Cum.Elapsed.days<100) 
+
+# save clean data
+write.csv(ExSituRespRatesNoOutliers, here("results", "ExSituRespRatesNoOutliers_HTcalcs.csv"))
+```
+
+```{r}
+#| label: plot flux for individual samples
+
+p1 <- ExSituRespRatesNoOutliers |>
+ggplot(aes(x = Cum.Elapsed.days, y = Flux_ugCO2_C.gsoil.day, color = Canopy, group = Sample)) +
+  geom_line(size = 1) +
+  facet_grid(Treatment ~ Site) +
+  labs(
+    x = "Time",
+    y = expression(CO[2]~Flux~(µg~C~g~soil^{-1}~day^{-1})),
+    title = "CO2 Flux over Time by Site and Treatment",
+    color = "Sample"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(face = "bold"),
+    legend.position = "bottom"  
+  )
+p1
+
+```
+
+## Cumulative Flux 
+
+```{r}
+#trapezoidal integration estimate of flux
+
+ExSituRespRates1 <- ExSituRespRates1 |> 
+  group_by(Sample) |> 
+  arrange(Sample, Cum.Elapsed.days) |> 
+  mutate(
+    next_day = lead(Cum.Elapsed.days),
+    next_flux = lead(Flux_ugCO2_C.gsoil.day),
+    interval = next_day - Cum.Elapsed.days,
+    avg_flux = (Flux_ugCO2_C.gsoil.day + next_flux) / 2,
+    flux_segment = avg_flux * interval
+  ) |> 
+  ungroup()
+
+# Summarize cumulative flux up to 40 days, retaining site metadata
+cumulative_flux_summary <- ExSituRespRates1 |> 
+  filter(Cum.Elapsed.days <= 40) |> 
+  group_by(Sample, Site, Treatment, Canopy) |> 
+  summarise(
+    CumFlux_ugCO2_C.gsoil.40d = sum(flux_segment, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+```
+
+## Treatment Comparisons
+
+```{r}
+#| label: Check ANOVA assumptions - cumulative flux
+
+# Filter and prepare data
+cumulative_flux_summary <- cumulative_flux_summary |>
+  mutate(Group = interaction(Site, Treatment, Canopy))
+
+# Step 1: Check initial normality
+hist(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d, main = "Histogram of Cumm Flux", xlab = "Cumm Flux")
+# remove outliers where CumFlux_ugCO2_C.gsoil.40d > 1500
+cumulative_flux_summary <- subset(cumulative_flux_summary, CumFlux_ugCO2_C.gsoil.40d < 1500) 
+qqnorm(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d); qqline(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d)
+
+shapiro_raw <- shapiro.test(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d)
+cat("Shapiro-Wilk p-value (raw):", shapiro_raw$p.value, "\n")
+
+# Step 2: Apply bestNormalize if needed
+if (shapiro_raw$p.value < 0.05) {
+  bn_obj <- bestNormalize(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d, 
+                          allow_orderNorm = FALSE)
+  cumulative_flux_summary <- cumulative_flux_summary |>
+    mutate(CumFlux_ugCO2_C.gsoil.40d_trans = predict(bn_obj, newdata = CumFlux_ugCO2_C.gsoil.40d))
+  used_var <- "CumFlux_ugCO2_C.gsoil.40d_trans"
+  transform_used <- class(bn_obj$chosen_transform)[1]
+  
+  # Check transformed normality
+  hist(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d_trans, main = "Histogram of Transformed Flux", xlab = "Flux_trans")
+  qqnorm(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d_trans); qqline(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d_trans)
+  
+  shapiro_trans <- shapiro.test(cumulative_flux_summary$CumFlux_ugCO2_C.gsoil.40d_trans)
+  cat("Shapiro-Wilk p-value (transformed):", shapiro_trans$p.value, "\n")
+} else {
+  used_var <- "CumFlux_ugCO2_C.gsoil.40d"
+  transform_used <- "None"
+}
+
+# Step 3: Levene's Test
+levene_result <- leveneTest(reformulate("Group", used_var), data = cumulative_flux_summary)
+
+# Step 4: Summary Table
+summary_table <- tibble(
+  variable = used_var,
+  transformed = transform_used,
+  shapiro_p_raw = shapiro_raw$p.value,
+  shapiro_p_trans = if (exists("shapiro_trans")) shapiro_trans$p.value else NA,
+  levene_p = levene_result$`Pr(>F)`[1]
+)
+print(summary_table) # transformation works - data conform to ANOVA assumptions 
+```
+
+```{r}
+#| label: three-way ANOVA
+
+# Step 5: Run 3-way ANOVA
+anova_model <- aov(reformulate(c("Site", "Treatment", "Canopy",
+                                  "Site:Treatment",
+                                  "Site:Canopy",
+                                  "Treatment:Canopy",
+                                  "Site:Treatment:Canopy"),
+                                used_var),
+                   data = cumulative_flux_summary)
+anova_summary <- summary(anova_model)
+
+# Post hoc comparisons for significant effects
+library(emmeans)
+
+emmeans_site <- emmeans(anova_model, ~ Site)
+posthoc_site <- pairs(emmeans_site, adjust = "tukey")
+
+emmeans_canopy <- emmeans(anova_model, ~ Canopy)
+posthoc_canopy <- pairs(emmeans_canopy, adjust = "tukey")
+
+# Optional plots
+plot(emmeans_site, comparisons = TRUE)
+plot(emmeans_canopy, comparisons = TRUE)
+
+# Step 6: Save output to a text file
+sink(here::here("results", "anova_summary_exsitu_cum_flux.txt"))
+cat("=== Transformation Summary ===\n")
+print(summary_table)
+
+cat("\n=== ANOVA Summary ===\n")
+print(anova_summary)
+
+cat("\n=== Post Hoc Comparisons: Site ===\n")
+print(posthoc_site)
+
+cat("\n=== Post Hoc Comparisons: Canopy ===\n")
+print(posthoc_canopy)
+sink()
+
+```
+
+```{r}
+#| label: boxplot for 40 day cum flux
+
+# Microsite labels get screwed up in running this code multiple times - rerun from start 
+
+# put the microsite, site, and treatment in order
+cumulative_flux_summary <- cumulative_flux_summary |>
+      mutate(
+        Canopy = factor(Canopy, levels = c("Intercanopy", "Canopy"), 
+                           labels = c("IC", "Canopy"))
+        )
+
+panel_labels <- data.frame(
+  Site = unique(cumulative_flux_summary$Site),
+  x = 0.6,  # Nudges left of the first x category
+  y = 1470,
+  label = c("B.", "D.", "C.", "A.", "E.")
+)
+
+p_cumm_flux_boxplot <- cumulative_flux_summary |> 
+  ggplot(aes(x = Canopy, y = CumFlux_ugCO2_C.gsoil.40d, fill = Treatment)) + 
+  geom_boxplot() +
+  facet_wrap(~ Site, nrow = 1, labeller = labeller(Site = label_wrap_gen(width = 15))) +
+  geom_text(
+    data = panel_labels,
+    inherit.aes = FALSE,
+    aes(x = x, y = y, label = label),
+    hjust = 0, vjust = 1,
+    size = 5) +
+  scale_y_continuous(limits = c(0, 1500), 
+                     expand = c(0, 0)) +
+  labs(
+    y = expression("Cumulative Flux (" * mu * g ~ CO[2]*"-C" %.% g^{-1} ~ "soil [40 days])"),
+    x = "Microsite") +
+  theme_grey(base_size = 18) +
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(size = 14),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = "none") +
+  guides(color = guide_legend(title = NULL))
+p_cumm_flux_boxplot
+
+ggsave(
+  filename = here("figures", "cumm_flux_boxplot.png"),  
+  plot = p_cumm_flux_boxplot,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+```

@@ -1,0 +1,40 @@
+=== Transformation Summary ===
+# A tibble: 1 × 5
+  variable                        transformed shapiro_p_raw shapiro_p_trans levene_p
+  <chr>                           <chr>               <dbl>           <dbl>    <dbl>
+1 CumFlux_ugCO2_C.gsoil.40d_trans boxcox      0.00000000577           0.248    0.869
+
+=== ANOVA Summary ===
+                      Df Sum Sq Mean Sq F value   Pr(>F)    
+Site                   4  59.42  14.854  38.181  < 2e-16 ***
+Treatment              2   0.96   0.480   1.234   0.2959    
+Canopy                 1  11.88  11.882  30.541 3.22e-07 ***
+Site:Treatment         8   3.72   0.465   1.196   0.3108    
+Site:Canopy            4   3.18   0.794   2.041   0.0954 .  
+Treatment:Canopy       2   2.39   1.195   3.072   0.0512 .  
+Site:Treatment:Canopy  8   1.83   0.228   0.587   0.7864    
+Residuals             89  34.63   0.389                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+=== Post Hoc Comparisons: Site ===
+ contrast                                     estimate    SE df t.ratio p.value
+ Desert Scrub - Desert Grassland               -0.3735 0.180 89  -2.074  0.2404
+ Desert Scrub - Juniper Savanna                -0.3373 0.179 89  -1.889  0.3309
+ Desert Scrub - Ponderosa Pine Meadow          -1.1944 0.180 89  -6.633  <.0001
+ Desert Scrub - Mixed Conifer Meadow           -1.9807 0.185 89 -10.707  <.0001
+ Desert Grassland - Juniper Savanna             0.0362 0.179 89   0.203  0.9996
+ Desert Grassland - Ponderosa Pine Meadow      -0.8209 0.180 89  -4.559  0.0002
+ Desert Grassland - Mixed Conifer Meadow       -1.6072 0.185 89  -8.688  <.0001
+ Juniper Savanna - Ponderosa Pine Meadow       -0.8572 0.179 89  -4.801  0.0001
+ Juniper Savanna - Mixed Conifer Meadow        -1.6435 0.184 89  -8.955  <.0001
+ Ponderosa Pine Meadow - Mixed Conifer Meadow  -0.7863 0.185 89  -4.251  0.0005
+
+Results are averaged over the levels of: Treatment, Canopy 
+P value adjustment: tukey method for comparing a family of 5 estimates 
+
+=== Post Hoc Comparisons: Canopy ===
+ contrast             estimate    SE df t.ratio p.value
+ Canopy - Intercanopy    0.629 0.115 89   5.485  <.0001
+
+Results are averaged over the levels of: Site, Treatment 
