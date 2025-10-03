@@ -2,18 +2,18 @@
 # A tibble: 1 × 5
   variable transformed shapiro_p_raw shapiro_p_trans levene_p
   <chr>    <chr>               <dbl>           <dbl>    <dbl>
-1 N_trans  yeojohnson      0.0000279       0.0000343    0.379
+1 N_trans  sqrt_x          0.0000279       0.0000743    0.720
 
 === ANOVA Summary for %N 5-10 cm depth ===
                          Df Sum Sq Mean Sq F value Pr(>F)    
-Site                      4 107.83  26.957 681.490 <2e-16 ***
-Treatment                 2   0.06   0.029   0.727 0.4864    
-Microsite                 1   0.13   0.127   3.198 0.0774 .  
-Site:Treatment            8   0.32   0.039   0.998 0.4437    
-Site:Microsite            4   0.06   0.015   0.387 0.8171    
-Treatment:Microsite       2   0.12   0.062   1.576 0.2130    
-Site:Treatment:Microsite  8   0.20   0.025   0.636 0.7456    
-Residuals                83   3.28   0.040                   
+Site                      4 108.33  27.083 780.139 <2e-16 ***
+Treatment                 2   0.04   0.020   0.573  0.566    
+Microsite                 1   0.13   0.126   3.636  0.060 .  
+Site:Treatment            8   0.27   0.034   0.985  0.454    
+Site:Microsite            4   0.04   0.011   0.318  0.865    
+Treatment:Microsite       2   0.08   0.042   1.214  0.302    
+Site:Treatment:Microsite  8   0.22   0.027   0.790  0.613    
+Residuals                83   2.88   0.035                   
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
@@ -21,16 +21,16 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 # A tibble: 30 × 5
    Site             Treatment Microsite   mean_val se_val
    <fct>            <fct>     <fct>          <dbl>  <dbl>
- 1 Desert Grassland Addition  Canopy        -0.724 0.0431
- 2 Desert Grassland Addition  Intercanopy   -0.781 0.0207
- 3 Desert Grassland Ambient   Canopy        -0.746 0.0524
- 4 Desert Grassland Ambient   Intercanopy   -0.745 0.0778
- 5 Desert Grassland Exclusion Canopy        -0.797 0.0383
- 6 Desert Grassland Exclusion Intercanopy   -0.751 0.0464
- 7 Desert Scrub     Addition  Canopy        -1.37  0.0246
- 8 Desert Scrub     Addition  Intercanopy   -1.35  0.0327
- 9 Desert Scrub     Ambient   Canopy        -1.33  0.0364
-10 Desert Scrub     Ambient   Intercanopy   -1.37  0.0346
+ 1 Desert Grassland Addition  Canopy        -0.637 0.0464
+ 2 Desert Grassland Addition  Intercanopy   -0.699 0.0227
+ 3 Desert Grassland Ambient   Canopy        -0.661 0.0570
+ 4 Desert Grassland Ambient   Intercanopy   -0.661 0.0848
+ 5 Desert Grassland Exclusion Canopy        -0.717 0.0418
+ 6 Desert Grassland Exclusion Intercanopy   -0.666 0.0499
+ 7 Desert Scrub     Addition  Canopy        -1.47  0.0412
+ 8 Desert Scrub     Addition  Intercanopy   -1.43  0.0544
+ 9 Desert Scrub     Ambient   Canopy        -1.40  0.0560
+10 Desert Scrub     Ambient   Intercanopy   -1.47  0.0579
 # ℹ 20 more rows
 # ℹ Use `print(n = ...)` to see more rows
 # A tibble: 30 × 5

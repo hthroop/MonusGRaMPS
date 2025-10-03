@@ -261,6 +261,9 @@ InSituResp_combined <- InSituResp_daily_collar_means |>
   )
 ```
 
+**** WORKING HERE - need to fill in missing values for pct C 
+
+
 ```{r}
 #| label: regression: plot-level VWC vs efflux
 # regression with plot-level VWC, with mean efflux values the mean of the two microsites for each plot
@@ -360,7 +363,7 @@ ggsave(here("figures", "ExSituFlux_vs_VWC.png"), plot = resp_v_VWC_p1, width = 1
 ## read in L2 CN data - there is one value for each site x treatment x plot x microsite x depth combination
 CN_L2 = read.csv(here("data","calculated_outputs","CN_L2.csv"))
 
-# calculate CN core means (0-10 cm) for across the two soils depths for each plot x site x treatmenet x microsite combination
+# calculate CN core means (0-10 cm) for across the two soils depths for each plot x site x treatment x microsite combination
 CN_core_means <- CN_L2 |>
   group_by(Site, Plot, Treatment, Microsite) |>
   summarise(
@@ -409,6 +412,9 @@ InSituResp_combined <- InSituResp_combined |>
       dplyr::select(Site, Plot, Treatment, Microsite, C_5.10, N_5.10),
     by = c("Site", "Plot", "Treatment", "Microsite")
   )
+
+### DO I NEED TO DO SOME GAP FILLING FOR MISSING CN VALUES?
+
 
 ```
 
