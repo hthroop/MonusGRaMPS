@@ -1,0 +1,63 @@
+=== Transformation Summary ===
+# A tibble: 1 × 5
+  variable transformed shapiro_p_raw shapiro_p_trans levene_p
+  <chr>    <chr>               <dbl>           <dbl>    <dbl>
+1 C_trans  sqrt_x         0.00000196        0.000565    0.836
+
+=== ANOVA Summary ===
+                         Df Sum Sq Mean Sq F value Pr(>F)    
+Site                      4 100.60  25.150 308.346 <2e-16 ***
+Treatment                 2   0.38   0.190   2.336 0.1032    
+Microsite                 1   0.50   0.500   6.130 0.0154 *  
+Site:Treatment            8   0.33   0.041   0.505 0.8491    
+Site:Microsite            4   0.23   0.058   0.708 0.5891    
+Treatment:Microsite       2   0.65   0.323   3.959 0.0229 *  
+Site:Treatment:Microsite  8   0.71   0.088   1.085 0.3821    
+Residuals                81   6.61   0.082                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+=== Group Means and Standard Errors for trans_C and pctC ===
+# A tibble: 30 × 5
+   Site             Treatment Microsite   mean_val se_val
+   <fct>            <fct>     <fct>          <dbl>  <dbl>
+ 1 Desert Grassland Addition  Canopy        -0.677 0.110 
+ 2 Desert Grassland Addition  Intercanopy   -0.823 0.0571
+ 3 Desert Grassland Ambient   Canopy        -0.569 0.0959
+ 4 Desert Grassland Ambient   Intercanopy   -0.744 0.0857
+ 5 Desert Grassland Exclusion Canopy        -0.717 0.0241
+ 6 Desert Grassland Exclusion Intercanopy   -0.838 0.131 
+ 7 Desert Scrub     Addition  Canopy        -1.24  0.158 
+ 8 Desert Scrub     Addition  Intercanopy   -1.42  0.185 
+ 9 Desert Scrub     Ambient   Canopy        -1.22  0.154 
+10 Desert Scrub     Ambient   Intercanopy   -0.944 0.0368
+# ℹ 20 more rows
+# ℹ Use `print(n = ...)` to see more rows
+# A tibble: 30 × 5
+   Site             Treatment Microsite   mean_val se_val
+   <fct>            <fct>     <fct>          <dbl>  <dbl>
+ 1 Desert Grassland Addition  Canopy         1.07  0.122 
+ 2 Desert Grassland Addition  Intercanopy    0.903 0.0588
+ 3 Desert Grassland Ambient   Canopy         1.20  0.120 
+ 4 Desert Grassland Ambient   Intercanopy    0.992 0.0956
+ 5 Desert Grassland Exclusion Canopy         1.02  0.0270
+ 6 Desert Grassland Exclusion Intercanopy    0.901 0.137 
+ 7 Desert Scrub     Addition  Canopy         0.543 0.118 
+ 8 Desert Scrub     Addition  Intercanopy    0.416 0.143 
+ 9 Desert Scrub     Ambient   Canopy         0.561 0.132 
+10 Desert Scrub     Ambient   Intercanopy    0.780 0.0362
+# ℹ 20 more rows
+# ℹ Use `print(n = ...)` to see more rows
+# A tibble: 10 × 6
+   Site                  mean_val se_val effect    Treatment Microsite  
+   <fct>                    <dbl>  <dbl> <chr>     <fct>     <fct>      
+ 1 Desert Grassland         1.02  0.0452 Site      <NA>      <NA>       
+ 2 Desert Scrub             0.557 0.0534 Site      <NA>      <NA>       
+ 3 Juniper Savanna          2.68  0.129  Site      <NA>      <NA>       
+ 4 Mixed Conifer Meadow     5.03  0.0996 Site      <NA>      <NA>       
+ 5 Ponderosa Pine Meadow    2.65  0.115  Site      <NA>      <NA>       
+ 6 <NA>                     2.35  0.278  Treatment Addition  <NA>       
+ 7 <NA>                     2.28  0.254  Treatment Ambient   <NA>       
+ 8 <NA>                     2.18  0.261  Treatment Exclusion <NA>       
+ 9 <NA>                     2.37  0.211  Microsite <NA>      Canopy     
+10 <NA>                     2.16  0.219  Microsite <NA>      Intercanopy

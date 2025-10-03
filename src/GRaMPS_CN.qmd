@@ -14,7 +14,8 @@ This is a compilation, cleaning, and analysis of soil carbon and nitrogen data f
 Code was written by Heather Throop, streamlining and updating the original analyses that Brittney did for her MS.
 
 Updated:\
-2025-07-25 Heather Throop
+2025-07-25 Heather Throop\
+2025-10-01 Heather Throop - added N ANOVA summary output
 
 ## SetUp
 
@@ -187,12 +188,66 @@ anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
 anova_summary <- summary(anova_model)
 print(anova_summary)
 
+group_summary <- CN_0.5 |>
+  group_by(Site, Treatment, Microsite) |>
+  summarise(
+    mean_val = mean(C_trans, na.rm = TRUE),
+    se_val   = sd(C_trans, na.rm = TRUE) / sqrt(sum(!is.na(C_trans))),
+    .groups = "drop"
+  )
+
+group_summary1 <- CN_0.5 |>
+  group_by(Site, Treatment, Microsite) |>
+  summarise(
+    mean_val = mean(mean_C, na.rm = TRUE),
+    se_val   = sd(mean_C, na.rm = TRUE) / sqrt(sum(!is.na(mean_C))),
+    .groups = "drop"
+  )
+
+# --- Site main effect ---
+site_summary <- CN_0.5 |>
+  group_by(Site) |>
+  summarise(
+    mean_val = mean(mean_C, na.rm = TRUE),
+    se_val   = sd(mean_C, na.rm = TRUE) / sqrt(sum(!is.na(mean_C))),
+    .groups = "drop"
+  )
+
+# --- Treatment main effect ---
+treat_summary <- CN_0.5 |>
+  group_by(Treatment) |>
+  summarise(
+    mean_val = mean(mean_C, na.rm = TRUE),
+    se_val   = sd(mean_C, na.rm = TRUE) / sqrt(sum(!is.na(mean_C))),
+    .groups = "drop"
+  )
+
+# --- Microsite main effect ---
+micro_summary <- CN_0.5 |>
+  group_by(Microsite) |>
+  summarise(
+    mean_val = mean(mean_C, na.rm = TRUE),
+    se_val   = sd(mean_C, na.rm = TRUE) / sqrt(sum(!is.na(mean_C))),
+    .groups = "drop"
+  )
+
+main_effects_summary <- bind_rows(
+  site_summary   %>% mutate(effect = "Site"),
+  treat_summary  %>% mutate(effect = "Treatment"),
+  micro_summary  %>% mutate(effect = "Microsite")
+)
+
+
 # Step 6: Save output to a text file
-sink(here::here("results", "anova_summary_C_0.5.txt"))
+sink(here::here("results", "anova_summary_pctC_0.5.txt"))
 cat("=== Transformation Summary ===\n")
 print(summary_table)
 cat("\n=== ANOVA Summary ===\n")
 print(anova_summary)
+cat("\n=== Group Means and Standard Errors for trans_C and pctC ===\n")
+print(group_summary)
+print(group_summary1)
+print(main_effects_summary)
 sink()
 ```
 
@@ -324,12 +379,65 @@ anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
 anova_summary <- summary(anova_model)
 print(anova_summary)
 
+group_summary <- CN_0.5 |>
+  group_by(Site, Treatment, Microsite) |>
+  summarise(
+    mean_val = mean(N_trans, na.rm = TRUE),
+    se_val   = sd(N_trans, na.rm = TRUE) / sqrt(sum(!is.na(N_trans))),
+    .groups = "drop"
+  )
+
+group_summary1 <- CN_0.5 |>
+  group_by(Site, Treatment, Microsite) |>
+  summarise(
+    mean_val = mean(mean_N, na.rm = TRUE),
+    se_val   = sd(mean_N, na.rm = TRUE) / sqrt(sum(!is.na(mean_N))),
+    .groups = "drop"
+  )
+
+# --- Site main effect ---
+site_summary <- CN_0.5 |>
+  group_by(Site) |>
+  summarise(
+    mean_val = mean(mean_N, na.rm = TRUE),
+    se_val   = sd(mean_N, na.rm = TRUE) / sqrt(sum(!is.na(mean_N))),
+    .groups = "drop"
+  )
+
+# --- Treatment main effect ---
+treat_summary <- CN_0.5 |>
+  group_by(Treatment) |>
+  summarise(
+    mean_val = mean(mean_N, na.rm = TRUE),
+    se_val   = sd(mean_N, na.rm = TRUE) / sqrt(sum(!is.na(mean_N))),
+    .groups = "drop"
+  )
+
+# --- Microsite main effect ---
+micro_summary <- CN_0.5 |>
+  group_by(Microsite) |>
+  summarise(
+    mean_val = mean(mean_N, na.rm = TRUE),
+    se_val   = sd(mean_N, na.rm = TRUE) / sqrt(sum(!is.na(mean_N))),
+    .groups = "drop"
+  )
+
+main_effects_summary <- bind_rows(
+  site_summary   %>% mutate(effect = "Site"),
+  treat_summary  %>% mutate(effect = "Treatment"),
+  micro_summary  %>% mutate(effect = "Microsite")
+)
+
 # Step 6: Save output to a text file
-sink(here::here("results", "anova_summary_N_0.5.txt"))
+sink(here::here("results", "anova_summary_pctN_0.5.txt"))
 cat("=== Transformation Summary ===\n")
 print(summary_table)
-cat("\n=== ANOVA Summary ===\n")
+cat("\n=== ANOVA Summary for pct N 0-5 cm data  ===\n")
 print(anova_summary)
+cat("\n=== Group Means and Standard Errors for trans_N and pctN ===\n")
+print(group_summary)
+print(group_summary1)
+print(main_effects_summary)
 sink()
 ```
 
@@ -397,6 +505,8 @@ ggsave(
 
 ### 5-10 cm depth
 
+#### carbon
+
 ```{r}
 #| label: Check ANOVA assumptions
 
@@ -461,11 +571,191 @@ anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
 anova_summary <- summary(anova_model)
 print(anova_summary)
 
+group_summary <- CN_5.10 |>
+  group_by(Site, Treatment, Microsite) |>
+  summarise(
+    mean_val = mean(C_trans, na.rm = TRUE),
+    se_val   = sd(C_trans, na.rm = TRUE) / sqrt(sum(!is.na(C_trans))),
+    .groups = "drop"
+  )
+
+group_summary1 <- CN_5.10 |>
+  group_by(Site, Treatment, Microsite) |>
+  summarise(
+    mean_val = mean(mean_C, na.rm = TRUE),
+    se_val   = sd(mean_C, na.rm = TRUE) / sqrt(sum(!is.na(mean_C))),
+    .groups = "drop"
+  )
+
+# --- Site main effect ---
+site_summary <- CN_5.10 |>
+  group_by(Site) |>
+  summarise(
+    mean_val = mean(mean_C, na.rm = TRUE),
+    se_val   = sd(mean_C, na.rm = TRUE) / sqrt(sum(!is.na(mean_C))),
+    .groups = "drop"
+  )
+
+# --- Treatment main effect ---
+treat_summary <- CN_5.10 |>
+  group_by(Treatment) |>
+  summarise(
+    mean_val = mean(mean_C, na.rm = TRUE),
+    se_val   = sd(mean_C, na.rm = TRUE) / sqrt(sum(!is.na(mean_C))),
+    .groups = "drop"
+  )
+
+# --- Microsite main effect ---
+micro_summary <- CN_5.10 |>
+  group_by(Microsite) |>
+  summarise(
+    mean_val = mean(mean_C, na.rm = TRUE),
+    se_val   = sd(mean_C, na.rm = TRUE) / sqrt(sum(!is.na(mean_C))),
+    .groups = "drop"
+  )
+
+main_effects_summary <- bind_rows(
+  site_summary   %>% mutate(effect = "Site"),
+  treat_summary  %>% mutate(effect = "Treatment"),
+  micro_summary  %>% mutate(effect = "Microsite")
+)
+
 # Step 6: Save output to a text file
-sink(here::here("results", "anova_summary_CN_5.10.txt"))
+sink(here::here("results", "anova_summary_pctC_5.10.txt"))
 cat("=== Transformation Summary ===\n")
 print(summary_table)
-cat("\n=== ANOVA Summary ===\n")
+cat("\n=== ANOVA Summary for %C 5-10 cm depth===\n")
 print(anova_summary)
+cat("\n=== Group Means and Standard Errors for trans_C and pctC ===\n")
+print(group_summary)
+print(group_summary1)
+print(main_effects_summary)
+sink()
+```
+
+### nitrogen
+
+```{r}
+#| label: Check ANOVA assumptions
+
+# Filter and prepare data
+CN_5.10 <- CN_L2 |>
+  filter(Depth == "5.1") |>
+  mutate(Group = interaction(Site, Treatment, Microsite))
+
+# Step 1: Check initial normality
+hist(CN_5.10$mean_N, main = "Histogram of mean_N (5-10 cm)", xlab = "mean_N")
+qqnorm(CN_5.10$mean_N); qqline(CN_5.10$mean_N)
+
+shapiro_raw <- shapiro.test(CN_5.10$mean_N)
+cat("Shapiro-Wilk p-value (raw):", shapiro_raw$p.value, "\n")
+
+# Step 2: Apply bestNormalize if needed
+if (shapiro_raw$p.value < 0.05) {
+  bn_obj <- bestNormalize(CN_5.10$mean_N, allow_orderNorm = FALSE)
+  CN_5.10 <- CN_5.10 |>
+    mutate(N_trans = predict(bn_obj, newdata = mean_N))
+  used_var <- "N_trans"
+  transform_used <- class(bn_obj$chosen_transform)[1]
+  
+  # Check transformed normality
+  hist(CN_5.10$N_trans, main = "Histogram of Transformed N", xlab = "N_trans")
+  qqnorm(CN_5.10$N_trans); qqline(CN_5.10$N_trans)
+  
+  shapiro_trans <- shapiro.test(CN_5.10$N_trans)
+  cat("Shapiro-Wilk p-value (transformed):", shapiro_trans$p.value, "\n")
+} else {
+  used_var <- "mean_N"
+  transform_used <- "None"
+}
+
+# Step 3: Levene's Test
+levene_result <- leveneTest(reformulate("Group", used_var), data = CN_5.10)
+
+# Step 4: Summary Table
+summary_table <- tibble(
+  variable = used_var,
+  transformed = transform_used,
+  shapiro_p_raw = shapiro_raw$p.value,
+  shapiro_p_trans = if (exists("shapiro_trans")) shapiro_trans$p.value else NA,
+  levene_p = levene_result$`Pr(>F)`[1]
+)
+print(summary_table)
+```
+
+```{r}
+#| label: three-way ANOVA
+
+# Three-way ANOVA model
+# Step 5: Run 3-way ANOVA
+anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
+                                  "Site:Treatment",
+                                  "Site:Microsite",
+                                  "Treatment:Microsite",
+                                  "Site:Treatment:Microsite"),
+                                used_var),
+                   data = CN_5.10)
+anova_summary <- summary(anova_model)
+print(anova_summary)
+
+group_summary <- CN_5.10 |>
+  group_by(Site, Treatment, Microsite) |>
+  summarise(
+    mean_val = mean(N_trans, na.rm = TRUE),
+    se_val   = sd(N_trans, na.rm = TRUE) / sqrt(sum(!is.na(N_trans))),
+    .groups = "drop"
+  )
+
+group_summary1 <- CN_5.10 |>
+  group_by(Site, Treatment, Microsite) |>
+  summarise(
+    mean_val = mean(mean_N, na.rm = TRUE),
+    se_val   = sd(mean_N, na.rm = TRUE) / sqrt(sum(!is.na(mean_N))),
+    .groups = "drop"
+  )
+
+# --- Site main effect ---
+site_summary <- CN_5.10 |>
+  group_by(Site) |>
+  summarise(
+    mean_val = mean(mean_N, na.rm = TRUE),
+    se_val   = sd(mean_N, na.rm = TRUE) / sqrt(sum(!is.na(mean_N))),
+    .groups = "drop"
+  )
+
+# --- Treatment main effect ---
+treat_summary <- CN_5.10 |>
+  group_by(Treatment) |>
+  summarise(
+    mean_val = mean(mean_N, na.rm = TRUE),
+    se_val   = sd(mean_N, na.rm = TRUE) / sqrt(sum(!is.na(mean_N))),
+    .groups = "drop"
+  )
+
+# --- Microsite main effect ---
+micro_summary <- CN_5.10 |>
+  group_by(Microsite) |>
+  summarise(
+    mean_val = mean(mean_N, na.rm = TRUE),
+    se_val   = sd(mean_N, na.rm = TRUE) / sqrt(sum(!is.na(mean_N))),
+    .groups = "drop"
+  )
+
+main_effects_summary <- bind_rows(
+  site_summary   %>% mutate(effect = "Site"),
+  treat_summary  %>% mutate(effect = "Treatment"),
+  micro_summary  %>% mutate(effect = "Microsite")
+)
+
+# Step 6: Save output to a text file
+sink(here::here("results", "anova_summary_pctN_5.10.txt"))
+cat("=== Transformation Summary ===\n")
+print(summary_table)
+cat("\n=== ANOVA Summary for %N 5-10 cm depth ===\n")
+print(anova_summary)
+cat("\n=== Group Means and Standard Errors for trans_N and pctN ===\n")
+print(group_summary)
+print(group_summary1)
+print(main_effects_summary)
 sink()
 ```
