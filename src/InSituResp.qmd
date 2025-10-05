@@ -99,10 +99,12 @@ InSituResp <- InSituResp |>
 
 ## Daily Means
 
+There are two collars in each plot - one per microsite. Multiple measurements were taken at a time for each collar using the protocol. Here we reduce the data to the mean for each collar.
+
 ```{r}
 #| label: daily collar means
 
-# calculate collar-level means for replicate respiration measurements per collar (~ 4 replicate Licor cycles per collar) for each date x plot x site combination x treatmenet x microsite combination
+# calculate collar-level means for replicate respiration measurements per collar (~ 4 replicate Licor cycles per collar) for each date x plot x site combination x treatment x microsite combination
 InSituResp_daily_collar_means <- InSituResp |>
   group_by(SampleDate, Site, Plot, Treatment, Microsite, Season, Trip) |>
   summarise(
@@ -145,7 +147,7 @@ p_trt_x_microsite
 
 ## Seasonal Means
 
-Here the data are plotted by seasons, merging the multiple sampling trips that occurred in the pre-monsoon and peak-monsoon seasons
+Here the data are plotted by three seasons (pre-, peak, and post-monsoon), merging the multiple sampling trips that occurred in the pre-monsoon and peak-monsoon seasons.
 
 ```{r}
 #| label: boxplot by season, separate microsites
@@ -232,9 +234,10 @@ ggsave(
 
 ## Drivers of InSitu Respiration
 
-This combines InSituResp_daily_collar_means with dailymoisturemeans_byplot\
-Uses model selection to come up with predictive relationship for InSituResp\
-Make a plot
+Explore potential drivers of in situ respiration (moisture, ANPP, and soil CN)
+
+This combines the dataframe InSituResp_daily_collar_means with dailymoisturemeans_byplot\
+Uses model selection to come up with predictive relationship for InSituResp
 
 ```{r}
 #| label: combine insitu resp and moisture data
@@ -260,9 +263,6 @@ InSituResp_combined <- InSituResp_daily_collar_means |>
     by = c("SampleDate", "Site", "Plot", "Treatment")
   )
 ```
-
-**** WORKING HERE - need to fill in missing values for pct C 
-
 
 ```{r}
 #| label: regression: plot-level VWC vs efflux

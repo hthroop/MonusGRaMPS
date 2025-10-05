@@ -15,8 +15,7 @@ Code was written by Heather Throop, streamlining and updating the original analy
 
 Updated:\
 2025-07-25 Heather Throop\
-2025-10-01 Heather Throop - added N ANOVA summary output
-2025-10-03 Heather Throop - added graphs for 5-10 cm depths
+2025-10-01 Heather Throop - added N ANOVA summary output 2025-10-03 Heather Throop - added graphs for 5-10 cm depths
 
 ## SetUp
 
@@ -882,4 +881,3 @@ ggsave(
   dpi = 300         # high-resolution PNG
 )
 ```
-
