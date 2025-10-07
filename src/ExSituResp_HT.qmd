@@ -20,7 +20,7 @@ Heather's to-do list (July 8, 2025)
 
 -   check units and that fluxes are calculated correctly
 
--   explore wehther treatments or canopy should be merged
+-   explore whether treatments or canopy should be merged
 
 -   calculate as total CO2 rather than weighted by soil C - this might be a fairer comparison to the in situ data
 

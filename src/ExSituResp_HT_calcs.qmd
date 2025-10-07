@@ -205,7 +205,7 @@ p1
 
 ```
 
-## Cumulative Flux 
+## Cumulative Flux
 
 ```{r}
 #trapezoidal integration estimate of flux

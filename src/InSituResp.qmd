@@ -99,7 +99,7 @@ InSituResp <- InSituResp |>
 
 ## Daily Means
 
-There are two collars in each plot - one per microsite. Multiple measurements were taken at a time for each collar using the protocol. Here we reduce the data to the mean for each collar.
+There are two collars in each plot - one per microsite. Multiple measurements were taken at a time for each collar using the protocol. Here we reduce the data to the mean for each collar (still two collars per plot).
 
 ```{r}
 #| label: daily collar means
@@ -178,7 +178,8 @@ p_trt_x_microsite
 
 ```
 
-Brittney's analyses indicate no microsite differences, so here they are merged together for a simpler figure.
+
+Merged the microsites together for a simpler figure.
 
 ```{r}
 #| label: boxplot: efflux by seasoen (microsites combimned)
