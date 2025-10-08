@@ -17,7 +17,9 @@ All concentrations are in mg C per kg dry soil
 Code was written by Heather Throop, streamlining and updating the original analyses that Brittney did for her MS.
 
 Written:\
-2025-07-27 Heather Throop
+2025-07-27 Heather Throop\
+Revised:\
+2025-10-07 Heather Throop - minor figure revisions
 
 ## SetUp
 
@@ -99,7 +101,9 @@ MBC_df <- MBC_df |>
 
 ### 0-5 cm depth
 
-#### contrasts by microsite, site and treatment
+#### microsite x site x treatment
+
+##### ANOVA
 
 ```{r}
 #| label: Check ANOVA assumptions - MBC 0-5 cm 
@@ -160,17 +164,32 @@ anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
                                   "Site:Treatment:Microsite"),
                                 used_var),
                    data = MBC_0.5_df)
+
+# Summarize ANOVA
 anova_summary <- summary(anova_model)
 print(anova_summary)
+
+# Pairwise comparisons (Tukey's HSD)
+tukey_results <- TukeyHSD(anova_model)
 
 # Step 6: Save output to a text file
 sink(here::here("results", "anova_summary_MBC_0.5_df.txt"))
 cat("=== Transformation Summary ===\n")
 print(summary_table)
+
 cat("\n=== ANOVA Summary ===\n")
 print(anova_summary)
+
+cat("\n=== Pairwise Comparisons (Tukey's HSD) ===\n")
+for (term in names(tukey_results)) {
+  cat("\n---", term, "---\n")
+  print(tukey_results[[term]])
+}
 sink()
+
 ```
+
+##### Boxplots
 
 ```{r}
 #| label: boxplot for 0-5 cm MBC
@@ -202,8 +221,9 @@ p_MBC_0.5 <- MBC_0.5_df |>
     aes(x = x, y = y, label = label),
     hjust = 0, vjust = 1,
     size = 5) +
-  ylab("Microbial Biomass Carbon (units here)") +
-  xlab("Microsite") +
+  labs(
+    x = "Microsite",
+    y = expression(Microbial~Biomass~(mg~DOC~kg^{-1}~dry~soil))) +
   theme_grey(base_size = 18) +
   scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
   theme_grey(base_size = 18) +
@@ -230,7 +250,7 @@ ggsave(
 )
 ```
 
-#### contrasts by site and microsite
+#### site x microsite
 
 ```{r}
 #| label: boxplot for 0-5 cm MBC - treatments combined
@@ -269,7 +289,7 @@ ggsave(
 
 ### 5-10 cm depth
 
-#### contrasts by site, treatment, and microsite
+#### site x treatment x microsite
 
 ```{r}
 #| label: Check ANOVA assumptions - MBC 5-10 cm 
@@ -441,7 +461,75 @@ ggsave(
 ### Combined depths
 
 ```{r}
-#| label: combined boxplot for upper and lower depths
+#| label: combined depth boxplot - treatments included
+
+# Customize x-axis labels to add second line when needed
+site_labels <- c(
+  "Desert Scrub" = "Desert Scrub",
+  "Desert Grassland" = "Desert Grassland",
+  "Juniper Savanna" = "Juniper Savanna",
+  "Ponderosa Pine Meadow" = "Ponderosa Pine\nMeadow",
+  "Mixed Conifer Meadow" = "Mixed Conifer\nMeadow"  
+)
+
+# Remove x-axis and y-axis titles from top plot; keep legend and add label
+p_top1 <- p_MBC_0.5 +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_line(),
+    legend.position = c(0.002, 0.88),
+    legend.justification = c("left", "top")
+  ) +
+  annotate("text", x = -Inf, y = Inf, label = "", 
+           hjust = -0.1, vjust = 1.5, size = 6, fontface = "plain") +
+  scale_x_discrete(labels = site_labels)
+
+# Remove both axis titles and legend from bottom plot; add label
+p_bottom1 <- p_MBC_5.10 +
+  theme(
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 16),
+    legend.position = "none"
+  ) +
+  annotate("text", x = -Inf, y = Inf, label = "", 
+           hjust = -0.1, vjust = 1.5, size = 6, fontface = "plain") +
+  scale_x_discrete(labels = site_labels)
+
+# Combine vertically
+combined_plot1 <- plot_grid(
+  p_top1, p_bottom1,
+  ncol = 1,
+  align = "v",
+  axis = "lr",
+  rel_heights = c(1, 1)
+)
+
+# Draw final plot with shared y-axis label
+# Add left margin space using a blank spacer
+final_plot1 <- ggdraw() +
+  draw_label(
+    expression("Microbial Biomass (mg DOC kg"^-1*" soil)"),
+    x = 0.02, y = 0.5, angle = 90, size = 18,
+    fontface = "plain"
+  ) +
+  draw_plot(combined_plot1, x = 0.05, y = 0, width = 0.95, height = 1)
+
+# Display the final plot
+final_plot1
+
+ggsave(
+  filename = here("figures", "MBC_by_trt_combined_depth_panels.png"),  
+  plot = final_plot1,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+```
+
+```{r}
+#| label: combined depth boxplot - no treatments included
 
 # Customize x-axis labels to add second line when needed
 site_labels <- c(

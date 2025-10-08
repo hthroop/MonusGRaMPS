@@ -20,7 +20,7 @@ This is a compilation, cleaning, and analysis of field-collected soil respiratio
 NEEDS WORK - decide how to deal with the microsites and time series (currently reduced to seasonal values but sample sizes are unbalanced)
 
 MicrobialBiomass.R
-Analysis of microbial biomass data. This code performs calculations, statistical analyses, and outputs figures.
+Analysis of microbial biomass data. This code performs calculations, statistical analyses, and outputs figures. Multiple L1 files are combined into one df. 
 
 OverallDOCresults.R
 
