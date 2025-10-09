@@ -178,7 +178,6 @@ p_trt_x_microsite
 
 ```
 
-
 Merged the microsites together for a simpler figure.
 
 ```{r}

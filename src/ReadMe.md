@@ -11,7 +11,7 @@ EnzymeAnalysis.R
 ExSituResp_HT.qmd:
 Analysis of lab-based soil respiration data. 
 
-GRaMPSCN2019.R:
+GRaMPSCN2019.qmd:
 This compiles and cleans CN data, plots, and does ANOVAs. 
 COMPLETE as of 2025-10-06
 
@@ -20,7 +20,8 @@ This is a compilation, cleaning, and analysis of field-collected soil respiratio
 NEEDS WORK - decide how to deal with the microsites and time series (currently reduced to seasonal values but sample sizes are unbalanced)
 
 MicrobialBiomass.R
-Analysis of microbial biomass data. This code performs calculations, statistical analyses, and outputs figures. Multiple L1 files are combined into one df. 
+Analysis of microbial biomass data. This code performs calculations, statistical analyses (ANOVA), and outputs figures. Multiple L1 files are combined into one df. A boxplot of combined depths is currently used in the manuscript.
+COMPLETE as of 2025-10-08
 
 OverallDOCresults.R
 

@@ -113,36 +113,50 @@ MBC_0.5_df <- MBC_df |>
   filter(Depth == "upper") |> 
   mutate(Group = interaction(Site, Treatment, Microsite))
 
-# Step 1: Check initial normality
-hist(MBC_0.5_df$MBC, main = "Histogram of mean_C (0–5 cm)", xlab = "mean_C")
-qqnorm(MBC_0.5_df$MBC); qqline(MBC_0.5_df$MBC)
+# visualize outliers
+ggplot(MBC_0.5_df, aes(x = Group, y = MBC)) +
+  geom_boxplot(outlier.color = "red") +
+  theme_bw()
+geom_jitter(width = 0.2, alpha = 0.6)
 
-shapiro_raw <- shapiro.test(MBC_0.5_df$MBC)
+# Remove outliers based on 1.5*IQR rule within each group
+MBC_0.5_outliers_rmvd <- MBC_0.5_df |>
+  group_by(Group) |>
+  filter(between(MBC,
+                 quantile(MBC, 0.25) - 1.5 * IQR(MBC),
+                 quantile(MBC, 0.75) + 1.5 * IQR(MBC))) |>
+  ungroup()
+
+# Check initial normality
+hist(MBC_0.5_outliers_rmvd$MBC, main = "Histogram of mean_C (0–5 cm)", xlab = "mean_C")
+qqnorm(MBC_0.5_outliers_rmvd$MBC); qqline(MBC_0.5_outliers_rmvd$MBC)
+
+shapiro_raw <- shapiro.test(MBC_0.5_outliers_rmvd$MBC)
 cat("Shapiro-Wilk p-value (raw):", shapiro_raw$p.value, "\n")
 
-# Step 2: Apply bestNormalize if needed
+# Apply bestNormalize if needed
 if (shapiro_raw$p.value < 0.05) {
-  bn_obj <- bestNormalize(MBC_0.5_df$MBC, allow_orderNorm = FALSE)
-  MBC_0.5_df <- MBC_0.5_df |>
+  bn_obj <- bestNormalize(MBC_0.5_outliers_rmvd$MBC, allow_orderNorm = FALSE)
+  MBC_0.5_outliers_rmvd <- MBC_0.5_outliers_rmvd |>
     mutate(MBC_trans = predict(bn_obj, newdata = MBC))
   used_var <- "MBC_trans"
   transform_used <- class(bn_obj$chosen_transform)[1]
   
-  # Check transformed normality
-  hist(MBC_0.5_df$MBC_trans, main = "Histogram of Transformed C", xlab = "MBC_trans")
-  qqnorm(MBC_0.5_df$MBC_trans); qqline(MBC_0.5_df$MBC_trans)
+# Check transformed normality
+  hist(MBC_0.5_outliers_rmvd$MBC_trans, main = "Histogram of Transformed C", xlab = "MBC_trans")
+  qqnorm(MBC_0.5_outliers_rmvd$MBC_trans); qqline(MBC_0.5_outliers_rmvd$MBC_trans)
   
-  shapiro_trans <- shapiro.test(MBC_0.5_df$MBC_trans)
+  shapiro_trans <- shapiro.test(MBC_0.5_outliers_rmvd$MBC_trans)
   cat("Shapiro-Wilk p-value (transformed):", shapiro_trans$p.value, "\n")
 } else {
   used_var <- "MBC"
   transform_used <- "None"
 }
 
-# Step 3: Levene's Test
-levene_result <- leveneTest(reformulate("Group", used_var), data = MBC_0.5_df)
+# Levene's Test
+levene_result <- leveneTest(reformulate("Group", used_var), data = MBC_0.5_outliers_rmvd)
 
-# Step 4: Summary Table
+# Summary Table
 summary_table <- tibble(
   variable = used_var,
   transformed = transform_used,
@@ -163,7 +177,7 @@ anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
                                   "Treatment:Microsite",
                                   "Site:Treatment:Microsite"),
                                 used_var),
-                   data = MBC_0.5_df)
+                   data = MBC_0.5_outliers_rmvd)
 
 # Summarize ANOVA
 anova_summary <- summary(anova_model)
@@ -195,7 +209,7 @@ sink()
 #| label: boxplot for 0-5 cm MBC
 
 # put the microsite, site, and treatment in order
-MBC_0.5_df <- MBC_0.5_df |>
+MBC_0.5_outliers_rmvd <- MBC_0.5_outliers_rmvd |>
       mutate(
         Microsite = factor(Microsite, levels = c("Intercanopy","Canopy")),
         Treatment = factor(Treatment, levels = c("Exclusion","Ambient","Addition")),
@@ -205,13 +219,13 @@ MBC_0.5_df <- MBC_0.5_df |>
         )
 
 panel_labels <- data.frame(
-  Site = unique(MBC_0.5_df$Site),
+  Site = unique(MBC_0.5_df_outliers_rmvd$Site),
   x = 0.6,  # Nudges left of the first x category
-  y = 1650,
+  y = 1150,
   label = c("A.", "B.", "C.", "D.", "E.")
 )
 
-p_MBC_0.5 <- MBC_0.5_df |> 
+p_MBC_0.5 <- MBC_0.5_outliers_rmvd |> 
   ggplot(aes(x = Microsite, y = MBC, fill = Treatment)) + 
   geom_boxplot() +
   facet_wrap(~ Site, nrow = 1, labeller = labeller(Site = label_wrap_gen(width = 15))) +
@@ -237,7 +251,7 @@ p_MBC_0.5 <- MBC_0.5_df |>
     legend.position = c(0.002, 0.88),
     legend.justification = c("left", "top")
   ) +
-   scale_y_continuous(limits = c(0, 1700), expand = c(0, 0)) +
+   scale_y_continuous(limits = c(0, 1200), expand = c(0, 0)) +
   guides(color = guide_legend(title = NULL))
 p_MBC_0.5
 
@@ -299,74 +313,99 @@ MBC_5.10_df <- MBC_df |>
   filter(Depth == "lower") |>
   mutate(Group = interaction(Site, Treatment, Microsite))
 
-# Step 1: Check initial normality
-hist(MBC_5.10_df$MBC, main = "Histogram of mean_C (0–5 cm)", xlab = "mean_C")
-qqnorm(MBC_5.10_df$MBC); qqline(MBC_5.10_df$MBC)
+# visualize outliers
+ggplot(MBC_5.10_df, aes(x = Group, y = MBC)) +
+  geom_boxplot(outlier.color = "red") +
+  theme_bw()
+geom_jitter(width = 0.2, alpha = 0.6)
 
-shapiro_raw <- shapiro.test(MBC_5.10_df$MBC)
+# Remove outliers based on 1.5*IQR rule within each group
+MBC_5.10_outliers_rmvd <- MBC_5.10_df |>
+  group_by(Group) |>
+  filter(between(MBC,
+                 quantile(MBC, 0.25) - 1.5 * IQR(MBC),
+                 quantile(MBC, 0.75) + 1.5 * IQR(MBC))) |>
+  ungroup()
+
+# Check initial normality
+hist(MBC_5.10_outliers_rmvd$MBC, main = "Histogram of mean_C (0–5 cm)", xlab = "mean_C")
+qqnorm(MBC_5.10_outliers_rmvd$MBC); qqline(MBC_5.10_outliers_rmvd$MBC)
+
+shapiro_raw <- shapiro.test(MBC_5.10_outliers_rmvd$MBC)
 cat("Shapiro-Wilk p-value (raw):", shapiro_raw$p.value, "\n")
 
-# Step 2: Apply bestNormalize if needed
+# Apply bestNormalize if needed
 if (shapiro_raw$p.value < 0.05) {
-  bn_obj <- bestNormalize(MBC_5.10_df$MBC, allow_orderNorm = FALSE)
-  MBC_5.10_df <- MBC_5.10_df |>
+  bn_obj <- bestNormalize(MBC_5.10_outliers_rmvd$MBC, allow_orderNorm = FALSE)
+  MBC_5.10_outliers_rmvd <- MBC_5.10_outliers_rmvd |>
     mutate(MBC_trans = predict(bn_obj, newdata = MBC))
   used_var <- "MBC_trans"
   transform_used <- class(bn_obj$chosen_transform)[1]
   
   # Check transformed normality
-  hist(MBC_5.10_df$MBC_trans, main = "Histogram of Transformed C", xlab = "MBC_trans")
-  qqnorm(MBC_5.10_df$MBC_trans); qqline(MBC_5.10_df$MBC_trans)
+  hist(MBC_5.10_outliers_rmvd$MBC_trans, main = "Histogram of Transformed C", xlab = "MBC_trans")
+  qqnorm(MBC_5.10_outliers_rmvd$MBC_trans); qqline(MBC_5.10_outliers_rmvd$MBC_trans)
   
-  shapiro_trans <- shapiro.test(MBC_5.10_df$MBC_trans)
+  shapiro_trans <- shapiro.test(MBC_5.10_outliers_rmvd$MBC_trans)
   cat("Shapiro-Wilk p-value (transformed):", shapiro_trans$p.value, "\n")
 } else {
   used_var <- "MBC"
   transform_used <- "None"
 }
 
-# Step 3: Levene's Test
-levene_result <- leveneTest(reformulate("Group", used_var), data = MBC_5.10_df)
+# Levene's Test
+levene_result <- leveneTest(reformulate("Group", used_var), data = MBC_5.10_outliers_rmvd)
 
-# Step 4: Summary Table
-summary_table <- tibble(
+# Summary Table
+summary_table2 <- tibble(
   variable = used_var,
   transformed = transform_used,
   shapiro_p_raw = shapiro_raw$p.value,
   shapiro_p_trans = if (exists("shapiro_trans")) shapiro_trans$p.value else NA,
   levene_p = levene_result$`Pr(>F)`[1]
 )
-print(summary_table)
+print(summary_table2)
 ```
 
 ```{r}
 #| label: three-way ANOVA
 
 # Three-way ANOVA model
-anova_model <- aov(reformulate(c("Site", "Treatment", "Microsite",
+anova_model2 <- aov(reformulate(c("Site", "Treatment", "Microsite",
                                   "Site:Treatment",
                                   "Site:Microsite",
                                   "Treatment:Microsite",
                                   "Site:Treatment:Microsite"),
                                 used_var),
-                   data = MBC_5.10_df)
-anova_summary <- summary(anova_model)
-print(anova_summary)
+                   data = MBC_5.10_outliers_rmvd)
+anova_summary2 <- summary(anova_model2)
+print(anova_summary2)
 
-# Save output to a text file
+# Pairwise comparisons (Tukey's HSD)
+tukey_results <- TukeyHSD(anova_model2)
+
+# Step 6: Save output to a text file
 sink(here::here("results", "anova_summary_MBC_5.10_df.txt"))
 cat("=== Transformation Summary ===\n")
-print(summary_table)
+print(summary_table2)
+
 cat("\n=== ANOVA Summary ===\n")
-print(anova_summary)
+print(anova_summary2)
+
+cat("\n=== Pairwise Comparisons (Tukey's HSD) ===\n")
+for (term in names(tukey_results)) {
+  cat("\n---", term, "---\n")
+  print(tukey_results[[term]])
+}
 sink()
+
 ```
 
 ```{r}
 #| label: boxplot for 5-10 cm MBC
 
 # put the microsite, site, and treatment in order
-MBC_5.10_df <- MBC_5.10_df |>
+MBC_5.10_outliers_rmvd <- MBC_5.10_outliers_rmvd |>
       mutate(
         Microsite = factor(Microsite, levels = c("Intercanopy","Canopy")),
         Treatment = factor(Treatment, levels = c("Exclusion","Ambient","Addition")),
@@ -376,13 +415,13 @@ MBC_5.10_df <- MBC_5.10_df |>
         )
 
 panel_labels <- data.frame(
-  Site = unique(MBC_5.10_df$Site),
+  Site = unique(MBC_5.10_outliers_rmvd$Site),
   x = 0.6,  # Nudges left of the first x category
   y = 725,
   label = c("F.", "G.", "H.", "I.", "J.")
 )
 
-p_MBC_5.10 <- MBC_5.10_df |> 
+p_MBC_5.10 <- MBC_5.10_outliers_rmvd |> 
   ggplot(aes(x = Microsite, y = MBC, fill = Treatment)) + 
   geom_boxplot() +
   facet_wrap(~ Site, nrow = 1, labeller = labeller(Site = label_wrap_gen(width = 15))) +
@@ -421,7 +460,7 @@ ggsave(
 )
 ```
 
-#### contrasts by site and microsite
+#### site x microsite
 
 ```{r}
 #| label: boxplot for 5-10 cm MBC - treatments combined
@@ -491,7 +530,9 @@ p_bottom1 <- p_MBC_5.10 +
   theme(
     axis.title.y = element_blank(),
     axis.title.x = element_text(size = 16),
-    legend.position = "none"
+    legend.position = "none",
+    strip.text.x = element_blank(),       # removes facet labels
+    strip.background = element_blank()    # removes the gray background strip
   ) +
   annotate("text", x = -Inf, y = Inf, label = "", 
            hjust = -0.1, vjust = 1.5, size = 6, fontface = "plain") +
@@ -510,7 +551,7 @@ combined_plot1 <- plot_grid(
 # Add left margin space using a blank spacer
 final_plot1 <- ggdraw() +
   draw_label(
-    expression("Microbial Biomass (mg DOC kg"^-1*" soil)"),
+    expression("Microbial Biomass Carbon (mg DOC kg"^-1*" soil)"),
     x = 0.02, y = 0.5, angle = 90, size = 18,
     fontface = "plain"
   ) +

@@ -2,17 +2,470 @@
 # A tibble: 1 × 5
   variable  transformed shapiro_p_raw shapiro_p_trans levene_p
   <chr>     <chr>               <dbl>           <dbl>    <dbl>
-1 MBC_trans yeojohnson      0.0000896           0.352    0.587
+1 MBC_trans boxcox           0.000111           0.356   0.0319
 
 === ANOVA Summary ===
-                         Df Sum Sq Mean Sq F value Pr(>F)    
-Site                      4  87.67  21.918  96.675 <2e-16 ***
-Treatment                 2   0.42   0.210   0.925 0.4003    
-Microsite                 1   1.43   1.434   6.327 0.0138 *  
-Site:Treatment            8   1.00   0.125   0.549 0.8161    
-Site:Microsite            4   1.12   0.279   1.231 0.3041    
-Treatment:Microsite       2   0.53   0.267   1.179 0.3127    
-Site:Treatment:Microsite  8   2.56   0.319   1.409 0.2044    
-Residuals                85  19.27   0.227                   
+                         Df Sum Sq Mean Sq F value  Pr(>F)    
+Site                      4  87.03  21.758 114.325 < 2e-16 ***
+Treatment                 2   0.55   0.276   1.451 0.24043    
+Microsite                 1   1.68   1.680   8.826 0.00392 ** 
+Site:Treatment            8   1.20   0.150   0.789 0.61379    
+Site:Microsite            4   1.09   0.271   1.426 0.23309    
+Treatment:Microsite       2   0.28   0.138   0.725 0.48735    
+Site:Treatment:Microsite  8   1.95   0.244   1.280 0.26557    
+Residuals                80  15.23   0.190                    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+=== Pairwise Comparisons (Tukey's HSD) ===
+
+--- Site ---
+                                                 diff        lwr        upr        p adj
+Desert Scrub-Desert Grassland              -0.8374411 -1.2005376 -0.4743446 8.300719e-08
+Juniper Savanna-Desert Grassland            1.7209332  1.3534446  2.0884218 0.000000e+00
+Mixed Conifer Meadow-Desert Grassland       1.0920652  0.7245766  1.4595538 1.127098e-11
+Ponderosa Pine Meadow-Desert Grassland      0.8967724  0.5377330  1.2558118 8.016631e-09
+Juniper Savanna-Desert Scrub                2.5583743  2.1869209  2.9298277 0.000000e+00
+Mixed Conifer Meadow-Desert Scrub           1.9295063  1.5580529  2.3009597 0.000000e+00
+Ponderosa Pine Meadow-Desert Scrub          1.7342135  1.3711170  2.0973100 0.000000e+00
+Mixed Conifer Meadow-Juniper Savanna       -0.6288680 -1.0046158 -0.2531202 1.143000e-04
+Ponderosa Pine Meadow-Juniper Savanna      -0.8241608 -1.1916494 -0.4566723 1.786773e-07
+Ponderosa Pine Meadow-Mixed Conifer Meadow -0.1952928 -0.5627814  0.1721957 5.763038e-01
+
+--- Treatment ---
+                          diff        lwr       upr     p adj
+Ambient-Addition   -0.17485839 -0.4207956 0.0710788 0.2122866
+Exclusion-Addition -0.08179441 -0.3277316 0.1641428 0.7076380
+Exclusion-Ambient   0.09306398 -0.1459440 0.3320720 0.6231108
+
+--- Microsite ---
+                         diff        lwr         upr       p adj
+Intercanopy-Canopy -0.2466919 -0.4122448 -0.08113913 0.003982933
+
+--- Site:Treatment ---
+                                                                      diff         lwr          upr        p adj
+Desert Scrub:Addition-Desert Grassland:Addition                -0.74459798 -1.59400249  0.104806525 1.512614e-01
+Juniper Savanna:Addition-Desert Grassland:Addition              1.87557550  1.05949404  2.691656949 6.826666e-10
+Mixed Conifer Meadow:Addition-Desert Grassland:Addition         1.31440790  0.49832645  2.130489357 2.476370e-05
+Ponderosa Pine Meadow:Addition-Desert Grassland:Addition        1.00573327  0.18965182  1.821814720 3.853772e-03
+Desert Grassland:Ambient-Desert Grassland:Addition             -0.07841574 -0.86858320  0.711751732 1.000000e+00
+Desert Scrub:Ambient-Desert Grassland:Addition                 -0.84977275 -1.63994022 -0.059605284 2.311667e-02
+Juniper Savanna:Ambient-Desert Grassland:Addition               1.84987595  1.03379450  2.665957404 1.127814e-09
+Mixed Conifer Meadow:Ambient-Desert Grassland:Addition          0.92080464  0.10472319  1.736886092 1.297264e-02
+Ponderosa Pine Meadow:Ambient-Desert Grassland:Addition         0.74702136 -0.04314611  1.537188829 8.372108e-02
+Desert Grassland:Exclusion-Desert Grassland:Addition            0.15825416 -0.63191331  0.948421630 9.999931e-01
+Desert Scrub:Exclusion-Desert Grassland:Addition               -0.81837462 -1.60854209 -0.028207154 3.499003e-02
+Juniper Savanna:Exclusion-Desert Grassland:Addition             1.52065783  0.70457637  2.336739277 5.922504e-07
+Mixed Conifer Meadow:Exclusion-Desert Grassland:Addition        1.12429271  0.30821126  1.940374163 6.135097e-04
+Ponderosa Pine Meadow:Exclusion-Desert Grassland:Addition       1.03102103  0.24085356  1.821188502 1.571072e-03
+Juniper Savanna:Addition-Desert Scrub:Addition                  2.62017348  1.77076897  3.469577984 0.000000e+00
+Mixed Conifer Meadow:Addition-Desert Scrub:Addition             2.05900589  1.20960138  2.908410392 8.489720e-11
+Ponderosa Pine Meadow:Addition-Desert Scrub:Addition            1.75033125  0.90092674  2.599735755 2.864432e-08
+Desert Grassland:Ambient-Desert Scrub:Addition                  0.66618225 -0.15835624  1.490720726 2.540924e-01
+Desert Scrub:Ambient-Desert Scrub:Addition                     -0.10517477 -0.92971325  0.719363709 1.000000e+00
+Juniper Savanna:Ambient-Desert Scrub:Addition                   2.59447393  1.74506943  3.443878439 0.000000e+00
+Mixed Conifer Meadow:Ambient-Desert Scrub:Addition              1.66540262  0.81599811  2.514807127 1.342327e-07
+Ponderosa Pine Meadow:Ambient-Desert Scrub:Addition             1.49161934  0.66708086  2.316157823 1.343356e-06
+Desert Grassland:Exclusion-Desert Scrub:Addition                0.90285214  0.07831366  1.727390623 1.873517e-02
+Desert Scrub:Exclusion-Desert Scrub:Addition                   -0.07377664 -0.89831512  0.750761840 1.000000e+00
+Juniper Savanna:Exclusion-Desert Scrub:Addition                 2.26525581  1.41585130  3.114660312 0.000000e+00
+Mixed Conifer Meadow:Exclusion-Desert Scrub:Addition            1.86889069  1.01948619  2.718295198 3.229459e-09
+Ponderosa Pine Meadow:Exclusion-Desert Scrub:Addition           1.77561901  0.95108053  2.600157495 6.731785e-09
+Mixed Conifer Meadow:Addition-Juniper Savanna:Addition         -0.56116759 -1.37724904  0.254913860 5.176380e-01
+Ponderosa Pine Meadow:Addition-Juniper Savanna:Addition        -0.86984223 -1.68592368 -0.053760777 2.558064e-02
+Desert Grassland:Ambient-Juniper Savanna:Addition              -1.95399123 -2.74415870 -1.163823765 3.379608e-11
+Desert Scrub:Ambient-Juniper Savanna:Addition                  -2.72534825 -3.51551572 -1.935180781 0.000000e+00
+Juniper Savanna:Ambient-Juniper Savanna:Addition               -0.02569955 -0.84178100  0.790381907 1.000000e+00
+Mixed Conifer Meadow:Ambient-Juniper Savanna:Addition          -0.95477086 -1.77085231 -0.138689405 8.076681e-03
+Ponderosa Pine Meadow:Ambient-Juniper Savanna:Addition         -1.12855414 -1.91872160 -0.338386667 3.131682e-04
+Desert Grassland:Exclusion-Juniper Savanna:Addition            -1.71732134 -2.50748880 -0.927153867 4.927352e-09
+Desert Scrub:Exclusion-Juniper Savanna:Addition                -2.69395012 -3.48411759 -1.903782650 0.000000e+00
+Juniper Savanna:Exclusion-Juniper Savanna:Addition             -0.35491767 -1.17099912  0.461163780 9.691520e-01
+Mixed Conifer Meadow:Exclusion-Juniper Savanna:Addition        -0.75128279 -1.56736424  0.064798666 1.044312e-01
+Ponderosa Pine Meadow:Exclusion-Juniper Savanna:Addition       -0.84455446 -1.63472193 -0.054386995 2.479511e-02
+Ponderosa Pine Meadow:Addition-Mixed Conifer Meadow:Addition   -0.30867464 -1.12475609  0.507406815 9.910902e-01
+Desert Grassland:Ambient-Mixed Conifer Meadow:Addition         -1.39282364 -2.18299111 -0.602656172 2.684121e-06
+Desert Scrub:Ambient-Mixed Conifer Meadow:Addition             -2.16418066 -2.95434813 -1.374013188 0.000000e+00
+Juniper Savanna:Ambient-Mixed Conifer Meadow:Addition           0.53546805 -0.28061340  1.351549500 5.961410e-01
+Mixed Conifer Meadow:Ambient-Mixed Conifer Meadow:Addition     -0.39360327 -1.20968472  0.422478187 9.306464e-01
+Ponderosa Pine Meadow:Ambient-Mixed Conifer Meadow:Addition    -0.56738654 -1.35755401  0.222780925 4.434894e-01
+Desert Grassland:Exclusion-Mixed Conifer Meadow:Addition       -1.15615374 -1.94632121 -0.365986274 1.951411e-04
+Desert Scrub:Exclusion-Mixed Conifer Meadow:Addition           -2.13278253 -2.92294999 -1.342615058 0.000000e+00
+Juniper Savanna:Exclusion-Mixed Conifer Meadow:Addition         0.20624992 -0.60983153  1.022331373 9.998820e-01
+Mixed Conifer Meadow:Exclusion-Mixed Conifer Meadow:Addition   -0.19011519 -1.00619665  0.625966258 9.999553e-01
+Ponderosa Pine Meadow:Exclusion-Mixed Conifer Meadow:Addition  -0.28338687 -1.07355434  0.506780597 9.946681e-01
+Desert Grassland:Ambient-Ponderosa Pine Meadow:Addition        -1.08414900 -1.87431647 -0.293981535 6.604989e-04
+Desert Scrub:Ambient-Ponderosa Pine Meadow:Addition            -1.85550602 -2.64567349 -1.065338552 3.047285e-10
+Juniper Savanna:Ambient-Ponderosa Pine Meadow:Addition          0.84414268  0.02806123  1.660224136 3.546162e-02
+Mixed Conifer Meadow:Ambient-Ponderosa Pine Meadow:Addition    -0.08492863 -0.90101008  0.731152824 1.000000e+00
+Ponderosa Pine Meadow:Ambient-Ponderosa Pine Meadow:Addition   -0.25871191 -1.04887937  0.531455562 9.978847e-01
+Desert Grassland:Exclusion-Ponderosa Pine Meadow:Addition      -0.84747911 -1.63764657 -0.057311638 2.384132e-02
+Desert Scrub:Exclusion-Ponderosa Pine Meadow:Addition          -1.82410789 -2.61427536 -1.033940421 5.793679e-10
+Juniper Savanna:Exclusion-Ponderosa Pine Meadow:Addition        0.51492456 -0.30115689  1.331006010 6.581541e-01
+Mixed Conifer Meadow:Exclusion-Ponderosa Pine Meadow:Addition   0.11855944 -0.69752201  0.934640895 9.999999e-01
+Ponderosa Pine Meadow:Exclusion-Ponderosa Pine Meadow:Addition  0.02528777 -0.76487970  0.815455234 1.000000e+00
+Desert Scrub:Ambient-Desert Grassland:Ambient                  -0.77135702 -1.53473131 -0.007982718 4.510658e-02
+Juniper Savanna:Ambient-Desert Grassland:Ambient                1.92829169  1.13812422  2.718459156 6.332002e-11
+Mixed Conifer Meadow:Ambient-Desert Grassland:Ambient           0.99922038  0.20905291  1.789387844 2.599490e-03
+Ponderosa Pine Meadow:Ambient-Desert Grassland:Ambient          0.82543710  0.06206280  1.588811396 2.171264e-02
+Desert Grassland:Exclusion-Desert Grassland:Ambient             0.23666990 -0.52670440  1.000044196 9.988141e-01
+Desert Scrub:Exclusion-Desert Grassland:Ambient                -0.73995889 -1.50333318  0.023415413 6.710884e-02
+Juniper Savanna:Exclusion-Desert Grassland:Ambient              1.59907356  0.80890609  2.389241030 5.078835e-08
+Mixed Conifer Meadow:Exclusion-Desert Grassland:Ambient         1.20270845  0.41254098  1.992875915 8.659538e-05
+Ponderosa Pine Meadow:Exclusion-Desert Grassland:Ambient        1.10943677  0.34606247  1.872811068 2.231175e-04
+Juniper Savanna:Ambient-Desert Scrub:Ambient                    2.69964870  1.90948124  3.489816173 0.000000e+00
+Mixed Conifer Meadow:Ambient-Desert Scrub:Ambient               1.77057739  0.98040992  2.560744860 1.703636e-09
+Ponderosa Pine Meadow:Ambient-Desert Scrub:Ambient              1.59679411  0.83341982  2.360168412 1.765695e-08
+Desert Grassland:Exclusion-Desert Scrub:Ambient                 1.00802691  0.24465262  1.771401212 1.287206e-03
+Desert Scrub:Exclusion-Desert Scrub:Ambient                     0.03139813 -0.73197617  0.794772429 1.000000e+00
+Juniper Savanna:Exclusion-Desert Scrub:Ambient                  2.37043058  1.58026311  3.160598046 0.000000e+00
+Mixed Conifer Meadow:Exclusion-Desert Scrub:Ambient             1.97406546  1.18389799  2.764232931 1.928246e-11
+Ponderosa Pine Meadow:Exclusion-Desert Scrub:Ambient            1.88079379  1.11741949  2.644168084 4.058553e-11
+Mixed Conifer Meadow:Ambient-Juniper Savanna:Ambient           -0.92907131 -1.74515276 -0.112989860 1.157696e-02
+Ponderosa Pine Meadow:Ambient-Juniper Savanna:Ambient          -1.10285459 -1.89302206 -0.312687122 4.834509e-04
+Desert Grassland:Exclusion-Juniper Savanna:Ambient             -1.69162179 -2.48178926 -0.901454322 8.204252e-09
+Desert Scrub:Exclusion-Juniper Savanna:Ambient                 -2.66825057 -3.45841804 -1.878083105 0.000000e+00
+Juniper Savanna:Exclusion-Juniper Savanna:Ambient              -0.32921813 -1.14529958  0.486863326 9.838772e-01
+Mixed Conifer Meadow:Exclusion-Juniper Savanna:Ambient         -0.72558324 -1.54166469  0.090498211 1.365472e-01
+Ponderosa Pine Meadow:Exclusion-Juniper Savanna:Ambient        -0.81885492 -1.60902239 -0.028687450 3.477350e-02
+Ponderosa Pine Meadow:Ambient-Mixed Conifer Meadow:Ambient     -0.17378328 -0.96395075  0.616384190 9.999778e-01
+Desert Grassland:Exclusion-Mixed Conifer Meadow:Ambient        -0.76255048 -1.55271795  0.027616991 6.985357e-02
+Desert Scrub:Exclusion-Mixed Conifer Meadow:Ambient            -1.73917926 -2.52934673 -0.949011793 3.189550e-09
+Juniper Savanna:Exclusion-Mixed Conifer Meadow:Ambient          0.59985319 -0.21622827  1.415934638 4.037225e-01
+Mixed Conifer Meadow:Exclusion-Mixed Conifer Meadow:Ambient     0.20348807 -0.61259338  1.019569523 9.998993e-01
+Ponderosa Pine Meadow:Exclusion-Mixed Conifer Meadow:Ambient    0.11021639 -0.67995107  0.900383862 9.999999e-01
+Desert Grassland:Exclusion-Ponderosa Pine Meadow:Ambient       -0.58876720 -1.35214150  0.174607099 3.245659e-01
+Desert Scrub:Exclusion-Ponderosa Pine Meadow:Ambient           -1.56539598 -2.32877028 -0.802021685 3.347056e-08
+Juniper Savanna:Exclusion-Ponderosa Pine Meadow:Ambient         0.77363646 -0.01653100  1.563803932 6.119305e-02
+Mixed Conifer Meadow:Exclusion-Ponderosa Pine Meadow:Ambient    0.37727135 -0.41289612  1.167438818 9.356375e-01
+Ponderosa Pine Meadow:Exclusion-Ponderosa Pine Meadow:Ambient   0.28399967 -0.47937463  1.047373971 9.923884e-01
+Desert Scrub:Exclusion-Desert Grassland:Exclusion              -0.97662878 -1.74000308 -0.213254485 2.163335e-03
+Juniper Savanna:Exclusion-Desert Grassland:Exclusion            1.36240366  0.57223620  2.152571132 4.746742e-06
+Mixed Conifer Meadow:Exclusion-Desert Grassland:Exclusion       0.96603855  0.17587108  1.756206017 4.338675e-03
+Ponderosa Pine Meadow:Exclusion-Desert Grassland:Exclusion      0.87276687  0.10939257  1.636141170 1.095945e-02
+Juniper Savanna:Exclusion-Desert Scrub:Exclusion                2.33903245  1.54886498  3.129199916 0.000000e+00
+Mixed Conifer Meadow:Exclusion-Desert Scrub:Exclusion           1.94266733  1.15249986  2.732834801 4.496281e-11
+Ponderosa Pine Meadow:Exclusion-Desert Scrub:Exclusion          1.84939566  1.08602136  2.612769954 8.702283e-11
+Mixed Conifer Meadow:Exclusion-Juniper Savanna:Exclusion       -0.39636511 -1.21244657  0.419716338 9.270124e-01
+Ponderosa Pine Meadow:Exclusion-Juniper Savanna:Exclusion      -0.48963679 -1.27980426  0.300530677 6.853182e-01
+Ponderosa Pine Meadow:Exclusion-Mixed Conifer Meadow:Exclusion -0.09327168 -0.88343915  0.696895791 1.000000e+00
+
+--- Site:Microsite ---
+                                                                            diff         lwr           upr        p adj
+Desert Scrub:Canopy-Desert Grassland:Canopy                        -0.5426712154 -1.14809263  0.0627501986 1.178710e-01
+Juniper Savanna:Canopy-Desert Grassland:Canopy                      1.8008040618  1.18043172  2.4211764040 0.000000e+00
+Mixed Conifer Meadow:Canopy-Desert Grassland:Canopy                 1.1795254171  0.57410400  1.7849468311 5.585623e-07
+Ponderosa Pine Meadow:Canopy-Desert Grassland:Canopy                1.0455848049  0.45291053  1.6382590774 7.029766e-06
+Desert Grassland:Intercanopy-Desert Grassland:Canopy                0.0001728619 -0.59250141  0.5928471343 1.000000e+00
+Desert Scrub:Intercanopy-Desert Grassland:Canopy                   -1.1320306252 -1.73745204 -0.5266092112 1.661849e-06
+Juniper Savanna:Intercanopy-Desert Grassland:Canopy                 1.6484955121  1.04307410  2.2539169261 0.000000e+00
+Mixed Conifer Meadow:Intercanopy-Desert Grassland:Canopy            0.9960483528  0.37567601  1.6164206950 5.722732e-05
+Ponderosa Pine Meadow:Intercanopy-Desert Grassland:Canopy           0.7346201188  0.12919870  1.3400415328 6.145754e-03
+Juniper Savanna:Canopy-Desert Scrub:Canopy                          2.3434752771  1.72310293  2.9638476193 0.000000e+00
+Mixed Conifer Meadow:Canopy-Desert Scrub:Canopy                     1.7221966324  1.11677522  2.3276180464 0.000000e+00
+Ponderosa Pine Meadow:Canopy-Desert Scrub:Canopy                    1.5882560203  0.99558175  2.1809302927 3.786305e-12
+Desert Grassland:Intercanopy-Desert Scrub:Canopy                    0.5428440773 -0.04983020  1.1355183497 1.011839e-01
+Desert Scrub:Intercanopy-Desert Scrub:Canopy                       -0.5893594098 -1.19478082  0.0160620042 6.297534e-02
+Juniper Savanna:Intercanopy-Desert Scrub:Canopy                     2.1911667275  1.58574531  2.7965881415 0.000000e+00
+Mixed Conifer Meadow:Intercanopy-Desert Scrub:Canopy                1.5387195682  0.91834723  2.1590919104 2.508909e-10
+Ponderosa Pine Meadow:Intercanopy-Desert Scrub:Canopy               1.2772913342  0.67186992  1.8827127482 5.677748e-08
+Mixed Conifer Meadow:Canopy-Juniper Savanna:Canopy                 -0.6212786447 -1.24165099 -0.0009063025 4.935828e-02
+Ponderosa Pine Meadow:Canopy-Juniper Savanna:Canopy                -0.7552192568 -1.36315803 -0.1472804872 4.497733e-03
+Desert Grassland:Intercanopy-Juniper Savanna:Canopy                -1.8006311999 -2.40856997 -1.1926924303 0.000000e+00
+Desert Scrub:Intercanopy-Juniper Savanna:Canopy                    -2.9328346870 -3.55320703 -2.3124623448 0.000000e+00
+Juniper Savanna:Intercanopy-Juniper Savanna:Canopy                 -0.1523085496 -0.77268089  0.4680637926 9.984173e-01
+Mixed Conifer Meadow:Intercanopy-Juniper Savanna:Canopy            -0.8047557090 -1.43972704 -0.1697843731 3.410645e-03
+Ponderosa Pine Meadow:Intercanopy-Juniper Savanna:Canopy           -1.0661839430 -1.68655629 -0.4458116008 1.295678e-05
+Ponderosa Pine Meadow:Canopy-Mixed Conifer Meadow:Canopy           -0.1339406121 -0.72661488  0.4587336603 9.991764e-01
+Desert Grassland:Intercanopy-Mixed Conifer Meadow:Canopy           -1.1793525552 -1.77202683 -0.5866782827 3.114441e-07
+Desert Scrub:Intercanopy-Mixed Conifer Meadow:Canopy               -2.3115560422 -2.91697746 -1.7061346282 0.000000e+00
+Juniper Savanna:Intercanopy-Mixed Conifer Meadow:Canopy             0.4689700951 -0.13645132  1.0743915091 2.735140e-01
+Mixed Conifer Meadow:Intercanopy-Mixed Conifer Meadow:Canopy       -0.1834770642 -0.80384941  0.4368952780 9.935318e-01
+Ponderosa Pine Meadow:Intercanopy-Mixed Conifer Meadow:Canopy      -0.4449052982 -1.05032671  0.1605161158 3.447144e-01
+Desert Grassland:Intercanopy-Ponderosa Pine Meadow:Canopy          -1.0454119430 -1.62505882 -0.4657650697 4.123605e-06
+Desert Scrub:Intercanopy-Ponderosa Pine Meadow:Canopy              -2.1776154301 -2.77028970 -1.5849411577 0.000000e+00
+Juniper Savanna:Intercanopy-Ponderosa Pine Meadow:Canopy            0.6029107072  0.01023643  1.1955849796 4.285902e-02
+Mixed Conifer Meadow:Intercanopy-Ponderosa Pine Meadow:Canopy      -0.0495364521 -0.65747522  0.5584023175 9.999999e-01
+Ponderosa Pine Meadow:Intercanopy-Ponderosa Pine Meadow:Canopy     -0.3109646861 -0.90363896  0.2817095863 7.878935e-01
+Desert Scrub:Intercanopy-Desert Grassland:Intercanopy              -1.1322034871 -1.72487776 -0.5395292147 9.482083e-07
+Juniper Savanna:Intercanopy-Desert Grassland:Intercanopy            1.6483226502  1.05564838  2.2409969226 0.000000e+00
+Mixed Conifer Meadow:Intercanopy-Desert Grassland:Intercanopy       0.9958754909  0.38793672  1.6038142605 3.749856e-05
+Ponderosa Pine Meadow:Intercanopy-Desert Grassland:Intercanopy      0.7344472569  0.14177298  1.3271215293 4.650091e-03
+Juniper Savanna:Intercanopy-Desert Scrub:Intercanopy                2.7805261373  2.17510472  3.3859475513 0.000000e+00
+Mixed Conifer Meadow:Intercanopy-Desert Scrub:Intercanopy           2.1280789780  1.50770664  2.7484513202 0.000000e+00
+Ponderosa Pine Meadow:Intercanopy-Desert Scrub:Intercanopy          1.8666507440  1.26122933  2.4720721580 0.000000e+00
+Mixed Conifer Meadow:Intercanopy-Juniper Savanna:Intercanopy       -0.6524471593 -1.27281950 -0.0320748171 3.124519e-02
+Ponderosa Pine Meadow:Intercanopy-Juniper Savanna:Intercanopy      -0.9138753933 -1.51929681 -0.3084539793 1.941167e-04
+Ponderosa Pine Meadow:Intercanopy-Mixed Conifer Meadow:Intercanopy -0.2614282340 -0.88180058  0.3589441082 9.322995e-01
+
+--- Treatment:Microsite ---
+                                                   diff        lwr        upr      p adj
+Ambient:Canopy-Addition:Canopy             -0.253882042 -0.6861036 0.17833951 0.52604748
+Exclusion:Canopy-Addition:Canopy           -0.050597511 -0.4778508 0.37665581 0.99932419
+Addition:Intercanopy-Addition:Canopy       -0.263113287 -0.7007890 0.17456238 0.50009960
+Ambient:Intercanopy-Addition:Canopy        -0.374425280 -0.8066468 0.05779627 0.12790102
+Exclusion:Intercanopy-Addition:Canopy      -0.410525427 -0.8482011 0.02715024 0.07876749
+Exclusion:Canopy-Ambient:Canopy             0.203284531 -0.2047996 0.61136865 0.69370925
+Addition:Intercanopy-Ambient:Canopy        -0.009231244 -0.4282148 0.40975233 0.99999984
+Ambient:Intercanopy-Ambient:Canopy         -0.120543238 -0.5338261 0.29273961 0.95659433
+Exclusion:Intercanopy-Ambient:Canopy       -0.156643385 -0.5756270 0.26234019 0.88333127
+Addition:Intercanopy-Exclusion:Canopy      -0.212515775 -0.6263722 0.20134068 0.66564180
+Ambient:Intercanopy-Exclusion:Canopy       -0.323827769 -0.7319119 0.08425635 0.19946043
+Exclusion:Intercanopy-Exclusion:Canopy     -0.359927916 -0.7737844 0.05392854 0.12511259
+Ambient:Intercanopy-Addition:Intercanopy   -0.111311994 -0.5302956 0.30767158 0.97085018
+Exclusion:Intercanopy-Addition:Intercanopy -0.147412141 -0.5720199 0.27719562 0.91206301
+Exclusion:Intercanopy-Ambient:Intercanopy  -0.036100147 -0.4550837 0.38288342 0.99985761
+
+--- Site:Treatment:Microsite ---
+                                                                                               diff          lwr           upr        p adj
+Desert Scrub:Addition:Canopy-Desert Grassland:Addition:Canopy                          -0.425992289 -1.811251140  0.9592665623 9.999941e-01
+Juniper Savanna:Addition:Canopy-Desert Grassland:Addition:Canopy                        2.019332670  0.634073819  3.4045915209 8.504350e-05
+Mixed Conifer Meadow:Addition:Canopy-Desert Grassland:Addition:Canopy                   1.145966688 -0.239292163  2.5312255393 2.699975e-01
+Ponderosa Pine Meadow:Addition:Canopy-Desert Grassland:Addition:Canopy                  1.311177717  0.015386714  2.6069687203 4.366318e-02
+Desert Grassland:Ambient:Canopy-Desert Grassland:Addition:Canopy                       -0.220698942 -1.516489945  1.0750920609 1.000000e+00
+Desert Scrub:Ambient:Canopy-Desert Grassland:Addition:Canopy                           -0.580638774 -1.876429777  0.7151522294 9.952121e-01
+Juniper Savanna:Ambient:Canopy-Desert Grassland:Addition:Canopy                         1.592555349  0.207296498  2.9778141999 7.851143e-03
+Mixed Conifer Meadow:Ambient:Canopy-Desert Grassland:Addition:Canopy                    1.168558038 -0.127232965  2.4643490414 1.399934e-01
+Ponderosa Pine Meadow:Ambient:Canopy-Desert Grassland:Addition:Canopy                   0.847272154 -0.448518849  2.1430631568 7.404212e-01
+Desert Grassland:Exclusion:Canopy-Desert Grassland:Addition:Canopy                      0.292707922 -1.003083081  1.5884989253 1.000000e+00
+Desert Scrub:Exclusion:Canopy-Desert Grassland:Addition:Canopy                         -0.524238185 -1.820029188  0.7715528182 9.990129e-01
+Juniper Savanna:Exclusion:Canopy-Desert Grassland:Addition:Canopy                       1.798253360  0.502462357  3.0940443635 2.529516e-04
+Mixed Conifer Meadow:Exclusion:Canopy-Desert Grassland:Addition:Canopy                  1.234054843 -0.061736160  2.5298458460 8.416818e-02
+Ponderosa Pine Meadow:Exclusion:Canopy-Desert Grassland:Addition:Canopy                 1.061856833 -0.233934171  2.3576478357 2.871463e-01
+Desert Grassland:Addition:Intercanopy-Desert Grassland:Addition:Canopy                 -0.023048775 -1.318839778  1.2727422279 1.000000e+00
+Desert Scrub:Addition:Intercanopy-Desert Grassland:Addition:Canopy                     -1.064270303 -2.449529154  0.3209885482 4.150127e-01
+Juniper Savanna:Addition:Intercanopy-Desert Grassland:Addition:Canopy                   1.745070050  0.449279046  3.0408610526 4.725061e-04
+Mixed Conifer Meadow:Addition:Intercanopy-Desert Grassland:Addition:Canopy              1.397417523  0.101626519  2.6932085256 1.966116e-02
+Ponderosa Pine Meadow:Addition:Intercanopy-Desert Grassland:Addition:Canopy             0.625157887 -0.760100964  2.0104167384 9.946958e-01
+Desert Grassland:Ambient:Intercanopy-Desert Grassland:Addition:Canopy                   0.058283831 -1.237507172  1.3540748337 1.000000e+00
+Desert Scrub:Ambient:Intercanopy-Desert Grassland:Addition:Canopy                      -1.134587645 -2.430378648  0.1612033586 1.787512e-01
+Juniper Savanna:Ambient:Intercanopy-Desert Grassland:Addition:Canopy                    2.007391337  0.711600334  3.3031823405 1.964845e-05
+Mixed Conifer Meadow:Ambient:Intercanopy-Desert Grassland:Addition:Canopy               0.598189956 -0.787068895  1.9834488070 9.972339e-01
+Ponderosa Pine Meadow:Ambient:Intercanopy-Desert Grassland:Addition:Canopy              0.619656084 -0.676134919  1.9154470871 9.882327e-01
+Desert Grassland:Exclusion:Intercanopy-Desert Grassland:Addition:Canopy                 0.005184934 -1.290606069  1.3009759373 1.000000e+00
+Desert Scrub:Exclusion:Intercanopy-Desert Grassland:Addition:Canopy                    -1.141223800 -2.437014803  0.1545672033 1.706054e-01
+Juniper Savanna:Exclusion:Intercanopy-Desert Grassland:Addition:Canopy                  1.170561463 -0.214697388  2.5558203143 2.334370e-01
+Mixed Conifer Meadow:Exclusion:Intercanopy-Desert Grassland:Addition:Canopy             0.970462584 -0.414796267  2.3557214350 6.097300e-01
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Desert Grassland:Addition:Canopy            0.960038922 -0.335752081  2.2558299255 4.919786e-01
+Juniper Savanna:Addition:Canopy-Desert Scrub:Addition:Canopy                            2.445324959  1.060066108  3.8305838095 5.369038e-07
+Mixed Conifer Meadow:Addition:Canopy-Desert Scrub:Addition:Canopy                       1.571958977  0.186700126  2.9572178279 9.557204e-03
+Ponderosa Pine Meadow:Addition:Canopy-Desert Scrub:Addition:Canopy                      1.737170006  0.441379003  3.0329610090 5.179430e-04
+Desert Grassland:Ambient:Canopy-Desert Scrub:Addition:Canopy                            0.205293346 -1.090497657  1.5010843495 1.000000e+00
+Desert Scrub:Ambient:Canopy-Desert Scrub:Addition:Canopy                               -0.154646485 -1.450437488  1.1411445180 1.000000e+00
+Juniper Savanna:Ambient:Canopy-Desert Scrub:Addition:Canopy                             2.018547638  0.633288787  3.4038064886 8.580764e-05
+Mixed Conifer Meadow:Ambient:Canopy-Desert Scrub:Addition:Canopy                        1.594550327  0.298759324  2.8903413301 2.584211e-03
+Ponderosa Pine Meadow:Ambient:Canopy-Desert Scrub:Addition:Canopy                       1.273264442 -0.022526561  2.5690554455 6.072802e-02
+Desert Grassland:Exclusion:Canopy-Desert Scrub:Addition:Canopy                          0.718700211 -0.577090792  2.0144912140 9.339949e-01
+Desert Scrub:Exclusion:Canopy-Desert Scrub:Addition:Canopy                             -0.098245896 -1.394036899  1.1975451069 1.000000e+00
+Juniper Savanna:Exclusion:Canopy-Desert Scrub:Addition:Canopy                           2.224245649  0.928454646  3.5200366521 1.225650e-06
+Mixed Conifer Meadow:Exclusion:Canopy-Desert Scrub:Addition:Canopy                      1.660047132  0.364256128  2.9558381347 1.250667e-03
+Ponderosa Pine Meadow:Exclusion:Canopy-Desert Scrub:Addition:Canopy                     1.487849121  0.192058118  2.7836401243 8.001660e-03
+Desert Grassland:Addition:Intercanopy-Desert Scrub:Addition:Canopy                      0.402943513 -0.892847490  1.6987345165 9.999926e-01
+Desert Scrub:Addition:Intercanopy-Desert Scrub:Addition:Canopy                         -0.638278014 -2.023536865  0.7469808368 9.928869e-01
+Juniper Savanna:Addition:Intercanopy-Desert Scrub:Addition:Canopy                       2.171062338  0.875271335  3.4668533412 2.442913e-06
+Mixed Conifer Meadow:Addition:Intercanopy-Desert Scrub:Addition:Canopy                  1.823409811  0.527618808  3.1192008143 1.874916e-04
+Ponderosa Pine Meadow:Addition:Intercanopy-Desert Scrub:Addition:Canopy                 1.051150176 -0.334108675  2.4364090270 4.411216e-01
+Desert Grassland:Ambient:Intercanopy-Desert Scrub:Addition:Canopy                       0.484276119 -0.811514884  1.7800671223 9.997458e-01
+Desert Scrub:Ambient:Intercanopy-Desert Scrub:Addition:Canopy                          -0.708595356 -2.004386359  0.5871956472 9.428838e-01
+Juniper Savanna:Ambient:Intercanopy-Desert Scrub:Addition:Canopy                        2.433383626  1.137592623  3.7291746291 7.787582e-08
+Mixed Conifer Meadow:Ambient:Intercanopy-Desert Scrub:Addition:Canopy                   1.024182245 -0.361076606  2.4094410956 4.964386e-01
+Ponderosa Pine Meadow:Ambient:Intercanopy-Desert Scrub:Addition:Canopy                  1.045648373 -0.250142630  2.3414393758 3.160401e-01
+Desert Grassland:Exclusion:Intercanopy-Desert Scrub:Addition:Canopy                     0.431177223 -0.864613780  1.7269682259 9.999712e-01
+Desert Scrub:Exclusion:Intercanopy-Desert Scrub:Addition:Canopy                        -0.715231511 -2.011022514  0.5805594920 9.371475e-01
+Juniper Savanna:Exclusion:Intercanopy-Desert Scrub:Addition:Canopy                      1.596553752  0.211294901  2.9818126030 7.554912e-03
+Mixed Conifer Meadow:Exclusion:Intercanopy-Desert Scrub:Addition:Canopy                 1.396454873  0.011196022  2.7817137237 4.560514e-02
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Desert Scrub:Addition:Canopy                1.386031211  0.090240208  2.6818222141 2.192255e-02
+Mixed Conifer Meadow:Addition:Canopy-Juniper Savanna:Addition:Canopy                   -0.873365982 -2.258624833  0.5118928693 7.986715e-01
+Ponderosa Pine Meadow:Addition:Canopy-Juniper Savanna:Addition:Canopy                  -0.708154953 -2.003945956  0.5876360504 9.432510e-01
+Desert Grassland:Ambient:Canopy-Juniper Savanna:Addition:Canopy                        -2.240031612 -3.535822615 -0.9442406090 9.977582e-07
+Desert Scrub:Ambient:Canopy-Juniper Savanna:Addition:Canopy                            -2.599971444 -3.895762447 -1.3041804406 8.355414e-09
+Juniper Savanna:Ambient:Canopy-Juniper Savanna:Addition:Canopy                         -0.426777321 -1.812036172  0.9584815300 9.999939e-01
+Mixed Conifer Meadow:Ambient:Canopy-Juniper Savanna:Addition:Canopy                    -0.850774632 -2.146565635  0.4450163715 7.333014e-01
+Ponderosa Pine Meadow:Ambient:Canopy-Juniper Savanna:Addition:Canopy                   -1.172060516 -2.467851519  0.1237304869 1.364029e-01
+Desert Grassland:Exclusion:Canopy-Juniper Savanna:Addition:Canopy                      -1.726624748 -3.022415751 -0.4308337446 5.852280e-04
+Desert Scrub:Exclusion:Canopy-Juniper Savanna:Addition:Canopy                          -2.543570855 -3.839361858 -1.2477798517 1.784208e-08
+Juniper Savanna:Exclusion:Canopy-Juniper Savanna:Addition:Canopy                       -0.221079309 -1.516870313  1.0747116936 1.000000e+00
+Mixed Conifer Meadow:Exclusion:Canopy-Juniper Savanna:Addition:Canopy                  -0.785277827 -2.081068830  0.5105131761 8.519108e-01
+Ponderosa Pine Meadow:Exclusion:Canopy-Juniper Savanna:Addition:Canopy                 -0.957475837 -2.253266840  0.3383151657 4.976841e-01
+Desert Grassland:Addition:Intercanopy-Juniper Savanna:Addition:Canopy                  -2.042381445 -3.338172448 -0.7465904420 1.265025e-05
+Desert Scrub:Addition:Intercanopy-Juniper Savanna:Addition:Canopy                      -3.083602973 -4.468861824 -1.6983441217 1.685454e-10
+Juniper Savanna:Addition:Intercanopy-Juniper Savanna:Addition:Canopy                   -0.274262620 -1.570053623  1.0215283827 1.000000e+00
+Mixed Conifer Meadow:Addition:Intercanopy-Juniper Savanna:Addition:Canopy              -0.621915147 -1.917706150  0.6738758557 9.876566e-01
+Ponderosa Pine Meadow:Addition:Intercanopy-Juniper Savanna:Addition:Canopy             -1.394174783 -2.779433633 -0.0089159316 4.647150e-02
+Desert Grassland:Ambient:Intercanopy-Juniper Savanna:Addition:Canopy                   -1.961048839 -3.256839842 -0.6652578362 3.502517e-05
+Desert Scrub:Ambient:Intercanopy-Juniper Savanna:Addition:Canopy                       -3.153920314 -4.449711318 -1.8581293114 0.000000e+00
+Juniper Savanna:Ambient:Intercanopy-Juniper Savanna:Addition:Canopy                    -0.011941332 -1.307732336  1.2838496706 1.000000e+00
+Mixed Conifer Meadow:Ambient:Intercanopy-Juniper Savanna:Addition:Canopy               -1.421142714 -2.806401565 -0.0358838629 3.709987e-02
+Ponderosa Pine Meadow:Ambient:Intercanopy-Juniper Savanna:Addition:Canopy              -1.399676586 -2.695467589 -0.1038855828 1.923870e-02
+Desert Grassland:Exclusion:Intercanopy-Juniper Savanna:Addition:Canopy                 -2.014147736 -3.309938739 -0.7183567326 1.805144e-05
+Desert Scrub:Exclusion:Intercanopy-Juniper Savanna:Addition:Canopy                     -3.160556470 -4.456347473 -1.8647654666 0.000000e+00
+Juniper Savanna:Exclusion:Intercanopy-Juniper Savanna:Addition:Canopy                  -0.848771207 -2.234030058  0.5364876444 8.381904e-01
+Mixed Conifer Meadow:Exclusion:Intercanopy-Juniper Savanna:Addition:Canopy             -1.048870086 -2.434128937  0.3363887651 4.457192e-01
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Juniper Savanna:Addition:Canopy            -1.059293748 -2.355084751  0.2364972555 2.916045e-01
+Ponderosa Pine Meadow:Addition:Canopy-Mixed Conifer Meadow:Addition:Canopy              0.165211029 -1.130579974  1.4610020321 1.000000e+00
+Desert Grassland:Ambient:Canopy-Mixed Conifer Meadow:Addition:Canopy                   -1.366665630 -2.662456634 -0.0708746274 2.631916e-02
+Desert Scrub:Ambient:Canopy-Mixed Conifer Meadow:Addition:Canopy                       -1.726605462 -3.022396465 -0.4308144589 5.853585e-04
+Juniper Savanna:Ambient:Canopy-Mixed Conifer Meadow:Addition:Canopy                     0.446588661 -0.938670190  1.8318475116 9.999846e-01
+Mixed Conifer Meadow:Ambient:Canopy-Mixed Conifer Meadow:Addition:Canopy                0.022591350 -1.273199653  1.3183823532 1.000000e+00
+Ponderosa Pine Meadow:Ambient:Canopy-Mixed Conifer Meadow:Addition:Canopy              -0.298694535 -1.594485538  0.9970964685 1.000000e+00
+Desert Grassland:Exclusion:Canopy-Mixed Conifer Meadow:Addition:Canopy                 -0.853258766 -2.149049769  0.4425322370 7.282086e-01
+Desert Scrub:Exclusion:Canopy-Mixed Conifer Meadow:Addition:Canopy                     -1.670204873 -2.965995876 -0.3744138700 1.115346e-03
+Juniper Savanna:Exclusion:Canopy-Mixed Conifer Meadow:Addition:Canopy                   0.652286672 -0.643504331  1.9480776752 9.774842e-01
+Mixed Conifer Meadow:Exclusion:Canopy-Mixed Conifer Meadow:Addition:Canopy              0.088088155 -1.207702848  1.3838791577 1.000000e+00
+Ponderosa Pine Meadow:Exclusion:Canopy-Mixed Conifer Meadow:Addition:Canopy            -0.084109856 -1.379900859  1.2116811474 1.000000e+00
+Desert Grassland:Addition:Intercanopy-Mixed Conifer Meadow:Addition:Canopy             -1.169015463 -2.464806467  0.1267755396 1.395203e-01
+Desert Scrub:Addition:Intercanopy-Mixed Conifer Meadow:Addition:Canopy                 -2.210236991 -3.595495842 -0.8249781401 9.205691e-06
+Juniper Savanna:Addition:Intercanopy-Mixed Conifer Meadow:Addition:Canopy               0.599103361 -0.696687642  1.8948943643 9.925403e-01
+Mixed Conifer Meadow:Addition:Intercanopy-Mixed Conifer Meadow:Addition:Canopy          0.251450834 -1.044340169  1.5472418374 1.000000e+00
+Ponderosa Pine Meadow:Addition:Intercanopy-Mixed Conifer Meadow:Addition:Canopy        -0.520808801 -1.906067652  0.8644500501 9.997174e-01
+Desert Grassland:Ambient:Intercanopy-Mixed Conifer Meadow:Addition:Canopy              -1.087682858 -2.383473861  0.2081081454 2.446199e-01
+Desert Scrub:Ambient:Intercanopy-Mixed Conifer Meadow:Addition:Canopy                  -2.280554333 -3.576345336 -0.9847633297 5.872857e-07
+Juniper Savanna:Ambient:Intercanopy-Mixed Conifer Meadow:Addition:Canopy                0.861424649 -0.434366354  2.1572156522 7.112303e-01
+Mixed Conifer Meadow:Ambient:Intercanopy-Mixed Conifer Meadow:Addition:Canopy          -0.547776732 -1.933035583  0.8374821187 9.993246e-01
+Ponderosa Pine Meadow:Ambient:Intercanopy-Mixed Conifer Meadow:Addition:Canopy         -0.526310604 -1.822101607  0.7694803989 9.989470e-01
+Desert Grassland:Exclusion:Intercanopy-Mixed Conifer Meadow:Addition:Canopy            -1.140781754 -2.436572757  0.1550092490 1.711392e-01
+Desert Scrub:Exclusion:Intercanopy-Mixed Conifer Meadow:Addition:Canopy                -2.287190488 -3.582981491 -0.9913994849 5.383258e-07
+Juniper Savanna:Exclusion:Intercanopy-Mixed Conifer Meadow:Addition:Canopy              0.024594775 -1.360664076  1.4098536261 1.000000e+00
+Mixed Conifer Meadow:Exclusion:Intercanopy-Mixed Conifer Meadow:Addition:Canopy        -0.175504104 -1.560762955  1.2097547468 1.000000e+00
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Mixed Conifer Meadow:Addition:Canopy       -0.185927766 -1.481718769  1.1098632372 1.000000e+00
+Desert Grassland:Ambient:Canopy-Ponderosa Pine Meadow:Addition:Canopy                  -1.531876659 -2.731546015 -0.3322073037 1.329359e-03
+Desert Scrub:Ambient:Canopy-Ponderosa Pine Meadow:Addition:Canopy                      -1.891816491 -3.091485847 -0.6921471352 1.248928e-05
+Juniper Savanna:Ambient:Canopy-Ponderosa Pine Meadow:Addition:Canopy                    0.281377632 -1.014413371  1.5771686348 1.000000e+00
+Mixed Conifer Meadow:Ambient:Canopy-Ponderosa Pine Meadow:Addition:Canopy              -0.142619679 -1.342289035  1.0570496769 1.000000e+00
+Ponderosa Pine Meadow:Ambient:Canopy-Ponderosa Pine Meadow:Addition:Canopy             -0.463905564 -1.663574919  0.7357637922 9.995382e-01
+Desert Grassland:Exclusion:Canopy-Ponderosa Pine Meadow:Addition:Canopy                -1.018469795 -2.218139151  0.1811995607 2.257919e-01
+Desert Scrub:Exclusion:Canopy-Ponderosa Pine Meadow:Addition:Canopy                    -1.835415902 -3.035085258 -0.6357465463 2.683057e-05
+Juniper Savanna:Exclusion:Canopy-Ponderosa Pine Meadow:Addition:Canopy                  0.487075643 -0.712593713  1.6867449989 9.989538e-01
+Mixed Conifer Meadow:Exclusion:Canopy-Ponderosa Pine Meadow:Addition:Canopy            -0.077122874 -1.276792230  1.1225464814 1.000000e+00
+Ponderosa Pine Meadow:Exclusion:Canopy-Ponderosa Pine Meadow:Addition:Canopy           -0.249320885 -1.448990240  0.9503484711 1.000000e+00
+Desert Grassland:Addition:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy            -1.334226492 -2.533895848 -0.1345571367 1.282589e-02
+Desert Scrub:Addition:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy                -2.375448020 -3.671239023 -1.0796570170 1.681134e-07
+Juniper Savanna:Addition:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy              0.433892332 -0.765777024  1.6335616880 9.998594e-01
+Mixed Conifer Meadow:Addition:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy         0.086239805 -1.113429550  1.2859091611 1.000000e+00
+Ponderosa Pine Meadow:Addition:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy       -0.686019830 -1.981810833  0.6097711732 9.596204e-01
+Desert Grassland:Ambient:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy             -1.252893887 -2.452563242 -0.0532245309 2.980972e-02
+Desert Scrub:Ambient:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy                 -2.445765362 -3.645434718 -1.2460960060 4.756047e-09
+Juniper Savanna:Ambient:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy               0.696213620 -0.503455736  1.8958829759 8.981324e-01
+Mixed Conifer Meadow:Ambient:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy         -0.712987761 -2.008778764  0.5828032419 9.391301e-01
+Ponderosa Pine Meadow:Ambient:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy        -0.691521633 -1.891190989  0.5081477226 9.042581e-01
+Desert Grassland:Exclusion:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy           -1.305992783 -2.505662139 -0.1063234273 1.730529e-02
+Desert Scrub:Exclusion:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy               -2.452401517 -3.652070873 -1.2527321612 4.316877e-09
+Juniper Savanna:Exclusion:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy            -0.140616254 -1.436407257  1.1551747492 1.000000e+00
+Mixed Conifer Meadow:Exclusion:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy       -0.340715133 -1.636506136  0.9550758699 9.999998e-01
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Ponderosa Pine Meadow:Addition:Canopy      -0.351138795 -1.550808151  0.8485305609 9.999979e-01
+Desert Scrub:Ambient:Canopy-Desert Grassland:Ambient:Canopy                            -0.359939832 -1.559609187  0.8397295242 9.999965e-01
+Juniper Savanna:Ambient:Canopy-Desert Grassland:Ambient:Canopy                          1.813254291  0.517463288  3.1090452942 2.116461e-04
+Mixed Conifer Meadow:Ambient:Canopy-Desert Grassland:Ambient:Canopy                     1.389256981  0.189587625  2.5889263363 7.019036e-03
+Ponderosa Pine Meadow:Ambient:Canopy-Desert Grassland:Ambient:Canopy                    1.067971096 -0.131698260  2.2676404517 1.562341e-01
+Desert Grassland:Exclusion:Canopy-Desert Grassland:Ambient:Canopy                       0.513406864 -0.686262491  1.7130762202 9.975891e-01
+Desert Scrub:Exclusion:Canopy-Desert Grassland:Ambient:Canopy                          -0.303539243 -1.503208598  0.8961301131 9.999999e-01
+Juniper Savanna:Exclusion:Canopy-Desert Grassland:Ambient:Canopy                        2.018952303  0.819282947  3.2186216584 2.156251e-06
+Mixed Conifer Meadow:Exclusion:Canopy-Desert Grassland:Ambient:Canopy                   1.454753785  0.255084429  2.6544231409 3.324548e-03
+Ponderosa Pine Meadow:Exclusion:Canopy-Desert Grassland:Ambient:Canopy                  1.282555775  0.082886419  2.4822251305 2.207169e-02
+Desert Grassland:Addition:Intercanopy-Desert Grassland:Ambient:Canopy                   0.197650167 -1.002019189  1.3973195227 1.000000e+00
+Desert Scrub:Addition:Intercanopy-Desert Grassland:Ambient:Canopy                      -0.843571361 -2.139362364  0.4522196425 7.478640e-01
+Juniper Savanna:Addition:Intercanopy-Desert Grassland:Ambient:Canopy                    1.965768992  0.766099636  3.1654383474 4.518602e-06
+Mixed Conifer Meadow:Addition:Intercanopy-Desert Grassland:Ambient:Canopy               1.618116465  0.418447109  2.8177858205 4.579053e-04
+Ponderosa Pine Meadow:Addition:Intercanopy-Desert Grassland:Ambient:Canopy              0.845856830 -0.449934174  2.1416478327 7.432775e-01
+Desert Grassland:Ambient:Intercanopy-Desert Grassland:Ambient:Canopy                    0.278982773 -0.920686583  1.4786521285 1.000000e+00
+Desert Scrub:Ambient:Intercanopy-Desert Grassland:Ambient:Canopy                       -0.913888702 -2.113558058  0.2857806534 4.328624e-01
+Juniper Savanna:Ambient:Intercanopy-Desert Grassland:Ambient:Canopy                     2.228090280  1.028420924  3.4277596354 1.111852e-07
+Mixed Conifer Meadow:Ambient:Intercanopy-Desert Grassland:Ambient:Canopy                0.818888898 -0.476902105  2.1146799013 7.951608e-01
+Ponderosa Pine Meadow:Ambient:Intercanopy-Desert Grassland:Ambient:Canopy               0.840355026 -0.359314330  2.0400243820 6.099493e-01
+Desert Grassland:Exclusion:Intercanopy-Desert Grassland:Ambient:Canopy                  0.225883876 -0.973785479  1.4255532321 1.000000e+00
+Desert Scrub:Exclusion:Intercanopy-Desert Grassland:Ambient:Canopy                     -0.920524858 -2.120194213  0.2791444982 4.176502e-01
+Juniper Savanna:Exclusion:Intercanopy-Desert Grassland:Ambient:Canopy                   1.391260406  0.095469402  2.6870514086 2.085604e-02
+Mixed Conifer Meadow:Exclusion:Intercanopy-Desert Grassland:Ambient:Canopy              1.191161526 -0.104629477  2.4869525293 1.180868e-01
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Desert Grassland:Ambient:Canopy             1.180737865 -0.018931491  2.3804072203 5.966088e-02
+Juniper Savanna:Ambient:Canopy-Desert Scrub:Ambient:Canopy                              2.173194123  0.877403120  3.4689851258 2.376546e-06
+Mixed Conifer Meadow:Ambient:Canopy-Desert Scrub:Ambient:Canopy                         1.749196812  0.549527456  2.9488661678 8.459322e-05
+Ponderosa Pine Meadow:Ambient:Canopy-Desert Scrub:Ambient:Canopy                        1.427910927  0.228241572  2.6275802832 4.532571e-03
+Desert Grassland:Exclusion:Canopy-Desert Scrub:Ambient:Canopy                           0.873346696 -0.326322660  2.0730160517 5.294198e-01
+Desert Scrub:Exclusion:Canopy-Desert Scrub:Ambient:Canopy                               0.056400589 -1.143268767  1.2560699446 1.000000e+00
+Juniper Savanna:Exclusion:Canopy-Desert Scrub:Ambient:Canopy                            2.378892134  1.179222778  3.5785614899 1.259335e-08
+Mixed Conifer Meadow:Exclusion:Canopy-Desert Scrub:Ambient:Canopy                       1.814693617  0.615024261  3.0143629724 3.544293e-05
+Ponderosa Pine Meadow:Exclusion:Canopy-Desert Scrub:Ambient:Canopy                      1.642495606  0.442826251  2.8421649621 3.364425e-04
+Desert Grassland:Addition:Intercanopy-Desert Scrub:Ambient:Canopy                       0.557589999 -0.642079357  1.7572593543 9.919781e-01
+Desert Scrub:Addition:Intercanopy-Desert Scrub:Ambient:Canopy                          -0.483631529 -1.779422532  0.8121594740 9.997518e-01
+Juniper Savanna:Addition:Intercanopy-Desert Scrub:Ambient:Canopy                        2.325708823  1.126039467  3.5253781790 2.722871e-08
+Mixed Conifer Meadow:Addition:Intercanopy-Desert Scrub:Ambient:Canopy                   1.978056296  0.778386941  3.1777256520 3.810963e-06
+Ponderosa Pine Meadow:Addition:Intercanopy-Desert Scrub:Ambient:Canopy                  1.205796661 -0.089994342  2.5015876642 1.054405e-01
+Desert Grassland:Ambient:Intercanopy-Desert Scrub:Ambient:Canopy                        0.638922604 -0.560746751  1.8385919601 9.568907e-01
+Desert Scrub:Ambient:Intercanopy-Desert Scrub:Ambient:Canopy                           -0.553948871 -1.753618227  0.6457204850 9.926721e-01
+Juniper Savanna:Ambient:Intercanopy-Desert Scrub:Ambient:Canopy                         2.588030111  1.388360755  3.7876994669 5.869341e-10
+Mixed Conifer Meadow:Ambient:Intercanopy-Desert Scrub:Ambient:Canopy                    1.178828730 -0.116962273  2.4746197328 1.296709e-01
+Ponderosa Pine Meadow:Ambient:Intercanopy-Desert Scrub:Ambient:Canopy                   1.200294858  0.000625502  2.3999642135 4.970563e-02
+Desert Grassland:Exclusion:Intercanopy-Desert Scrub:Ambient:Canopy                      0.585823708 -0.613845648  1.7854930637 9.845668e-01
+Desert Scrub:Exclusion:Intercanopy-Desert Scrub:Ambient:Canopy                         -0.560585026 -1.760254382  0.6390843298 9.913675e-01
+Juniper Savanna:Exclusion:Intercanopy-Desert Scrub:Ambient:Canopy                       1.751200237  0.455409234  3.0469912402 4.399327e-04
+Mixed Conifer Meadow:Exclusion:Intercanopy-Desert Scrub:Ambient:Canopy                  1.551101358  0.255310355  2.8468923609 4.128600e-03
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Desert Scrub:Ambient:Canopy                 1.540677696  0.341008340  2.7403470519 1.194585e-03
+Mixed Conifer Meadow:Ambient:Canopy-Juniper Savanna:Ambient:Canopy                     -0.423997311 -1.719788314  0.8717936925 9.999793e-01
+Ponderosa Pine Meadow:Ambient:Canopy-Juniper Savanna:Ambient:Canopy                    -0.745283195 -2.041074198  0.5505078079 9.061951e-01
+Desert Grassland:Exclusion:Canopy-Juniper Savanna:Ambient:Canopy                       -1.299847427 -2.595638430 -0.0040564236 4.825545e-02
+Desert Scrub:Exclusion:Canopy-Juniper Savanna:Ambient:Canopy                           -2.116793534 -3.412584537 -0.8210025307 4.909733e-06
+Juniper Savanna:Exclusion:Canopy-Juniper Savanna:Ambient:Canopy                         0.205698011 -1.090092992  1.5014890146 1.000000e+00
+Mixed Conifer Meadow:Exclusion:Canopy-Juniper Savanna:Ambient:Canopy                   -0.358500506 -1.654291509  0.9372904971 9.999994e-01
+Ponderosa Pine Meadow:Exclusion:Canopy-Juniper Savanna:Ambient:Canopy                  -0.530698516 -1.826489519  0.7650924867 9.987948e-01
+Desert Grassland:Addition:Intercanopy-Juniper Savanna:Ambient:Canopy                   -1.615604124 -2.911395127 -0.3198131211 2.051543e-03
+Desert Scrub:Addition:Intercanopy-Juniper Savanna:Ambient:Canopy                       -2.656825652 -4.042084503 -1.2715668008 3.898715e-08
+Juniper Savanna:Addition:Intercanopy-Juniper Savanna:Ambient:Canopy                     0.152514701 -1.143276303  1.4483057036 1.000000e+00
+Mixed Conifer Meadow:Addition:Intercanopy-Juniper Savanna:Ambient:Canopy               -0.195137826 -1.490928829  1.1006531767 1.000000e+00
+Ponderosa Pine Meadow:Addition:Intercanopy-Juniper Savanna:Ambient:Canopy              -0.967397462 -2.352656313  0.4178613894 6.161767e-01
+Desert Grassland:Ambient:Intercanopy-Juniper Savanna:Ambient:Canopy                    -1.534271518 -2.830062521 -0.2384805153 4.935438e-03
+Desert Scrub:Ambient:Intercanopy-Juniper Savanna:Ambient:Canopy                        -2.727142993 -4.022933997 -1.4313519904 1.493598e-09
+Juniper Savanna:Ambient:Intercanopy-Juniper Savanna:Ambient:Canopy                      0.414835988 -0.880955015  1.7106269916 9.999866e-01
+Mixed Conifer Meadow:Ambient:Intercanopy-Juniper Savanna:Ambient:Canopy                -0.994365393 -2.379624244  0.3908934580 5.591950e-01
+Ponderosa Pine Meadow:Ambient:Intercanopy-Juniper Savanna:Ambient:Canopy               -0.972899265 -2.268690268  0.3228917382 4.636073e-01
+Desert Grassland:Exclusion:Intercanopy-Juniper Savanna:Ambient:Canopy                  -1.587370415 -2.883161418 -0.2915794117 2.794305e-03
+Desert Scrub:Exclusion:Intercanopy-Juniper Savanna:Ambient:Canopy                      -2.733779149 -4.029570152 -1.4379881456 1.364506e-09
+Juniper Savanna:Exclusion:Intercanopy-Juniper Savanna:Ambient:Canopy                   -0.421993886 -1.807252737  0.9632649654 9.999952e-01
+Mixed Conifer Meadow:Exclusion:Intercanopy-Juniper Savanna:Ambient:Canopy              -0.622092765 -2.007351616  0.7631660861 9.950578e-01
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Juniper Savanna:Ambient:Canopy             -0.632516427 -1.928307430  0.6632745765 9.846430e-01
+Ponderosa Pine Meadow:Ambient:Canopy-Mixed Conifer Meadow:Ambient:Canopy               -0.321285885 -1.520955240  0.8783834711 9.999997e-01
+Desert Grassland:Exclusion:Canopy-Mixed Conifer Meadow:Ambient:Canopy                  -0.875850116 -2.075519472  0.3238192396 5.233316e-01
+Desert Scrub:Exclusion:Canopy-Mixed Conifer Meadow:Ambient:Canopy                      -1.692796223 -2.892465579 -0.4931268674 1.765671e-04
+Juniper Savanna:Exclusion:Canopy-Mixed Conifer Meadow:Ambient:Canopy                    0.629695322 -0.569974034  1.8293646778 9.633087e-01
+Mixed Conifer Meadow:Exclusion:Canopy-Mixed Conifer Meadow:Ambient:Canopy               0.065496805 -1.134172551  1.2651661603 1.000000e+00
+Ponderosa Pine Meadow:Exclusion:Canopy-Mixed Conifer Meadow:Ambient:Canopy             -0.106701206 -1.306370562  1.0929681500 1.000000e+00
+Desert Grassland:Addition:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy              -1.191606814 -2.391276169  0.0080625422 5.393305e-02
+Desert Scrub:Addition:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy                  -2.232828341 -3.528619344 -0.9370373381 1.096013e-06
+Juniper Savanna:Addition:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy                0.576512011 -0.623157345  1.7761813669 9.874501e-01
+Mixed Conifer Meadow:Addition:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy           0.228859484 -0.970809872  1.4285288400 1.000000e+00
+Ponderosa Pine Meadow:Addition:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy         -0.543400151 -1.839191154  0.7523908521 9.982419e-01
+Desert Grassland:Ambient:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy               -1.110274208 -2.309943564  0.0893951480 1.109680e-01
+Desert Scrub:Ambient:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy                   -2.303145683 -3.502815039 -1.1034763271 3.773114e-08
+Juniper Savanna:Ambient:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy                 0.838833299 -0.360836057  2.0385026548 6.136463e-01
+Mixed Conifer Meadow:Ambient:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy           -0.570368082 -1.866159085  0.7254229208 9.963135e-01
+Ponderosa Pine Meadow:Ambient:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy          -0.548901954 -1.748571310  0.6507674015 9.935517e-01
+Desert Grassland:Exclusion:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy             -1.163373104 -2.363042460  0.0362962516 6.990524e-02
+Desert Scrub:Exclusion:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy                 -2.309781838 -3.509451194 -1.1101124823 3.428135e-08
+Juniper Savanna:Exclusion:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy               0.002003425 -1.293787578  1.2977944281 1.000000e+00
+Mixed Conifer Meadow:Exclusion:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy         -0.198095454 -1.493886457  1.0976955488 1.000000e+00
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Mixed Conifer Meadow:Ambient:Canopy        -0.208519116 -1.408188472  0.9911502398 1.000000e+00
+Desert Grassland:Exclusion:Canopy-Ponderosa Pine Meadow:Ambient:Canopy                 -0.554564231 -1.754233587  0.6451051243 9.925584e-01
+Desert Scrub:Exclusion:Canopy-Ponderosa Pine Meadow:Ambient:Canopy                     -1.371510339 -2.571179694 -0.1718409828 8.547718e-03
+Juniper Savanna:Exclusion:Canopy-Ponderosa Pine Meadow:Ambient:Canopy                   0.950981207 -0.248688149  2.1506505625 3.509235e-01
+Mixed Conifer Meadow:Exclusion:Canopy-Ponderosa Pine Meadow:Ambient:Canopy              0.386782689 -0.812886667  1.5864520450 9.999846e-01
+Ponderosa Pine Meadow:Exclusion:Canopy-Ponderosa Pine Meadow:Ambient:Canopy             0.214584679 -0.985084677  1.4142540346 1.000000e+00
+Desert Grassland:Addition:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy             -0.870320929 -2.069990285  0.3293484268 5.367902e-01
+Desert Scrub:Addition:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy                 -1.911542457 -3.207333460 -0.6157514534 6.449816e-05
+Juniper Savanna:Addition:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy               0.897797896 -0.301871460  2.0974672515 4.705499e-01
+Mixed Conifer Meadow:Addition:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy          0.550145369 -0.649523987  1.7498147246 9.933435e-01
+Ponderosa Pine Meadow:Addition:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy        -0.222114266 -1.517905269  1.0736767367 1.000000e+00
+Desert Grassland:Ambient:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy              -0.788988323 -1.988657679  0.4106810326 7.303737e-01
+Desert Scrub:Ambient:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy                  -1.981859798 -3.181529154 -0.7821904425 3.614970e-06
+Juniper Savanna:Ambient:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy                1.160119184 -0.039550172  2.3597885395 7.198406e-02
+Mixed Conifer Meadow:Ambient:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy          -0.249082198 -1.544873201  1.0467088054 1.000000e+00
+Ponderosa Pine Meadow:Ambient:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy         -0.227616070 -1.427285425  0.9720532861 1.000000e+00
+Desert Grassland:Exclusion:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy            -0.842087220 -2.041756575  0.3575821362 6.057363e-01
+Desert Scrub:Exclusion:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy                -1.988495953 -3.188165309 -0.7888265977 3.296560e-06
+Juniper Savanna:Exclusion:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy              0.323289310 -0.972501693  1.6190803127 9.999999e-01
+Mixed Conifer Meadow:Exclusion:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy         0.123190430 -1.172600573  1.4189814334 1.000000e+00
+Ponderosa Pine Meadow:Exclusion:Intercanopy-Ponderosa Pine Meadow:Ambient:Canopy        0.112766769 -1.086902587  1.3124361244 1.000000e+00
+Desert Scrub:Exclusion:Canopy-Desert Grassland:Exclusion:Canopy                        -0.816946107 -2.016615463  0.3827232487 6.661801e-01
+Juniper Savanna:Exclusion:Canopy-Desert Grassland:Exclusion:Canopy                      1.505545438  0.305876082  2.7052147939 1.825402e-03
+Mixed Conifer Meadow:Exclusion:Canopy-Desert Grassland:Exclusion:Canopy                 0.941346921 -0.258322435  2.1410162765 3.714335e-01
+Ponderosa Pine Meadow:Exclusion:Canopy-Desert Grassland:Exclusion:Canopy                0.769148910 -0.430520445  1.9688182661 7.729175e-01
+Desert Grassland:Addition:Intercanopy-Desert Grassland:Exclusion:Canopy                -0.315756697 -1.515426053  0.8839126583 9.999998e-01
+ [ reached getOption("max.print") -- omitted 185 rows ]

@@ -328,76 +328,192 @@ ggsave(here("figures", "root_to_ANPP.png"), plot = root_shoot_plot, width = 10, 
 
 ## ANOVAs
 
-### Root biomass - Canopy (g m-2)
-
 ```{r}
-# check normality and transform as needed
-qqnorm(ANPPandRoot_df$Root_mass_Can_gm2) 
-shapiro.test(ANPPandRoot_df$Root_mass_Can_gm2) # P < 0.05 - reject hypothesis of normality
-BN_RootCan_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_Can_gm2)
-BN_RootCan_gm2 # show options for normalizing
-ANPPandRoot_df$Root_mass_Can_gm2_norm <- predict(BN_RootCan_gm2)
-qqnorm(ANPPandRoot_df$Root_mass_Can_gm2_norm) # way better
-qqline(ANPPandRoot_df$Root_mass_Can_gm2_norm) # add line to plot
-shapiro.test(ANPPandRoot_df$Root_mass_Can_gm2_norm) # P > 0.05 - looks good!
+#| label: Canopy root biomass ANOVA
 
-# 2-way ANOVA model with transformed data
-Root_Can_gm2_anova <- aov(Root_mass_Can_gm2_norm ~ 
-                            Site * Treatment, data=ANPPandRoot_df)
-summary(Root_Can_gm2_anova)
-## No significant treatment differences
+# Define output file
+output_file <- here("results", "ANOVA_Root_mass_Can_gm2.txt")
+sink(output_file)
+
+cat("=== Normality Check and Transformation ===\n\n")
+
+# --- Raw normality ---
+cat("Shapiro-Wilk test (raw data):\n")
+shapiro_raw <- shapiro.test(ANPPandRoot_df$Root_mass_Can_gm2)
+print(shapiro_raw)
+
+# Apply bestNormalize if not normal
+if (shapiro_raw$p.value < 0.05) {
+  cat("\nData not normal (p < 0.05). Applying bestNormalize...\n")
+  BN_RootCan_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_Can_gm2)
+  print(BN_RootCan_gm2)
+  
+  ANPPandRoot_df$Root_mass_Can_gm2_norm <- predict(BN_RootCan_gm2)
+  
+  cat("\nShapiro-Wilk test (transformed data):\n")
+  shapiro_trans <- shapiro.test(ANPPandRoot_df$Root_mass_Can_gm2_norm)
+  print(shapiro_trans)
+  
+  used_var <- "Root_mass_Can_gm2_norm"
+  transform_used <- class(BN_RootCan_gm2$chosen_transform)[1]
+  
+} else {
+  cat("\nData are already normal (p >= 0.05). No transformation applied.\n")
+  ANPPandRoot_df$Root_mass_Can_gm2_norm <- ANPPandRoot_df$Root_mass_Can_gm2
+  used_var <- "Root_mass_Can_gm2"
+  transform_used <- "None"
+}
+
+cat("\nTransformation method used:", transform_used, "\n")
+
+# --- QQ plots ---
+par(mfrow = c(1, 2))
+qqnorm(ANPPandRoot_df$Root_mass_Can_gm2, main = "Raw Data")
+qqline(ANPPandRoot_df$Root_mass_Can_gm2)
+qqnorm(ANPPandRoot_df$Root_mass_Can_gm2_norm, main = "Transformed Data")
+qqline(ANPPandRoot_df$Root_mass_Can_gm2_norm)
+par(mfrow = c(1, 1))
+
+# --- ANOVA ---
+cat("\n\n=== Two-Way ANOVA ===\n\n")
+anova_formula <- as.formula(paste(used_var, "~ Site * Treatment"))
+Root_Can_gm2_anova <- aov(anova_formula, data = ANPPandRoot_df)
+anova_summary <- summary(Root_Can_gm2_anova)
+print(anova_summary)
+
+# --- Tukey’s HSD ---
+cat("\n\n=== Pairwise Comparisons (Tukey's HSD) ===\n\n")
+Can_pairwise <- TukeyHSD(Root_Can_gm2_anova)
+print(Can_pairwise)
+
+sink()  # close the file
 ```
 
-### Root biomass - Intercanopy
-
 ```{r}
-# check normality and transform as needed
-qqnorm(ANPPandRoot_df$Root_mass_IC_gm2) 
-shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2) # P < 0.05 - reject hypothesis of normality
-BN_RootIC_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_IC_gm2)
-BN_RootIC_gm2 # show options for normalizing
-ANPPandRoot_df$Root_mass_IC_gm2_norm <- predict(BN_RootIC_gm2)
-qqnorm(ANPPandRoot_df$Root_mass_IC_gm2_norm) # way better
-qqline(ANPPandRoot_df$Root_mass_IC_gm2_norm) # add line to plot
-shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2_norm) # P > 0.05 - looks good!
+#| label: IC root biomass ANOVA
 
-# 2-way ANOVA model with transformed data
-Root_IC_gm2_anova <- aov(Root_mass_IC_gm2_norm ~ 
-                            Site * Treatment, data=ANPPandRoot_df)
-summary(Root_IC_gm2_anova)
-## Significant Site and Treatment differences (no interaction)
+# Define output file
+output_file <- here("results", "ANOVA_Root_mass_IC_gm2.txt")
+sink(output_file)
 
-# Perform pairwise comparisons using Tukey's HSD test
+cat("=== Normality Check and Transformation ===\n\n")
+
+# --- Raw normality ---
+cat("Shapiro-Wilk test (raw data):\n")
+shapiro_raw <- shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2)
+print(shapiro_raw)
+
+# Apply bestNormalize if not normal
+if (shapiro_raw$p.value < 0.05) {
+  cat("\nData not normal (p < 0.05). Applying bestNormalize...\n")
+  BN_RootIC_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_IC_gm2)
+  print(BN_RootIC_gm2)
+  
+  ANPPandRoot_df$Root_mass_IC_gm2_norm <- predict(BN_RootIC_gm2)
+  
+  cat("\nShapiro-Wilk test (transformed data):\n")
+  shapiro_trans <- shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2_norm)
+  print(shapiro_trans)
+  
+  used_var <- "Root_mass_IC_gm2_norm"
+  transform_used <- class(BN_RootIC_gm2$chosen_transform)[1]
+  
+} else {
+  cat("\nData are already normal (p >= 0.05). No transformation applied.\n")
+  ANPPandRoot_df$Root_mass_IC_gm2_norm <- ANPPandRoot_df$Root_mass_IC_gm2
+  used_var <- "Root_mass_IC_gm2"
+  transform_used <- "None"
+}
+
+cat("\nTransformation method used:", transform_used, "\n")
+
+# --- QQ plots ---
+par(mfrow = c(1, 2))
+qqnorm(ANPPandRoot_df$Root_mass_IC_gm2, main = "Raw Data")
+qqline(ANPPandRoot_df$Root_mass_IC_gm2)
+qqnorm(ANPPandRoot_df$Root_mass_IC_gm2_norm, main = "Transformed Data")
+qqline(ANPPandRoot_df$Root_mass_IC_gm2_norm)
+par(mfrow = c(1, 1))
+
+# --- ANOVA ---
+cat("\n\n=== Two-Way ANOVA ===\n\n")
+anova_formula <- as.formula(paste(used_var, "~ Site * Treatment"))
+Root_IC_gm2_anova <- aov(anova_formula, data = ANPPandRoot_df)
+anova_summary <- summary(Root_IC_gm2_anova)
+print(anova_summary)
+
+# --- Tukey’s HSD ---
+cat("\n\n=== Pairwise Comparisons (Tukey's HSD) ===\n\n")
 IC_pairwise <- TukeyHSD(Root_IC_gm2_anova)
 print(IC_pairwise)
-plot(IC_pairwise)
+
+sink()  # close the file
+
 ```
 
-### Root biomass - Combined IC and Canopy
+### 
 
 using area-weighted values for whole plot root mass (g m-2)
 
 ```{r}
-# check normality and transform as needed
-qqnorm(ANPPandRoot_df$Root_mass_total_gm2) 
-shapiro.test(ANPPandRoot_df$Root_mass_total_gm2) # P < 0.05 - reject hypothesis of normality
-BN_Root_mass_total_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_total_gm2)
-BN_Root_mass_total_gm2 # show options for normalizing
-ANPPandRoot_df$Root_mass_total_gm2_norm <- predict(BN_Root_mass_total_gm2)
-qqnorm(ANPPandRoot_df$Root_mass_total_gm2_norm) # way better
-qqline(ANPPandRoot_df$Root_mass_total_gm2_norm) # add line to plot
-shapiro.test(ANPPandRoot_df$Root_mass_total_gm2_norm) # still not normally, but improved
+#| label: total root biomass ANOVA
 
-# 2-way ANOVA model with transformed data
-Root_total_gm2_anova <- aov(Root_mass_total_gm2_norm ~ 
-                            Site * Treatment, data=ANPPandRoot_df)
-summary(Root_total_gm2_anova)
-## Significant Site and Treatment differences (no interaction)
+# Define output file
+output_file <- here("results", "ANOVA_Root_mass_total_gm2.txt")
+sink(output_file)
 
-# Perform pairwise comparisons using Tukey's HSD test
+cat("=== Normality Check and Transformation ===\n\n")
+
+# --- Raw normality ---
+cat("Shapiro-Wilk test (raw data):\n")
+shapiro_raw <- shapiro.test(ANPPandRoot_df$Root_mass_total_gm2)
+print(shapiro_raw)
+
+# Apply bestNormalize if not normal
+if (shapiro_raw$p.value < 0.05) {
+  cat("\nData not normal (p < 0.05). Applying bestNormalize...\n")
+  BN_Roottotal_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_total_gm2)
+  print(BN_Roottotal_gm2)
+  
+  ANPPandRoot_df$Root_mass_total_gm2_norm <- predict(BN_Roottotal_gm2)
+  
+  cat("\nShapiro-Wilk test (transformed data):\n")
+  shapiro_trans <- shapiro.test(ANPPandRoot_df$Root_mass_total_gm2_norm)
+  print(shapiro_trans)
+  
+  used_var <- "Root_mass_total_gm2_norm"
+  transform_used <- class(BN_Roottotal_gm2$chosen_transform)[1]
+  
+} else {
+  cat("\nData are already normal (p >= 0.05). No transformation applied.\n")
+  ANPPandRoot_df$Root_mass_total_gm2_norm <- ANPPandRoot_df$Root_mass_total_gm2
+  used_var <- "Root_mass_total_gm2"
+  transform_used <- "None"
+}
+
+cat("\nTransformation method used:", transform_used, "\n")
+
+# --- QQ plots ---
+par(mfrow = c(1, 2))
+qqnorm(ANPPandRoot_df$Root_mass_total_gm2, main = "Raw Data")
+qqline(ANPPandRoot_df$Root_mass_total_gm2)
+qqnorm(ANPPandRoot_df$Root_mass_total_gm2_norm, main = "Transformed Data")
+qqline(ANPPandRoot_df$Root_mass_total_gm2_norm)
+par(mfrow = c(1, 1))
+
+# --- ANOVA ---
+cat("\n\n=== Two-Way ANOVA ===\n\n")
+anova_formula <- as.formula(paste(used_var, "~ Site * Treatment"))
+Root_total_gm2_anova <- aov(anova_formula, data = ANPPandRoot_df)
+anova_summary <- summary(Root_total_gm2_anova)
+print(anova_summary)
+
+# --- Tukey’s HSD ---
+cat("\n\n=== Pairwise Comparisons (Tukey's HSD) ===\n\n")
 total_pairwise <- TukeyHSD(Root_total_gm2_anova)
 print(total_pairwise)
-plot(total_pairwise)
+
+sink()  # close the file
 ```
 
 ### ANPP
@@ -421,6 +537,68 @@ summary(ANPP_anova)
 ANPP_pairwise <- TukeyHSD(ANPP_anova)
 print(ANPP_pairwise)
 plot(ANPP_pairwise)
+
+
+### START HERE -- modify the code below for ANPP output. Do this also for Root:ANPP.
+
+#| label: IC root biomass ANOVA
+
+# Define output file
+output_file <- here("results", "ANOVA_Root_mass_IC_gm2.txt")
+sink(output_file)
+
+cat("=== Normality Check and Transformation ===\n\n")
+
+# --- Raw normality ---
+cat("Shapiro-Wilk test (raw data):\n")
+shapiro_raw <- shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2)
+print(shapiro_raw)
+
+# Apply bestNormalize if not normal
+if (shapiro_raw$p.value < 0.05) {
+  cat("\nData not normal (p < 0.05). Applying bestNormalize...\n")
+  BN_RootIC_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_IC_gm2)
+  print(BN_RootIC_gm2)
+  
+  ANPPandRoot_df$Root_mass_IC_gm2_norm <- predict(BN_RootIC_gm2)
+  
+  cat("\nShapiro-Wilk test (transformed data):\n")
+  shapiro_trans <- shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2_norm)
+  print(shapiro_trans)
+  
+  used_var <- "Root_mass_IC_gm2_norm"
+  transform_used <- class(BN_RootIC_gm2$chosen_transform)[1]
+  
+} else {
+  cat("\nData are already normal (p >= 0.05). No transformation applied.\n")
+  ANPPandRoot_df$Root_mass_IC_gm2_norm <- ANPPandRoot_df$Root_mass_IC_gm2
+  used_var <- "Root_mass_IC_gm2"
+  transform_used <- "None"
+}
+
+cat("\nTransformation method used:", transform_used, "\n")
+
+# --- QQ plots ---
+par(mfrow = c(1, 2))
+qqnorm(ANPPandRoot_df$Root_mass_IC_gm2, main = "Raw Data")
+qqline(ANPPandRoot_df$Root_mass_IC_gm2)
+qqnorm(ANPPandRoot_df$Root_mass_IC_gm2_norm, main = "Transformed Data")
+qqline(ANPPandRoot_df$Root_mass_IC_gm2_norm)
+par(mfrow = c(1, 1))
+
+# --- ANOVA ---
+cat("\n\n=== Two-Way ANOVA ===\n\n")
+anova_formula <- as.formula(paste(used_var, "~ Site * Treatment"))
+Root_IC_gm2_anova <- aov(anova_formula, data = ANPPandRoot_df)
+anova_summary <- summary(Root_IC_gm2_anova)
+print(anova_summary)
+
+# --- Tukey’s HSD ---
+cat("\n\n=== Pairwise Comparisons (Tukey's HSD) ===\n\n")
+IC_pairwise <- TukeyHSD(Root_IC_gm2_anova)
+print(IC_pairwise)
+
+sink()  # close the file
 
 ```
 

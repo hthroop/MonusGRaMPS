@@ -1,0 +1,298 @@
+---
+title: "Enzymes - GRaMPS"
+author: "Heather Throop"
+format: html
+editor: visual
+---
+
+## Overview
+
+This is a compilation, cleaning, analysis, and plotting of enzyme activity data from Brittney Monus's MS research in the GRaMPS project.
+
+Code was written by Heather Throop, streamlining and updating the original analyses that Brittney did for her MS.
+
+Written:\
+2025-10-08 Heather Throop
+
+## SetUp
+
+```{r}
+#| label: load packages
+library(tidyverse)
+library(bestNormalize)
+library(cowplot)
+library(grid)
+library(here)
+library(car)
+library(purrr)
+library(tibble)
+```
+
+## Ingest and Prepare Data
+
+```{r}
+#| label: read data
+
+#Enzyme analyses
+Enzymeslong = read.csv(here("data","EnzymeResultslong.csv"))
+
+#Change grouping variables to factors
+Enzymeslong <- Enzymeslong |>
+  mutate(Enzyme = factor(Enzyme),
+         Site = factor(Site),
+         Treatment = factor(Treatment),
+         Microsite = factor(Microsite))
+
+# Order the variables
+Enzymeslong$SiteOrder = 
+  factor(Enzymeslong$Site, 
+         levels=c("BP","ANT","BC","ARB","CC"), 
+         labels=c("Desert Scrub","Desert Grassland","Juniper Savanna","Ponderosa Pine Meadow","Mixed Conifer Meadow")) 
+Enzymeslong$EnzymeOrder = 
+  factor(Enzymeslong$Enzyme, 
+         levels=c("BG","CBH","NAG","PHOS"), 
+         labels=c("Beta Glucosidase","Cellobiohydrolase","N-Acetyl glucosaminidase","Phosphatase")) 
+Enzymeslong$TreatmentOrder = 
+  factor(Enzymeslong$Treatment, 
+         levels=c("Exl","Ctrl","Add"), 
+         labels=c("Exclusion","Ambient","Addition")) 
+
+```
+
+```{r}
+#| label: explore data
+
+#summary 
+EnzymeMeans <- Enzymeslong |>
+  group_by(Site, Treatment, Enzyme) |>
+  summarise(
+    N = sum(!is.na(Activity)),
+    mean_activity = mean(Activity, na.rm = TRUE),
+    sd_activity = sd(Activity, na.rm = TRUE),
+    se_activity = sd_activity / sqrt(N),
+    .groups = "drop"
+  )
+print(EnzymeMeans)
+
+# visualize the distribution
+ggplot(Enzymeslong, aes(x = Activity, fill = Treatment)) +
+  geom_density(alpha = 0.4) +
+  facet_wrap(~ Enzyme, scales = "free") +
+  theme_bw()
+```
+
+```{r}
+#| label: assess outliers
+
+# Visualize potential outliers by treatment or site
+ggplot(Enzymeslong, aes(x = Treatment, y = Activity, fill = Treatment)) +
+  geom_boxplot(outlier.color = "red") +
+  facet_wrap(~ Enzyme, scales = "free") +
+  theme_bw() +
+  theme(legend.position = "none")
+# There are a few outliers (2 BG, 6 CBH, 1 NAG, 2 PHOS), all of which are high. 
+
+# Remove outliers based on 1.5*IQR rule within each group
+Enzymes_outliers_rmvd <- Enzymeslong |>
+  group_by(Enzyme, Site, Treatment) |>
+  filter(between(
+    Activity,
+    quantile(Activity, 0.25, na.rm = TRUE) - 1.5 * IQR(Activity, na.rm = TRUE),
+    quantile(Activity, 0.75, na.rm = TRUE) + 1.5 * IQR(Activity, na.rm = TRUE)
+  )) |>
+  ungroup()
+```
+
+## ANOVAs
+
+```{r}
+#| label: check ANOVA assumptions
+
+# Transform the activity variable if needed and create summary table
+summary_list <- list()  # store summary per enzyme
+
+# Loop over each enzyme for transformation + plots
+for(enzyme_name in levels(Enzymes_outliers_rmvd$Enzyme)){
+  
+  # Subset enzyme
+  df_enzyme <- Enzymes_outliers_rmvd |> filter(Enzyme == enzyme_name)
+  
+  # Skip if too few points
+  if(nrow(df_enzyme) < 3){
+    warning(paste("Skipping", enzyme_name, "- not enough data"))
+    next
+  }
+  
+  # --- Normality check and transform if needed ---
+  shapiro_raw <- shapiro.test(df_enzyme$Activity)
+  
+  if(shapiro_raw$p.value < 0.05){
+    bn_obj <- bestNormalize(df_enzyme$Activity, allow_orderNorm = FALSE)
+    df_enzyme <- df_enzyme |> mutate(Activity_trans = predict(bn_obj, newdata = Activity))
+    transform_used <- class(bn_obj$chosen_transform)[1]
+    shapiro_trans <- shapiro.test(df_enzyme$Activity_trans)
+  } else {
+    df_enzyme <- df_enzyme |> mutate(Activity_trans = Activity)
+    transform_used <- "None"
+    shapiro_trans <- shapiro_raw
+  }
+  
+  # --- Levene's Test ---
+  df_enzyme <- df_enzyme |> mutate(Group = interaction(Site, Treatment, drop = TRUE))
+  levene_result <- leveneTest(Activity_trans ~ Group, data = df_enzyme)
+  
+  # --- Diagnostic plots ---
+  par(mfrow = c(2,2), oma = c(0,0,3,0))  # 2x2 layout with outer title
+  hist(df_enzyme$Activity, main = "Raw Activity", xlab = "Activity", col = "grey")
+  qqnorm(df_enzyme$Activity, main = "Q-Q Plot (Raw)"); qqline(df_enzyme$Activity)
+  hist(df_enzyme$Activity_trans, main = "Transformed Activity", xlab = "Activity_trans", col = "lightblue")
+  qqnorm(df_enzyme$Activity_trans, main = "Q-Q Plot (Transformed)"); qqline(df_enzyme$Activity_trans)
+  mtext(paste("Enzyme:", enzyme_name), outer = TRUE, line = 1.5, font = 2, cex = 1.2)
+  par(mfrow = c(1,1))  # reset layout
+  
+  # --- Update the main dataframe with Activity_trans ---
+  Enzymes_outliers_rmvd$Activity_trans[Enzymes_outliers_rmvd$Enzyme == enzyme_name] <- df_enzyme$Activity_trans
+  
+  # --- Store summary ---
+  summary_list[[enzyme_name]] <- tibble(
+    Enzyme = enzyme_name,
+    variable = "Activity_trans",
+    transformed = transform_used,
+    shapiro_p_raw = shapiro_raw$p.value,
+    shapiro_p_trans = shapiro_trans$p.value,
+    levene_p = levene_result$`Pr(>F)`[1]
+  )
+}
+
+# Combine summary table
+summary_table <- bind_rows(summary_list)
+summary_table
+
+
+```
+
+```{r}
+#| label: 2-way ANOVA
+
+# Define ANOVA terms
+anova_terms <- "Site*Treatment"  # main effects + interaction
+
+# Output file
+output_file <- here("results", "anova_summary_Enzymes.txt")
+sink(output_file)
+
+cat("=== Transformation Summary ===\n")
+print(summary_table)
+
+# Loop over each Enzyme
+for(enzyme_name in levels(Enzymes_outliers_rmvd$Enzyme)){
+  
+  cat("\n=============================\n")
+  cat("Enzyme:", enzyme_name, "\n")
+  cat("=============================\n\n")
+  
+  # Subset enzyme
+  df_enzyme <- Enzymes_outliers_rmvd |> filter(Enzyme == enzyme_name)
+  
+  # Two-way ANOVA
+  anova_model <- aov(as.formula(paste("Activity_trans ~", anova_terms)), data = df_enzyme)
+  
+  # ANOVA summary
+  anova_summary <- summary(anova_model)
+  print(anova_summary)
+  
+  # Pairwise comparisons (Tukey HSD)
+  tukey_results <- TukeyHSD(anova_model)
+  cat("\n--- Pairwise Comparisons (Tukey's HSD) ---\n")
+  for(term in names(tukey_results)){
+    cat("\n---", term, "---\n")
+    print(tukey_results[[term]])
+  }
+  
+  cat("\n\n")
+}
+
+sink()  # close the output file
+```
+
+## Boxplots
+
+```{r}
+#| label: boxplot
+
+# Create a vector of letters for facet labels
+enzyme_levels <- unique(Enzymes_outliers_rmvd$EnzymeOrder)
+facet_labels <- paste0(LETTERS[1:length(enzyme_levels)], ". ", enzyme_levels)
+
+# Create a lookup table for annotations
+label_df <- tibble(
+  EnzymeOrder = enzyme_levels,
+  label = facet_labels
+)
+
+# Create boxplot with facet labels in upper-left
+plot_Enzyme <- ggplot(data = Enzymes_outliers_rmvd, 
+                      aes(x = SiteOrder, y = Activity, fill = TreatmentOrder)) +
+  geom_boxplot(position = position_dodge(0.8)) +
+  facet_grid(
+    vars(EnzymeOrder),
+    scales = "free"
+  ) +
+  scale_fill_manual(
+    name = NULL,
+    values = c("#de2d26", "#bdbdbd", "#08519c")
+  ) +
+  labs(
+    x = "Site",
+    y = expression(paste(Enzyme~Activity~"(nmol " * h^{-1} * " " * g^{-1} * " soil)"))
+  ) +
+  scale_x_discrete(labels = label_wrap_gen(width = 10)) +
+  theme_grey(base_size = 17) +
+  theme(
+    strip.background = element_blank(),  # removes grey facet boxes
+    strip.text = element_blank() ) +        # removes facet labels
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x = element_blank(),
+    legend.position = c(0.1, 0.65),
+    panel.background = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA)
+  ) +
+  # Add facet labels in upper-left of each panel
+  geom_text(
+    data = label_df,
+    aes(x = -Inf, y = Inf, label = label),
+    inherit.aes = FALSE,
+    hjust = -0.1, vjust = 1.2,
+    size = 5, fontface = "plain" ) +
+  theme(legend.position = c(0.1, 0.1))
+plot_Enzyme
+
+ggsave(
+  filename = here("figures", "Enzyme_boxplot.png"),  
+  plot = plot_Enzyme,
+  width = 12,       # width in inches
+  height = 8,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
+
+```
+
+There are significant site effects for all enzymes (and no other significant effects), so summarize the activity values for each site to use those values in comparisons.
+
+```{r}
+#| label: compare site means
+
+#summary 
+SiteMeans <- Enzymes_outliers_rmvd |>
+  group_by(Enzyme, SiteOrder) |>
+  summarise(
+    N = sum(!is.na(Activity)),
+    mean_activity = mean(Activity, na.rm = TRUE),
+    sd_activity = sd(Activity, na.rm = TRUE),
+    se_activity = sd_activity / sqrt(N),
+    .groups = "drop"
+  )
+print(SiteMeans)
+```
