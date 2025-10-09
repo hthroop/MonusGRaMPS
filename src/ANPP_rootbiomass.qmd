@@ -19,6 +19,7 @@ library(tidyverse)
 library(here)
 library(bestNormalize)
 library(cowplot)
+library(car)
 ```
 
 # ANPP and Root Biomass
@@ -451,8 +452,6 @@ sink()  # close the file
 
 ```
 
-### 
-
 using area-weighted values for whole plot root mass (g m-2)
 
 ```{r}
@@ -516,63 +515,44 @@ print(total_pairwise)
 sink()  # close the file
 ```
 
-### ANPP
-
 ```{r}
-# check normality and transform as needed
-qqnorm(ANPPandRoot_df$plot_mean_ANPP) 
-shapiro.test(ANPPandRoot_df$plot_mean_ANPP) # P < 0.05 - reject hypothesis of normality
-BN_ANPP <- bestNormalize(ANPPandRoot_df$plot_mean_ANPP)
-BN_ANPP # show options for normalizing
-ANPPandRoot_df$plot_mean_ANPP_norm <- predict(BN_ANPP)
-qqnorm(ANPPandRoot_df$plot_mean_ANPP_norm) # a little better
-qqline(ANPPandRoot_df$plot_mean_ANPP_norm) # add line to plot
-shapiro.test(ANPPandRoot_df$plot_mean_ANPP_norm) # P > 0.05 - ok
-
-# 2-way ANOVA model with transformed data
-ANPP_anova <- aov(plot_mean_ANPP_norm ~ Site * Treatment, data=ANPPandRoot_df)
-summary(ANPP_anova)
-
-# Perform pairwise comparisons using Tukey's HSD test
-ANPP_pairwise <- TukeyHSD(ANPP_anova)
-print(ANPP_pairwise)
-plot(ANPP_pairwise)
-
-
-### START HERE -- modify the code below for ANPP output. Do this also for Root:ANPP.
-
-#| label: IC root biomass ANOVA
+#| label: total ANPP ANOVA
 
 # Define output file
-output_file <- here("results", "ANOVA_Root_mass_IC_gm2.txt")
+output_file <- here("results", "ANOVA_ANPP.txt")
 sink(output_file)
+
+cat("=== ANPP Analysis Report ===\n")
+cat("Date/Time of analysis:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+cat("============================================================\n\n")
 
 cat("=== Normality Check and Transformation ===\n\n")
 
 # --- Raw normality ---
 cat("Shapiro-Wilk test (raw data):\n")
-shapiro_raw <- shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2)
+shapiro_raw <- shapiro.test(ANPPandRoot_df$plot_mean_ANPP)
 print(shapiro_raw)
 
 # Apply bestNormalize if not normal
 if (shapiro_raw$p.value < 0.05) {
   cat("\nData not normal (p < 0.05). Applying bestNormalize...\n")
-  BN_RootIC_gm2 <- bestNormalize(ANPPandRoot_df$Root_mass_IC_gm2)
-  print(BN_RootIC_gm2)
+  BN_plot_mean_ANPP <- bestNormalize(ANPPandRoot_df$plot_mean_ANPP)
+  print(BN_plot_mean_ANPP)
   
-  ANPPandRoot_df$Root_mass_IC_gm2_norm <- predict(BN_RootIC_gm2)
+  # Save normalized/transformed variable to dataframe
+  ANPPandRoot_df$plot_mean_ANPP_norm <- predict(BN_plot_mean_ANPP)
   
   cat("\nShapiro-Wilk test (transformed data):\n")
-  shapiro_trans <- shapiro.test(ANPPandRoot_df$Root_mass_IC_gm2_norm)
+  shapiro_trans <- shapiro.test(ANPPandRoot_df$plot_mean_ANPP_norm)
   print(shapiro_trans)
   
-  used_var <- "Root_mass_IC_gm2_norm"
-  transform_used <- class(BN_RootIC_gm2$chosen_transform)[1]
+  used_var <- "plot_mean_ANPP_norm"
+  transform_used <- class(BN_plot_mean_ANPP$chosen_transform)[1]
   
 } else {
   cat("\nData are already normal (p >= 0.05). No transformation applied.\n")
-  ANPPandRoot_df$Root_mass_IC_gm2_norm <- ANPPandRoot_df$Root_mass_IC_gm2
-  used_var <- "Root_mass_IC_gm2"
+  ANPPandRoot_df$plot_mean_ANPP_norm <- ANPPandRoot_df$plot_mean_ANPP
+  used_var <- "plot_mean_ANPP"
   transform_used <- "None"
 }
 
@@ -580,49 +560,163 @@ cat("\nTransformation method used:", transform_used, "\n")
 
 # --- QQ plots ---
 par(mfrow = c(1, 2))
-qqnorm(ANPPandRoot_df$Root_mass_IC_gm2, main = "Raw Data")
-qqline(ANPPandRoot_df$Root_mass_IC_gm2)
-qqnorm(ANPPandRoot_df$Root_mass_IC_gm2_norm, main = "Transformed Data")
-qqline(ANPPandRoot_df$Root_mass_IC_gm2_norm)
+qqnorm(ANPPandRoot_df$plot_mean_ANPP, main = "Raw Data")
+qqline(ANPPandRoot_df$plot_mean_ANPP)
+qqnorm(ANPPandRoot_df$plot_mean_ANPP_norm, main = "Transformed Data")
+qqline(ANPPandRoot_df$plot_mean_ANPP_norm)
 par(mfrow = c(1, 1))
 
 # --- ANOVA ---
 cat("\n\n=== Two-Way ANOVA ===\n\n")
 anova_formula <- as.formula(paste(used_var, "~ Site * Treatment"))
-Root_IC_gm2_anova <- aov(anova_formula, data = ANPPandRoot_df)
-anova_summary <- summary(Root_IC_gm2_anova)
+plot_mean_ANPP_anova <- aov(anova_formula, data = ANPPandRoot_df)
+anova_summary <- summary(plot_mean_ANPP_anova)
 print(anova_summary)
+
+# --- Levene’s Test (Homogeneity of Variance) ---
+cat("\n\n=== Levene's Test for Homogeneity of Variance ===\n\n")
+levene_result <- leveneTest(anova_formula, data = ANPPandRoot_df)
+print(levene_result)
 
 # --- Tukey’s HSD ---
 cat("\n\n=== Pairwise Comparisons (Tukey's HSD) ===\n\n")
-IC_pairwise <- TukeyHSD(Root_IC_gm2_anova)
-print(IC_pairwise)
+total_pairwise <- TukeyHSD(plot_mean_ANPP_anova)
+print(total_pairwise)
 
 sink()  # close the file
 
 ```
 
-### Root:ANPP
+```{r}
+#| label: total root:ANPP ANOVA
+
+# Define output file
+output_file <- here("results", "ANOVA_root.ANPP.txt")
+sink(output_file)
+
+cat("=== root:ANPP Analysis Report ===\n")
+cat("Date/Time of analysis:", 
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+cat("============================================================\n\n")
+
+cat("=== Normality Check and Transformation ===\n\n")
+
+# --- Raw normality ---
+cat("Shapiro-Wilk test (raw data):\n")
+shapiro_raw <- shapiro.test(ANPPandRoot_df$root_to_ANPP)
+print(shapiro_raw)
+
+# Apply bestNormalize if not normal
+if (shapiro_raw$p.value < 0.05) {
+  cat("\nData not normal (p < 0.05). Applying bestNormalize...\n")
+  BN_root_to_ANPP <- bestNormalize(ANPPandRoot_df$root_to_ANPP)
+  print(BN_root_to_ANPP)
+  
+  # Save normalized/transformed variable to dataframe
+  ANPPandRoot_df$root_to_ANPP_norm <- predict(BN_root_to_ANPP)
+  
+  cat("\nShapiro-Wilk test (transformed data):\n")
+  shapiro_trans <- shapiro.test(ANPPandRoot_df$root_to_ANPP_norm)
+  print(shapiro_trans)
+  
+  used_var <- "root_to_ANPP_norm"
+  transform_used <- class(BN_root_to_ANPP$chosen_transform)[1]
+  
+} else {
+  cat("\nData are already normal (p >= 0.05). No transformation applied.\n")
+  ANPPandRoot_df$root_to_ANPP_norm <- ANPPandRoot_df$root_to_ANPP
+  used_var <- "root_to_ANPP"
+  transform_used <- "None"
+}
+
+cat("\nTransformation method used:", transform_used, "\n")
+
+# --- QQ plots ---
+par(mfrow = c(1, 2))
+qqnorm(ANPPandRoot_df$root_to_ANPP, main = "Raw Data")
+qqline(ANPPandRoot_df$root_to_ANPP)
+qqnorm(ANPPandRoot_df$root_to_ANPP_norm, main = "Transformed Data")
+qqline(ANPPandRoot_df$root_to_ANPP_norm)
+par(mfrow = c(1, 1))
+
+# --- ANOVA ---
+cat("\n\n=== Two-Way ANOVA ===\n\n")
+anova_formula <- as.formula(paste(used_var, "~ Site * Treatment"))
+root_to_ANPP_anova <- aov(anova_formula, data = ANPPandRoot_df)
+anova_summary <- summary(root_to_ANPP_anova)
+print(anova_summary)
+
+# --- Levene’s Test (Homogeneity of Variance) ---
+cat("\n\n=== Levene's Test for Homogeneity of Variance ===\n\n")
+levene_result <- leveneTest(anova_formula, data = ANPPandRoot_df)
+print(levene_result)
+
+# --- Tukey’s HSD ---
+cat("\n\n=== Pairwise Comparisons (Tukey's HSD) ===\n\n")
+total_pairwise <- TukeyHSD(root_to_ANPP_anova)
+print(total_pairwise)
+
+sink()  # close the file
+
+```
+
+## Group Means
 
 ```{r}
-# check normality and transform as needed
-qqnorm(ANPPandRoot_df$root_to_ANPP) 
-shapiro.test(ANPPandRoot_df$root_to_ANPP) # P < 0.05 - reject hypothesis of normality
-BN_root_to_ANPP <- bestNormalize(ANPPandRoot_df$root_to_ANPP)
-BN_root_to_ANPP # show options for normalizing
-ANPPandRoot_df$root_to_ANPP_norm <- predict(BN_root_to_ANPP)
-qqnorm(ANPPandRoot_df$root_to_ANPP_norm) # a little better
-qqline(ANPPandRoot_df$root_to_ANPP_norm) # add line to plot
-shapiro.test(ANPPandRoot_df$root_to_ANPP_norm) # P > 0.05 - ok
+#| label: summary_by_Site_Treatment
 
-# 2-way ANOVA model with transformed data
-root_to_ANPP_anova <- aov(root_to_ANPP_norm ~ Site * Treatment, data=ANPPandRoot_df)
-summary(root_to_ANPP_anova)
+# Define output file
+output_file <- here("results", "Summary_ANPPandRoot.txt")
+sink(output_file)
 
-# Perform pairwise comparisons using Tukey's HSD test
-root_to_ANPP_pairwise <- TukeyHSD(root_to_ANPP_anova)
-print(root_to_ANPP_pairwise)
-plot(root_to_ANPP_pairwise)
+# Write header with date
+cat("=== Summary Statistics for ANPP and Root Variables ===\n")
+cat("Analysis run on:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n")
+
+# Function to summarize (mean and SE)
+summary_fun <- function(df, vars, group_vars) {
+  df |>
+    group_by(across(all_of(group_vars))) %>%
+    summarise(
+      across(
+        all_of(vars),
+        list(
+          mean = ~mean(.x, na.rm = TRUE),
+          SE   = ~sd(.x, na.rm = TRUE) / sqrt(sum(!is.na(.x)))
+        ),
+        .names = "{.col}_{.fn}"
+      ),
+      .groups = "drop"
+    )
+}
+
+# Variables to summarize
+vars_to_summarize <- c("plot_mean_ANPP",
+                        "Root_mass_Can_gm2", 
+                        "Root_mass_IC_gm2", 
+                        "Root_mass_total_gm2", 
+                        "root_to_ANPP")
+
+# --- 1. Site main effect ---
+site_summary <- summary_fun(ANPPandRoot_df, vars_to_summarize, "Site")
+cat("=== Means and SE by Site ===\n")
+print(as.data.frame(site_summary), row.names = FALSE)
+cat("\n\n")
+
+# --- 2. Treatment main effect ---
+treatment_summary <- summary_fun(ANPPandRoot_df, vars_to_summarize, "Treatment")
+cat("=== Means and SE by Treatment ===\n")
+print(as.data.frame(treatment_summary), row.names = FALSE)
+cat("\n\n")
+
+# --- 3. Site × Treatment interaction ---
+interaction_summary <- summary_fun(ANPPandRoot_df, vars_to_summarize, c("Site", "Treatment"))
+cat("=== Means and SE by Site × Treatment ===\n")
+print(as.data.frame(interaction_summary), row.names = FALSE)
+cat("\n\n")
+
+# Close sink
+sink()
 
 ```
 

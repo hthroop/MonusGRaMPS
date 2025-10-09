@@ -3,7 +3,7 @@ ReadMe
 Files present in this folder:
 
 ANPP_rootbiomass.qmd:
-Analysis of ANPP and rootbiomass data. This code performs calculations, statistical analyses, and outputs figures. 
+Analysis of ANPP and rootbiomass data. This code performs calculations, statistical analyses, and outputs bar plots. 
 Compiled by Heather Throop
 
 EnzymeAnalysis.R
