@@ -275,7 +275,7 @@ ggsave(here("figures", "roots_IC_gm2.png"), plot = roots_IC_gm2, width = 10, hei
 #### Root biomass - Combined
 
 ```{r}
-#|label: column-graph-rootbiomass-total-by-trt-and-site
+#|label: boxplot-rootbiomass-total-by-trt-and-site
 
 roots_total_gm2 <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = Root_mass_total_gm2, fill = TreatmentOrder)) + 
@@ -301,8 +301,10 @@ ggsave(here("figures", "roots_total_gm2.png"), plot = roots_total_gm2, width = 1
 
 ```
 
+#### Root:ANPP
+
 ```{r}
-#|label: column-graph-ANPP-to-rootbiomass-by-trt-and-site
+#|label: boxplot-ANPP-to-rootbiomass-by-trt-and-site
 
 root_shoot_plot <- ANPPandRoot_df |>
   ggplot(aes(x = SiteOrder, y = root_to_ANPP, fill = TreatmentOrder)) + 
@@ -325,6 +327,34 @@ labs(
 root_shoot_plot
 
 ggsave(here("figures", "root_to_ANPP.png"), plot = root_shoot_plot, width = 10, height = 8)
+```
+
+#### Mean Cover
+
+```{r}
+#|label: boxplot-plot-mean-cover-by-trt-and-site
+
+canopy_area <- ANPPandRoot_df |>
+  ggplot(aes(x = SiteOrder, y = plot_mean_Cover, fill = TreatmentOrder)) + 
+  geom_boxplot(position = position_dodge(0.8)) +  
+  scale_fill_manual(name = "", values = c("#de2d26", "#bdbdbd", "#08519c")) +
+  scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
+ labs(
+   x = "Site", 
+   y = expression("Canopy Cover (%)")) +
+  scale_x_discrete(labels = site_labels) +
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.ticks.x = element_blank(),
+    legend.position = c(0.3, 0.7),
+    panel.background = element_blank(),
+    panel.border = element_rect(color = "black", fill = NA)
+  ) 
+canopy_area
+
+ggsave(here("figures", "canopy_area.png"), plot = canopy_area, width = 10, height = 8)
 ```
 
 ## ANOVAs
@@ -660,6 +690,78 @@ sink()  # close the file
 
 ```
 
+```{r}
+#| label: canopy area ANOVA
+
+# Define output file
+output_file <- here("results", "canopy_area.txt")
+sink(output_file)
+
+cat("=== Canopy Area Analysis Report ===\n")
+cat("Date/Time of analysis:", 
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+cat("============================================================\n\n")
+
+cat("=== Normality Check and Transformation ===\n\n")
+
+# --- Raw normality ---
+cat("Shapiro-Wilk test (raw data):\n")
+shapiro_raw <- shapiro.test(ANPPandRoot_df$plot_mean_Cover)
+print(shapiro_raw)
+
+# Apply bestNormalize if not normal
+if (shapiro_raw$p.value < 0.05) {
+  cat("\nData not normal (p < 0.05). Applying bestNormalize...\n")
+  BN_plot_mean_Cover <- bestNormalize(ANPPandRoot_df$plot_mean_Cover)
+  print(BN_plot_mean_Cover)
+  
+  # Save normalized/transformed variable to dataframe
+  ANPPandRoot_df$plot_mean_Cover_norm <- predict(BN_plot_mean_Cover)
+  
+  cat("\nShapiro-Wilk test (transformed data):\n")
+  shapiro_trans <- shapiro.test(ANPPandRoot_df$plot_mean_Cover_norm)
+  print(shapiro_trans)
+  
+  used_var <- "plot_mean_Cover_norm"
+  transform_used <- class(BN_plot_mean_Cover$chosen_transform)[1]
+  
+} else {
+  cat("\nData are already normal (p >= 0.05). No transformation applied.\n")
+  ANPPandRoot_df$plot_mean_Cover_norm <- ANPPandRoot_df$plot_mean_Cover
+  used_var <- "plot_mean_Cover"
+  transform_used <- "None"
+}
+
+cat("\nTransformation method used:", transform_used, "\n")
+
+# --- QQ plots ---
+par(mfrow = c(1, 2))
+qqnorm(ANPPandRoot_df$plot_mean_Cover, main = "Raw Data")
+qqline(ANPPandRoot_df$plot_mean_Cover)
+qqnorm(ANPPandRoot_df$plot_mean_Cover_norm, main = "Transformed Data")
+qqline(ANPPandRoot_df$plot_mean_Cover_norm)
+par(mfrow = c(1, 1))
+
+# --- ANOVA ---
+cat("\n\n=== Two-Way ANOVA ===\n\n")
+anova_formula <- as.formula(paste(used_var, "~ Site * Treatment"))
+plot_mean_Cover_anova <- aov(anova_formula, data = ANPPandRoot_df)
+anova_summary <- summary(plot_mean_Cover_anova)
+print(anova_summary)
+
+# --- Levene’s Test (Homogeneity of Variance) ---
+cat("\n\n=== Levene's Test for Homogeneity of Variance ===\n\n")
+levene_result <- leveneTest(anova_formula, data = ANPPandRoot_df)
+print(levene_result)
+
+# --- Tukey’s HSD ---
+cat("\n\n=== Pairwise Comparisons (Tukey's HSD) ===\n\n")
+total_pairwise <- TukeyHSD(plot_mean_Cover_anova)
+print(total_pairwise)
+
+sink()  # close the file
+```
+
 ## Group Means
 
 ```{r}
@@ -695,7 +797,8 @@ vars_to_summarize <- c("plot_mean_ANPP",
                         "Root_mass_Can_gm2", 
                         "Root_mass_IC_gm2", 
                         "Root_mass_total_gm2", 
-                        "root_to_ANPP")
+                        "root_to_ANPP",
+                        "plot_mean_Cover")
 
 # --- 1. Site main effect ---
 site_summary <- summary_fun(ANPPandRoot_df, vars_to_summarize, "Site")

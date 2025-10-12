@@ -1,5 +1,5 @@
 === ANPP Analysis Report ===
-Date/Time of analysis: 2025-10-09 14:30:44 
+Date/Time of analysis: 2025-10-12 15:23:57 
 ============================================================
 
 === Normality Check and Transformation ===
@@ -15,15 +15,15 @@ W = 0.89276, p-value = 7.237e-05
 Data not normal (p < 0.05). Applying bestNormalize...
 Best Normalizing transformation with 60 Observations
  Estimated Normality Statistics (Pearson P / df, lower => more normal):
- - arcsinh(x): 1.3667
- - Box-Cox: 1.1667
- - Center+scale: 1.9
+ - arcsinh(x): 1.2667
+ - Box-Cox: 1.2
+ - Center+scale: 1.7
  - Double Reversed Log_b(x+a): 2.8167
  - Exp(x): 5.9
- - Log_b(x+a): 1.3667
- - orderNorm (ORQ): 1.55
- - sqrt(x + a): 1.3833
- - Yeo-Johnson: 1.2167
+ - Log_b(x+a): 1.2667
+ - orderNorm (ORQ): 1.4333
+ - sqrt(x + a): 1.2333
+ - Yeo-Johnson: 1.2
 Estimation method: Out-of-sample via CV with 10 folds and 5 repeats
  
 Based off these, bestNormalize chose:
