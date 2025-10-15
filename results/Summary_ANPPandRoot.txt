@@ -1,5 +1,5 @@
 === Summary Statistics for ANPP and Root Variables ===
-Analysis run on: 2025-10-12 15:24:05 
+Analysis run on: 2025-10-13 09:26:31 
 
 === Means and SE by Site ===
  Site plot_mean_ANPP_mean plot_mean_ANPP_SE Root_mass_Can_gm2_mean Root_mass_Can_gm2_SE Root_mass_IC_gm2_mean Root_mass_IC_gm2_SE

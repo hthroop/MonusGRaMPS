@@ -3,6 +3,8 @@ title: "Enzymes - GRaMPS"
 author: "Heather Throop"
 format: html
 editor: visual
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Overview

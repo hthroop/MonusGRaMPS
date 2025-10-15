@@ -11,14 +11,14 @@ W = 0.82801, p-value = 2.027e-06
 Data not normal (p < 0.05). Applying bestNormalize...
 Best Normalizing transformation with 54 Observations
  Estimated Normality Statistics (Pearson P / df, lower => more normal):
- - arcsinh(x): 1.6087
- - Box-Cox: 1.5447
- - Center+scale: 1.7447
- - Double Reversed Log_b(x+a): 2.012
- - Log_b(x+a): 1.6087
- - orderNorm (ORQ): 1.5933
- - sqrt(x + a): 1.272
- - Yeo-Johnson: 1.5447
+ - arcsinh(x): 1.5693
+ - Box-Cox: 1.636
+ - Center+scale: 2.0047
+ - Double Reversed Log_b(x+a): 2.3847
+ - Log_b(x+a): 1.5693
+ - orderNorm (ORQ): 1.668
+ - sqrt(x + a): 1.5373
+ - Yeo-Johnson: 1.636
 Estimation method: Out-of-sample via CV with 10 folds and 5 repeats
  
 Based off these, bestNormalize chose:
