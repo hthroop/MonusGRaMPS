@@ -20,8 +20,6 @@ Heather's to-do list (July 8, 2025)
 
 -   check units and that fluxes are calculated correctly
 
--   explore wehther treatments or canopy should be merged
-
 -   calculate as total CO2 rather than weighted by soil C - this might be a fairer comparison to the in situ data
 
 ## Preparation Steps
@@ -29,6 +27,7 @@ Heather's to-do list (July 8, 2025)
 ```{r}
 #| label: load packages
 library(tidyverse)
+library(bestNormalize)
 library(cowplot)
 library(patchwork)
 library(here)
@@ -184,7 +183,7 @@ write.csv(ExSituRespRatesNoOutliers, here("results", "ExSituRespRatesNoOutliers_
 ```
 
 ```{r}
-#| label: plot flux for individual samples
+#| label: plot daily flux flux for individual samples
 
 p1 <- ExSituRespRatesNoOutliers |>
 ggplot(aes(x = Cum.Elapsed.days, y = Flux_ugCO2_C.gsoil.day, color = Canopy, group = Sample)) +
@@ -208,6 +207,8 @@ p1
 ## Cumulative Flux
 
 ```{r}
+#| label: calc cumm flux for 40 days
+
 #trapezoidal integration estimate of flux
 
 ExSituRespRates1 <- ExSituRespRates1 |> 

@@ -6,10 +6,12 @@ ANPP_rootbiomass.qmd:
 Analysis of ANPP and rootbiomass data. This code performs calculations, statistical analyses, and outputs bar plots. 
 Compiled by Heather Throop
 
-EnzymeAnalysis.R
+EnzymeAnalysis.qmd
 
-ExSituResp_HT.qmd:
-Analysis of lab-based soil respiration data. 
+
+ExSituResp_HT_calcs.qmd:
+Analysis of lab-based soil respiration data. The code calculates daily flux rates based on repeated headspace sampling and estimates total C mineralized over the first 40 days of the incubation (some jars were incubated longer). It performs ANOVAs of 40 day cumulative flux and outputs summary figures. 
+COMPLETE as of 2025-10-19
 
 GRaMPSCN2019.qmd:
 This compiles and cleans CN data, plots, and does ANOVAs. 
