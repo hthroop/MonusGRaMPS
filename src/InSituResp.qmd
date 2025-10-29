@@ -28,6 +28,12 @@ library(MASS)
 library(lme4)
 library(here)
 library(broom)
+library(lme4)
+library(lmerTest)  # for stepwise methods with p-values (optional)
+library(performance)
+library(purrr)
+library(broom.mixed)
+library(bestNormalize)
 ```
 
 ```{r}
@@ -70,6 +76,18 @@ InSituResp <- InSituResp |>
            TRUE ~ NA_character_  # Set to NA if not in any defined range
          ))
 
+# Add a column to provide a single mean date for each sampling trip 
+InSituResp <- InSituResp |>
+  mutate(Trip_date = case_when(
+    Trip == "1" ~ "2018-06-04",
+    Trip == "2" ~ "2018-06-19",
+    Trip == "3" ~ "2018-07-03",
+    Trip == "4" ~ "2018-07-24",
+    Trip == "5" ~ "2018-08-15",
+    Trip == "6" ~ "2018-09-12",
+    TRUE ~ NA_character_
+  ))
+
 ## data clean-up
 
 # Convert SampleDate to Date format
@@ -106,10 +124,12 @@ There are two collars in each plot - one per microsite. Multiple measurements we
 
 # calculate collar-level means for replicate respiration measurements per collar (~ 4 replicate Licor cycles per collar) for each date x plot x site combination x treatment x microsite combination
 InSituResp_daily_collar_means <- InSituResp |>
-  group_by(SampleDate, Site, Plot, Treatment, Microsite, Season, Trip) |>
+  group_by(SampleDate, Site, Plot, Treatment, Microsite, Season, Trip, Trip_date) |>
   summarise(
     N_reps    = sum(!is.na(EFFLUX)),
     Efflux   = mean(EFFLUX, na.rm = TRUE),
+    sd_Efflux = sd(EFFLUX, na.rm = TRUE),
+    se_Efflux = sd_Efflux/sqrt(N_reps),
     RHcmbr   = mean(RHcmbr, na.rm = TRUE),
     Tsoil_C   = mean(Tsoil_C, na.rm = TRUE), 
     Tsch_C   = mean(Tsch_C, na.rm = TRUE),
@@ -118,30 +138,68 @@ InSituResp_daily_collar_means <- InSituResp |>
 ```
 
 ```{r}
-#| label: graph plot x microsite means for each trip
+#| label: sampling trip means
 
-p_trt_x_microsite <- InSituResp_daily_collar_means |> 
-  ggplot(aes(x = SampleDate, y = Efflux, color = Treatment)) + 
-  geom_point(position = position_dodge(width = 0.5), size = 2) +
-  facet_grid(rows = vars(Site), cols = vars(Microsite), labeller = labeller(
-    Site = label_wrap_gen(width = 15),
+# calculate sampling trip means across plots for site x treatment x microsite combination
+InSituResp_trip_means <- InSituResp_daily_collar_means |>
+  group_by(Trip, Trip_date, Site, Treatment, Microsite) |>
+  summarise(
+    N_reps    = sum(!is.na(Efflux)),
+    mean_Efflux   = mean(Efflux, na.rm = TRUE),
+    sd_Efflux = sd(Efflux, na.rm = TRUE),
+    se_Efflux = sd_Efflux/sqrt(N_reps),
+    RHcmbr   = mean(RHcmbr, na.rm = TRUE),
+    Tsoil_C   = mean(Tsoil_C, na.rm = TRUE), 
+    Tsch_C   = mean(Tsch_C, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+```{r}
+#| label: graph plot x microsite means for each trip 
+
+
+## TO DO - fix colors for symbols, lines, error bars. add letters.
+
+p_trt_x_microsite <- InSituResp_trip_means |> 
+  ggplot(aes(
+    x = Trip_date,
+    y = mean_Efflux,
+    color = Treatment,
+    linetype = Treatment,
+    shape = Treatment,
+    group = Treatment
+  )) + 
+  # Line for each microsite
+  geom_line(size = 1) +
+  # Points for each microsite
+  geom_point(size = 3) +
+  # Error bars
+  geom_errorbar(aes(ymin = mean_Efflux - se_Efflux, ymax = mean_Efflux + se_Efflux), 
+                width = 0.2, position = position_dodge(width = 0.2)) +
+  # Facet by Site and Microsite
+  facet_grid(cols = vars(Site), rows = vars(Microsite), labeller = labeller(
+    site = label_wrap_gen(width = 15),
     Microsite = label_wrap_gen(width = 15))) +
-  scale_y_continuous(limits = c(0, 7.5), breaks = c(0, 2, 4, 6)) +
-  scale_x_date(date_breaks = "2 weeks", date_labels = "%b %d") +
+  # Labels
   ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1})))) +
-  xlab("Sample Date") +
+  xlab("Date") +
   theme_grey(base_size = 18) +
-  scale_color_manual(name = "Treatment", values = c("#de2d26", "#bdbdbd", "#08519c")) +
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    axis.text.x = element_text(angle = 90, hjust = 1, size = 10),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(angle = 90, size = 12),
     axis.text = element_text(size = 15),
     panel.border = element_rect(color = "black", fill = NA),
-    legend.position = "top"
+    legend.position = c(0.02, 0.88),
+    legend.justification = c("left", "top")
   ) +
-  guides(color = guide_legend(title = "Treatment"))
+  scale_color_manual(name = "Treatment", values = c("#de2d26", "darkgrey", "#08519c")) +
+  scale_shape_manual(values = c(21, 24, 19)) +
+  scale_linetype_manual(values = c("solid", "dashed", "dotted")) 
 p_trt_x_microsite
+
 
 ```
 
@@ -413,8 +471,6 @@ InSituResp_combined <- InSituResp_combined |>
     by = c("Site", "Plot", "Treatment", "Microsite")
   )
 
-### DO I NEED TO DO SOME GAP FILLING FOR MISSING CN VALUES?
-
 
 ```
 
@@ -509,5 +565,142 @@ summary(final_model)
 sink(here("results","insitu_resp_model_summary.txt"))
 summary(final_model)
 sink()
+
+```
+
+```{r}
+#| label: model: site-specific stepwise models for InSituResp
+
+# make a complicated mixed effects model with all possible predictors for each site. 
+
+#------------------------------------------------------------
+# 1. Preprocessing
+#------------------------------------------------------------
+
+
+# Ensure Site and Plot are factors
+InSituResp_combined <- InSituResp_combined |>
+  mutate(
+    Site = as.factor(Site),
+    Plot = as.factor(Plot)
+  )
+
+# Standardize numeric predictors
+numeric_vars <- c("VWC", "Tsoil_C", "C_0.5", "plot_mean_ANPP", "Root_mass_gm2")
+InSituResp_combined <- InSituResp_combined |>
+  mutate(across(all_of(numeric_vars), scale))
+
+#------------------------------------------------------------
+# 2. Function: Stepwise model selection for one site
+#------------------------------------------------------------
+fit_stepwise_models <- function(df) {
+  site_name <- unique(df$Site)
+  message("\n===== Running stepwise model selection for site: ", site_name, " =====")
+
+  # Drop rows with missing values and report
+  pre_rows <- nrow(df)
+  df <- df |> drop_na(VWC, Treatment, Tsoil_C, C_0.5, Microsite, plot_mean_ANPP, Root_mass_gm2, Efflux)
+  post_rows <- nrow(df)
+  message("Rows before dropping NAs: ", pre_rows, "; rows used after dropping NAs: ", post_rows)
+
+  # Normality check and transform if needed
+  shapiro_p <- shapiro.test(df$Efflux)$p.value
+  if (shapiro_p < 0.05) {
+    message("Efflux not normal (p = ", round(shapiro_p, 3), "). Applying bestNormalize...")
+    bn_obj <- bestNormalize(df$Efflux)
+    df <- df |> mutate(Efflux_norm = predict(bn_obj))
+    response_var <- "Efflux_norm"
+  } else {
+    message("Efflux approximately normal (p = ", round(shapiro_p, 3), "). No transformation needed.")
+    response_var <- "Efflux"
+  }
+
+  # Define global formula
+  global_formula <- reformulate(
+    c("VWC", "Treatment", "Tsoil_C", "C_0.5", "Microsite", "plot_mean_ANPP", "Root_mass_gm2"),
+    response = response_var
+  )
+
+  # Fit global model safely
+  message("Fitting global mixed model...")
+  global_model <- tryCatch(
+    lmer(update(global_formula, . ~ . + (1 | Plot)), data = df, REML = FALSE),
+    error = function(e) {
+      message("❌ Global model failed for site ", site_name, ": ", e$message)
+      return(NULL)
+    }
+  )
+
+  if (is.null(global_model)) {
+    message("⚠️ Skipping stepwise selection for site ", site_name, " (global model could not be fit).")
+    return(list(
+      summary = tibble(Site = site_name, Final_Model = NA, AIC = NA,
+                       Marginal_R2 = NA, Conditional_R2 = NA),
+      coefs = tibble(Site = site_name, term = NA, estimate = NA,
+                     std.error = NA, statistic = NA, p.value = NA)
+    ))
+  }
+
+  # Stepwise selection safely
+  message("Performing stepwise selection (both directions)...")
+  step_results <- tryCatch({
+    suppressMessages(step(global_model, direction = "both", trace = FALSE))
+  }, error = function(e) {
+    message("⚠️ Stepwise selection failed for site ", site_name, ": ", e$message)
+    return(NULL)
+  })
+
+  best_model <- if (!is.null(step_results)) {
+    tryCatch(get_model(step_results), error = function(e) global_model)
+  } else {
+    global_model
+  }
+
+  # Compute AIC and R²
+  best_AIC <- AIC(best_model)
+  best_r2 <- suppressMessages(r2(best_model))
+
+  # Extract coefficients
+  coef_summary <- tryCatch({
+    broom.mixed::tidy(best_model, effects = "fixed") |>
+      select(term, estimate, std.error, statistic, p.value)
+  }, error = function(e) tibble(term = NA, estimate = NA, std.error = NA,
+                                statistic = NA, p.value = NA))
+
+  # Summarize
+  summary_tbl <- tibble(
+    Site = site_name,
+    Final_Model = deparse(formula(best_model)),
+    AIC = best_AIC,
+    Marginal_R2 = best_r2$R2_marginal,
+    Conditional_R2 = best_r2$R2_conditional
+  )
+
+  coef_tbl <- coef_summary |> mutate(Site = site_name)
+
+  return(list(summary = summary_tbl, coefs = coef_tbl))
+}
+
+#------------------------------------------------------------
+# 3. Run across sites
+#------------------------------------------------------------
+model_results <- InSituResp_combined |>
+  group_split(Site) |>
+  set_names(unique(InSituResp_combined$Site)) |>
+  map(fit_stepwise_models)
+
+# Combine summaries and coefficients
+model_summary <- bind_rows(map(model_results, "summary"))
+model_coefs <- bind_rows(map(model_results, "coefs"))
+
+#------------------------------------------------------------
+# 4. Save results
+#------------------------------------------------------------
+write.csv(model_summary, here("results", "InSituResp_Stepwise_Model_Summaries.csv"), row.names = FALSE)
+write.csv(model_coefs, here("results", "InSituResp_Stepwise_Model_Coefficients.csv"), row.names = FALSE)
+
+message("\n✅ Stepwise model results saved to 'results/' folder.")
+print(model_summary)
+
 
 ```

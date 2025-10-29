@@ -7,7 +7,8 @@ Analysis of ANPP and rootbiomass data. This code performs calculations, statisti
 Compiled by Heather Throop
 
 EnzymeAnalysis.qmd
-
+Analysis of extracellular enzyme activity data. This code performs calculations, statistical analyses (ANOVA), and outputs figures.
+COMPLETE as of 2025-10-14
 
 ExSituResp_HT_calcs.qmd:
 Analysis of lab-based soil respiration data. The code calculates daily flux rates based on repeated headspace sampling and estimates total C mineralized over the first 40 days of the incubation (some jars were incubated longer). It performs ANOVAs of 40 day cumulative flux and outputs summary figures. 
@@ -25,7 +26,5 @@ MicrobialBiomass.R
 Analysis of microbial biomass data. This code performs calculations, statistical analyses (ANOVA), and outputs figures. Multiple L1 files are combined into one df. A boxplot of combined depths is currently used in the manuscript.
 COMPLETE as of 2025-10-08
 
-OverallDOCresults.R
 
-RespirationAnalysis.R
 
