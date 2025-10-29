@@ -138,7 +138,7 @@ InSituResp_daily_collar_means <- InSituResp |>
 ```
 
 ```{r}
-#| label: sampling trip means
+#| label: sampling trip means - separated by microsite
 
 # calculate sampling trip means across plots for site x treatment x microsite combination
 InSituResp_trip_means <- InSituResp_daily_collar_means |>
@@ -153,13 +153,18 @@ InSituResp_trip_means <- InSituResp_daily_collar_means |>
     Tsch_C   = mean(Tsch_C, na.rm = TRUE),
     .groups = "drop"
   )
+
+# Make sure Trip_date is a date
+InSituResp_trip_means <- InSituResp_trip_means |>
+  mutate(
+    Trip_date = as.Date(Trip_date)
+  )
 ```
 
 ```{r}
-#| label: graph plot x microsite means for each trip 
+#| label: graph site x microsite means for each trip 
 
-
-## TO DO - fix colors for symbols, lines, error bars. add letters.
+# note that error bars have global aes that overrides the black, solid bars. See solution on combined microsite graph (2 chunks down)
 
 p_trt_x_microsite <- InSituResp_trip_means |> 
   ggplot(aes(
@@ -170,20 +175,29 @@ p_trt_x_microsite <- InSituResp_trip_means |>
     shape = Treatment,
     group = Treatment
   )) + 
-  # Line for each microsite
-  geom_line(size = 1) +
-  # Points for each microsite
-  geom_point(size = 3) +
-  # Error bars
-  geom_errorbar(aes(ymin = mean_Efflux - se_Efflux, ymax = mean_Efflux + se_Efflux), 
-                width = 0.2, position = position_dodge(width = 0.2)) +
+  # Line for each treatment
+  geom_line(size = 0.7) +
+  # Points: solid symbols filled same as color
+  geom_point(size = 3, stroke = 0.5) +  # default shape 16 is solid circle
+  # Error bars: solid black with caps
+  geom_errorbar(aes(ymin = mean_Efflux - se_Efflux,
+                    ymax = mean_Efflux + se_Efflux),
+                width = 0.2, color = "black", size = 0.7) +
   # Facet by Site and Microsite
-  facet_grid(cols = vars(Site), rows = vars(Microsite), labeller = labeller(
-    site = label_wrap_gen(width = 15),
-    Microsite = label_wrap_gen(width = 15))) +
-  # Labels
+  facet_grid(rows = vars(Microsite), cols = vars(Site), labeller = labeller(
+    Site = label_wrap_gen(width = 15),
+    Microsite = label_wrap_gen(width = 15)
+  )) +
+  # Axis labels
   ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1})))) +
-  xlab("Date") +
+  xlab("Sample Date") +
+  # X-axis ticks every 2 weeks
+  scale_x_date(date_breaks = "2 weeks", date_labels = "%b-%d") +
+  # Manual scales
+  scale_color_manual(name = "", values = c("#de2d26", "#2F4F4F", "#08519c")) +
+  scale_shape_manual(name = "", values = c(15, 16, 17)) +  # all solid
+  scale_linetype_manual(name = "", values = c("dotted", "dashed", "solid")) +
+  # Theme
   theme_grey(base_size = 18) +
   theme(
     panel.grid.major = element_blank(),
@@ -193,13 +207,94 @@ p_trt_x_microsite <- InSituResp_trip_means |>
     axis.text = element_text(size = 15),
     panel.border = element_rect(color = "black", fill = NA),
     legend.position = c(0.02, 0.88),
-    legend.justification = c("left", "top")
-  ) +
-  scale_color_manual(name = "Treatment", values = c("#de2d26", "darkgrey", "#08519c")) +
-  scale_shape_manual(values = c(21, 24, 19)) +
-  scale_linetype_manual(values = c("solid", "dashed", "dotted")) 
+    legend.justification = c("left", "top"),
+    legend.key = element_rect(fill = NA),
+    legend.spacing = unit(0, "pt")
+  )
+
 p_trt_x_microsite
 
+
+```
+
+```{r}
+#| label: sampling trip means - combined by microsite
+
+# calculate sampling trip means across plots for site x treatment combination
+InSituResp_trip_means_micro_combined <- InSituResp_trip_means |>
+  group_by(Trip, Trip_date, Site, Treatment) |>
+  summarise(
+    N_reps    = sum(!is.na(mean_Efflux)),
+    Efflux   = mean(mean_Efflux, na.rm = TRUE),
+    sd_Efflux = sd(mean_Efflux, na.rm = TRUE),
+    se_Efflux = sd_Efflux/sqrt(N_reps),
+    RHcmbr   = mean(RHcmbr, na.rm = TRUE),
+    Tsoil_C   = mean(Tsoil_C, na.rm = TRUE), 
+    Tsch_C   = mean(Tsch_C, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+```{r}
+#| label: graph site x treatment means for each trip 
+# same as above but these are means of the two microsites per plot
+
+
+### ADD LETTERS AND BE DONE
+
+p_trt_x_site <- InSituResp_trip_means_micro_combined |> 
+  ggplot() + 
+  # Line for each treatment
+  geom_line(aes(
+    x = Trip_date,
+    y = Efflux,
+    color = Treatment,
+    linetype = Treatment,
+    group = Treatment
+  ), size = 0.7) +
+  # Points: solid symbols filled same as color
+  geom_point(aes(
+    x = Trip_date,
+    y = Efflux,
+    color = Treatment,
+    shape = Treatment,
+    group = Treatment
+  ), size = 3, stroke = 0.5) +  # default shape 16 is solid circle
+  # Error bars: solid black with caps
+  geom_errorbar(aes(
+    x = Trip_date,
+    ymin = Efflux - se_Efflux,
+    ymax = Efflux + se_Efflux
+  ), width = 0.6, color = "black", size = 0.7) +
+  # Facet by Site
+  facet_grid(cols = vars(Site), labeller = labeller(
+    Site = label_wrap_gen(width = 15)
+  )) +
+  # Axis labels
+  ylab(expression(paste(Soil~CO[2]~Efflux~(mu*mol*CO[2]*m^{-2}*s^{-1})))) +
+  xlab("Sample Date") +
+  # X-axis ticks every 2 weeks
+  scale_x_date(date_breaks = "2 weeks", date_labels = "%b-%d") +
+  # Manual scales
+  scale_color_manual(name = "", values = c("#de2d26", "#2F4F4F", "#08519c")) +
+  scale_shape_manual(name = "", values = c(15, 16, 17)) +
+  scale_linetype_manual(name = "", values = c("dotted", "dashed", "solid")) +
+  # Theme
+  theme_grey(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    axis.text.x = element_text(angle = 90, size = 12),
+    axis.text = element_text(size = 15),
+    panel.border = element_rect(color = "black", fill = NA),
+    legend.position = c(0.02, 0.88),
+    legend.justification = c("left", "top"),
+    legend.key = element_rect(fill = NA),
+    legend.spacing = unit(0, "pt")
+  )
+
+p_trt_x_site
 
 ```
 
