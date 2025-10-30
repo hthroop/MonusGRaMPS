@@ -16,7 +16,8 @@ Code was written by Heather Throop, streamlining and updating the original analy
 Updated:
 
 2025-07-09 Heather Throop\
-2025-07-25 Heather Throop added soil C as s predictor of flux (needs some more work)
+2025-07-25 Heather Throop added soil C as s predictor of flux (needs some more work)\
+2025-10-29 HT worked on predictive models and created a the line graph for means by sampling trip
 
 ## SetUp
 
@@ -137,6 +138,8 @@ InSituResp_daily_collar_means <- InSituResp |>
   )
 ```
 
+## Sampling Trip Means
+
 ```{r}
 #| label: sampling trip means - separated by microsite
 
@@ -239,8 +242,16 @@ InSituResp_trip_means_micro_combined <- InSituResp_trip_means |>
 #| label: graph site x treatment means for each trip 
 # same as above but these are means of the two microsites per plot
 
+# Determine an early date for label placement (adjust as needed)
+label_date <- min(InSituResp_trip_means_micro_combined$Trip_date, na.rm = TRUE)
 
-### ADD LETTERS AND BE DONE
+# Create panel labels with a Date value for x
+panel_labels <- data.frame(
+  Site = unique(InSituResp_trip_means_micro_combined$Site),
+  x = label_date,   # must be a Date, not numeric
+  y = 7.3,
+  label = c("A.", "B.", "C.", "D.", "E.")
+)
 
 p_trt_x_site <- InSituResp_trip_means_micro_combined |> 
   ggplot() + 
@@ -260,7 +271,12 @@ p_trt_x_site <- InSituResp_trip_means_micro_combined |>
     shape = Treatment,
     group = Treatment
   ), size = 3, stroke = 0.5) +  # default shape 16 is solid circle
-  # Error bars: solid black with caps
+  geom_text(
+   data = panel_labels,
+   #inherit.aes = FALSE,
+    aes(x = x, y = y, label = label),
+    hjust = 0, vjust = 1,
+    size = 5) +
   geom_errorbar(aes(
     x = Trip_date,
     ymin = Efflux - se_Efflux,
@@ -295,6 +311,14 @@ p_trt_x_site <- InSituResp_trip_means_micro_combined |>
   )
 
 p_trt_x_site
+
+ggsave(
+  filename = here("figures", "InSituFlux_trip_means.png"),  
+  plot = p_trt_x_site,
+  width = 12,       # width in inches
+  height = 6,       # height in inches
+  dpi = 300         # high-resolution PNG
+)
 
 ```
 
@@ -377,7 +401,7 @@ p_trt_x_season <- InSituResp_daily_collar_means |>
 p_trt_x_season
 
 ggsave(
-  filename = here("figures", "ExSituFlux_by_season.png"),  
+  filename = here("figures", "InSituFlux_by_season.png"),  
   plot = p_trt_x_season,
   width = 12,       # width in inches
   height = 6,       # height in inches
@@ -475,7 +499,7 @@ panel_labels <- data.frame(
   Site = unique(InSituResp_combined_plotmeans$Site),
   x = 0.01,  # Nudges left of the first x category
   y = 8.45,
-  label = c("H.", "F.", "I.", "F.", "J.")
+  label = c("H.", "G.", "I.", "F.", "J.")
 )
 
 # make the plot
@@ -507,7 +531,7 @@ resp_v_VWC_p1 <- InSituResp_combined_plotmeans |>
     panel.border = element_rect(color = "black", fill = NA)) 
 resp_v_VWC_p1
 
-ggsave(here("figures", "ExSituFlux_vs_VWC.png"), plot = resp_v_VWC_p1, width = 10, height = 8)
+ggsave(here("figures", "InSituFlux_vs_VWC.png"), plot = resp_v_VWC_p1, width = 10, height = 8)
 ```
 
 ```{r}
