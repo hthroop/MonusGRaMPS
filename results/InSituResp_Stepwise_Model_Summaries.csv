@@ -1,11 +1,11 @@
 "Site","Final_Model","AIC","Marginal_R2","Conditional_R2"
-"Desert Scrub","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",230.342023356751,0.566114816962244,0.693459943865517
-"Desert Scrub","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",230.342023356751,0.566114816962244,0.693459943865517
+"Desert Scrub","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",228.402591040054,0.574715870246499,0.703701528877154
+"Desert Scrub","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",228.402591040054,0.574715870246499,0.703701528877154
 "Desert Grassland","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",230.774500604392,0.468242256842385,NA
 "Desert Grassland","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",230.774500604392,0.468242256842385,NA
-"Juniper Savanna","Efflux ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + plot_mean_ANPP + ",184.406846942591,0.196310140649003,NA
-"Juniper Savanna","    Root_mass_gm2 + (1 | Plot)",184.406846942591,0.196310140649003,NA
-"Ponderosa Pine Meadow","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",293.398098677567,0.272510526887841,NA
-"Ponderosa Pine Meadow","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",293.398098677567,0.272510526887841,NA
-"Mixed Conifer Meadow","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",273.356693936946,0.383036583415948,NA
-"Mixed Conifer Meadow","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",273.356693936946,0.383036583415948,NA
+"Juniper Savanna","Efflux ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + plot_mean_ANPP + ",184.406846942591,0.196310140649004,NA
+"Juniper Savanna","    Root_mass_gm2 + (1 | Plot)",184.406846942591,0.196310140649004,NA
+"Ponderosa Pine Meadow","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",297.071858230023,0.247161218695271,NA
+"Ponderosa Pine Meadow","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",297.071858230023,0.247161218695271,NA
+"Mixed Conifer Meadow","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",273.491745979923,0.382252838863656,NA
+"Mixed Conifer Meadow","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",273.491745979923,0.382252838863656,NA

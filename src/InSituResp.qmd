@@ -35,6 +35,7 @@ library(performance)
 library(purrr)
 library(broom.mixed)
 library(bestNormalize)
+library(lmerTest)
 ```
 
 ```{r}
@@ -136,6 +137,37 @@ InSituResp_daily_collar_means <- InSituResp |>
     Tsch_C   = mean(Tsch_C, na.rm = TRUE),
     .groups = "drop"
   )
+
+# add new variable that is a unique identifier for each plot x site combination
+InSituResp_daily_plot_means <- InSituResp_daily_collar_means |>
+  mutate(
+    Plot_Site = paste(Site, Plot, sep = "_"),
+    Plot_Site = gsub(" ", "_", Plot_Site)
+  )
+```
+
+```{r}
+#| label: daily plot means
+
+# calculate plot means for replicate microsites (2 micosites per plot) for each date x plot x site combination x treatment combination
+InSituResp_daily_plot_means <- InSituResp_daily_collar_means |>
+  group_by(SampleDate, Site, Plot, Treatment, Season, Trip, Trip_date) |>
+  summarise(
+    N_reps    = sum(!is.na(Efflux)),
+    Efflux   = mean(Efflux, na.rm = TRUE),
+    RHcmbr   = mean(RHcmbr, na.rm = TRUE),
+    Tsoil_C   = mean(Tsoil_C, na.rm = TRUE), 
+    Tsch_C   = mean(Tsch_C, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# add new variable that is a unique identifier for each plot x site combination
+InSituResp_daily_plot_means <- InSituResp_daily_plot_means |>
+  mutate(
+    Plot_Site = paste(Site, Plot, sep = "_"),
+    Plot_Site = gsub(" ", "_", Plot_Site)
+  )
+
 ```
 
 ## Sampling Trip Means
@@ -197,7 +229,7 @@ p_trt_x_microsite <- InSituResp_trip_means |>
   # X-axis ticks every 2 weeks
   scale_x_date(date_breaks = "2 weeks", date_labels = "%b-%d") +
   # Manual scales
-  scale_color_manual(name = "", values = c("#de2d26", "#2F4F4F", "#08519c")) +
+  scale_color_manual(name = "", values = c("#de2d26", "grey", "#08519c")) +
   scale_shape_manual(name = "", values = c(15, 16, 17)) +  # all solid
   scale_linetype_manual(name = "", values = c("dotted", "dashed", "solid")) +
   # Theme
@@ -292,7 +324,7 @@ p_trt_x_site <- InSituResp_trip_means_micro_combined |>
   # X-axis ticks every 2 weeks
   scale_x_date(date_breaks = "2 weeks", date_labels = "%b-%d") +
   # Manual scales
-  scale_color_manual(name = "", values = c("#de2d26", "#2F4F4F", "#08519c")) +
+  scale_color_manual(name = "", values = c("#de2d26", "darkgrey", "#08519c")) +
   scale_shape_manual(name = "", values = c(15, 16, 17)) +
   scale_linetype_manual(name = "", values = c("dotted", "dashed", "solid")) +
   # Theme
@@ -319,6 +351,91 @@ ggsave(
   height = 6,       # height in inches
   dpi = 300         # high-resolution PNG
 )
+
+```
+
+```{r}
+#| label: mixed effect model - trip means by microsite
+
+# create a lme with response variable Efflux, main effects are treatment, site, microsite, Trip_date, and random effect is the plot number x site combo
+
+InSituResp_daily_collar_means <- InSituResp_daily_collar_means |>
+  mutate(
+    Plot_Site = paste(Site, Plot, sep = "_"),
+    Plot_Site = gsub(" ", "_", Plot_Site)
+  )
+
+# make sure variables are factors
+InSituResp_daily_collar_means$Plot_Site <- factor(InSituResp_daily_collar_means$Plot_Site)
+InSituResp_daily_collar_means$Trip_date <- factor(InSituResp_daily_collar_means$Trip_date)
+
+# test ANOVA assumptions
+qqnorm(InSituResp_daily_collar_means$Efflux)
+qqline(InSituResp_daily_collar_means$Efflux)
+
+# Shapiro–Wilk (note: mixed models are robust, but good for inspection)
+shapiro.test(InSituResp_daily_plot_means$Efflux)
+### data are not normal
+
+# use bestNormalize to transform data
+bn_efflux <- bestNormalize(InSituResp_daily_collar_means$Efflux,
+                           allow_orderNorm = FALSE)
+bn_efflux
+InSituResp_daily_collar_means$Efflux_norm <- predict(bn_efflux)
+
+# check whether normal now
+qqnorm(InSituResp_daily_collar_means$Efflux_norm)
+qqline(InSituResp_daily_collar_means$Efflux_norm)
+shapiro.test(InSituResp_daily_collar_means$Efflux_norm)
+
+# apply model with 2-way interactions to the noramlized data
+model_norm_1 <- lmer(
+  Efflux_norm ~ (Treatment + Microsite + Site + Trip_date)^2 + (1 | Plot_Site),
+  data = InSituResp_daily_collar_means
+)
+summary(model_norm_1)
+anova(model_norm_1)
+
+# save anove results as csv
+anova_results <- as.data.frame(anova(model_norm_1))
+write.csv(anova_results, here("results","InSituResp_ANOVA_incl_microsites.csv"))
+```
+
+
+
+```{r}
+#| label: mixed effect model - trip means by plot
+
+# create a lme with response variable Efflux, main effects are treatment, site, Trip_date, and random effect is the plot number x site combo
+
+# make sure variables are factors
+InSituResp_daily_plot_means$Plot_Site <- factor(InSituResp_daily_plot_means$Plot_Site)
+InSituResp_daily_plot_means$Trip_date <- factor(InSituResp_daily_plot_means$Trip_date)
+
+# test ANOVA assumptions
+qqnorm(InSituResp_daily_plot_means$Efflux)
+qqline(InSituResp_daily_plot_means$Efflux)
+
+# Shapiro–Wilk (note: mixed models are robust, but good for inspection)
+shapiro.test(InSituResp_daily_plot_means$Efflux)
+### data are not normal
+
+# use bestNormalize to transform data
+bn_efflux <- bestNormalize(InSituResp_daily_plot_means$Efflux)
+bn_efflux
+InSituResp_daily_plot_means$Efflux_norm <- predict(bn_efflux)
+
+# apply model with 2-way interactions to the noramlized data
+model_norm <- lmer(
+  Efflux_norm ~ (Treatment + Site + Trip_date)^2 + (1 | Plot_Site),
+  data = InSituResp_daily_plot_means
+)
+summary(model_norm)
+anova(model_norm)
+
+# save anove results as csv
+anova_results <- as.data.frame(anova(model_norm))
+write.csv(anova_results, here("results","InSituResp_ANOVA_microsites_combined_results.csv"))
 
 ```
 
@@ -686,6 +803,64 @@ summary(final_model)
 sink()
 
 ```
+
+This is a linear mixed-effects modeling approach to evaluate the drivers of soil CO₂ efflux. The full model was fit using maximum likelihood and simplified via Satterthwaite-based stepwise selection using the lmerTest package. Marginal and conditional R² values were calculated following Nakagawa & Schielzeth (2013). This allowed quantification of the variance explained by fixed predictors alone (R²m) and by the full mixed model including random plot effects (R²c).
+
+```{r}
+#| label: model: predictive relationship for InSituResp across sites
+
+# Use linear mixed effects models to predict Efflux based on VWC and Tsoil_C, with a different model for each site
+
+# Full model with all fixed effects
+full_model_allsites <- lmer(
+  Efflux ~ VWC + Treatment + Tsoil_C + C_0.5 + 
+    Microsite + plot_mean_ANPP + Root_mass_gm2 + (1 | Plot),
+  data = InSituResp_combined,
+  REML = FALSE
+)
+
+# Stepwise selection (Satterthwaite)
+stepwise_model_allsites <- step(full_model_allsites)
+
+# Extract the final model
+final_model_allsites <- get_model(stepwise_model_allsites)
+
+# Show final summary
+summary(final_model_allsites)
+
+# Compute marginal and conditional R2 for lmer models (no MuMIn)
+r2_lmer_manual <- function(model) {
+  # Extract variance components
+  var_fix <- var(as.vector(fixef(model) %*% t(model.matrix(model))))  # variance of fixed effects
+  var_rand <- sum(unlist(VarCorr(model)))                              # random effect variance
+  var_resid <- sigma(model)^2                                          # residual variance
+  
+  # Marginal R2: fixed effects only
+  r2_marginal <- var_fix / (var_fix + var_rand + var_resid)
+  
+  # Conditional R2: fixed + random
+  r2_conditional <- (var_fix + var_rand) / (var_fix + var_rand + var_resid)
+  
+  return(list(
+    marginal_R2 = r2_marginal,
+    conditional_R2 = r2_conditional
+  ))
+}
+
+r2_vals <- r2_lmer_manual(final_model_allsites)
+r2_vals
+
+# Save output
+sink(here("results","insitu_resp_model_allsites_summary.txt"))
+summary(final_model_allsites)
+cat("\n\n=== Marginal and Conditional R2 ===\n")
+print(r2_vals)
+sink()
+
+
+```
+
+
 
 ```{r}
 #| label: model: site-specific stepwise models for InSituResp
