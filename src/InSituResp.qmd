@@ -36,6 +36,12 @@ library(purrr)
 library(broom.mixed)
 library(bestNormalize)
 library(lmerTest)
+library(MuMIn)
+library(performance)
+library(tidyverse)
+
+options(na.action = "na.fail")  # required for dredge
+
 ```
 
 ```{r}
@@ -582,6 +588,9 @@ InSituResp_combined_plotmeans <- InSituResp_combined_plotmeans |>
   mutate(VWC = ifelse(is.na(VWC), mean(VWC, na.rm = TRUE), VWC)) |>
   ungroup()
 
+```
+
+```{r}
 # regression model for each site (note that this is oddly printed with two lines per site)
 flux_v_VWC_regression_results <- InSituResp_combined_plotmeans |>
   group_by(Site) |>
@@ -607,6 +616,7 @@ flux_v_VWC_regression_results <- InSituResp_combined_plotmeans |>
 
 flux_v_VWC_regression_results
 ```
+
 
 ```{r}
 #|label: graph: efflux vs VWC
@@ -998,3 +1008,217 @@ print(model_summary)
 
 
 ```
+
+### Single Global Model
+
+```{r}
+#| label: pre-processing for global model
+
+InSituResp_combined <- InSituResp_combined |>
+  mutate(
+    Site = as.factor(Site),
+    Plot = as.factor(Plot)
+  )
+
+numeric_vars <- c("VWC", "Tsoil_C", "C_0.5", "plot_mean_ANPP", "Root_mass_gm2")
+InSituResp_combined <- InSituResp_combined |>
+  mutate(across(all_of(numeric_vars), scale))
+
+# Drop rows with missing data once, globally
+pre_rows <- nrow(InSituResp_combined)
+
+InSituResp_clean <- InSituResp_combined |>
+  drop_na(
+    Efflux, VWC, Treatment, Tsoil_C, C_0.5,
+    Microsite, plot_mean_ANPP, Root_mass_gm2, Site
+  )
+
+post_rows <- nrow(InSituResp_clean)
+
+message("Rows before dropping NAs: ", pre_rows,
+        "; rows used after dropping NAs: ", post_rows)
+
+```
+
+```{r}
+#| label: normality check
+
+shapiro_p <- shapiro.test(InSituResp_clean$Efflux)$p.value
+
+if (shapiro_p < 0.05) {
+  message("Efflux not normal (p = ", round(shapiro_p, 3), "). Applying bestNormalize...")
+  bn_obj <- bestNormalize(InSituResp_clean$Efflux)
+  InSituResp_clean <- InSituResp_clean |>
+    mutate(Efflux_norm = predict(bn_obj))
+  response_var <- "Efflux_norm"
+} else {
+  message("Efflux approximately normal (p = ", round(shapiro_p, 3), "). No transformation needed.")
+  response_var <- "Efflux"
+}
+
+```
+
+```{r}
+#| label: global mixed effects model
+
+global_formula <- reformulate(
+  c("VWC", "Treatment", "Tsoil_C", "C_0.5",
+    "Microsite", "plot_mean_ANPP", "Root_mass_gm2", "Site"),
+  response = response_var
+)
+
+message("Fitting global mixed-effects model...")
+
+global_model <- lmer(
+  update(global_formula, . ~ . + (1 | Plot)),
+  data = InSituResp_clean,
+  REML = FALSE
+)
+
+```
+
+```{r}
+#| label: model selection with dredge
+
+message("Running AICc-based model selection...")
+
+model_set <- dredge(global_model, rank = "AICc")
+
+# Inspect top models
+print(head(model_set, 10))
+
+```
+
+```{r}
+#| label: extract best model
+
+best_model <- get.models(model_set, subset = 1)[[1]]
+
+summary(best_model)
+
+```
+
+```{r}
+#| label: model diagnostics
+
+# R²
+r2_vals <- r2(best_model)
+
+# Coefficients
+coef_tbl <- broom.mixed::tidy(best_model, effects = "fixed") |>
+  dplyr::select(term, estimate, std.error, statistic, p.value)
+
+# Model summary table
+model_summary <- tibble(
+  Final_Model = deparse(formula(best_model)),
+  AICc = AICc(best_model),
+  Marginal_R2 = r2_vals$R2_marginal,
+  Conditional_R2 = r2_vals$R2_conditional
+)
+
+```
+
+```{r}
+#| label: save AICc model results
+
+write.csv(
+  model_summary,
+  here("results", "InSituResp_AICc_Model_Summary.csv"),
+  row.names = FALSE
+)
+
+write.csv(
+  coef_tbl,
+  here("results", "InSituResp_AICc_Model_Coefficients.csv"),
+  row.names = FALSE
+)
+
+message("\n✅ AICc-based model selection complete. Results saved to 'results/' folder.")
+print(model_summary)
+
+```
+
+```{r}
+#| label: extract a model selection table
+
+model_table <- as.data.frame(model_set) |>
+  as_tibble() |>
+  mutate(
+    Delta_AICc = AICc - min(AICc)
+  ) |>
+  arrange(AICc)
+
+
+# extract human readable model formulas
+model_table <- as.data.frame(model_set) |>
+  as_tibble() |>
+  mutate(
+    Delta_AICc = AICc - min(AICc),
+    Model_ID = row_number()
+  )
+
+model_formulas <- map_chr(
+  seq_len(nrow(model_set)),
+  ~ paste(
+      deparse(formula(get.models(model_set, subset = .x)[[1]])),
+      collapse = " "
+    )
+)
+
+model_table <- model_table |>
+  mutate(Formula = model_formulas)
+
+
+model_table <- model_table |>
+  mutate(
+    Formula = gsub("\\s+", " ", Formula),
+    Formula = gsub("\\(1 \\| Plot\\)", "+ (1 | Plot)", Formula)
+  )
+
+```
+
+```{r}
+#| label: save model selection table
+
+model_table_top <- model_table |>
+  filter(Delta_AICc < 2) |>
+  dplyr::select(
+    Model_ID,
+    Formula,
+    df,
+    AICc,
+    Delta_AICc,
+    weight
+  ) |>
+  arrange(AICc)
+
+print(model_table_top)
+
+write.csv(
+  model_table_top,
+  here("results", "InSituResp_AICc_TopModels_DeltaAICc_lt2.csv"),
+  row.names = FALSE
+)
+
+```
+
+```{r}
+#| label: compact table
+
+supported_predictors <- model_table |>
+  filter(Delta_AICc < 2) |>
+  dplyr::select(
+    -Model_ID, -Formula, -df, -AICc, -Delta_AICc, -weight
+  ) |>
+  dplyr::select(where(is.numeric)) |>
+  summarise(dplyr::across(everything(), mean)) |>
+  tidyr::pivot_longer(
+    cols = everything(),
+    names_to = "Predictor",
+    values_to = "Inclusion_Proportion"
+  ) |>
+  arrange(desc(Inclusion_Proportion))
+
+
+```
+

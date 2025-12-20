@@ -16,23 +16,23 @@ Random effects:
 Number of obs: 506, groups:  Plot, 11
 
 Fixed effects:
-                   Estimate Std. Error        df t value Pr(>|t|)    
-(Intercept)         1.90891    0.09223  37.39021  20.698  < 2e-16 ***
-VWC                 0.46097    0.04699 501.93449   9.810  < 2e-16 ***
-TreatmentAmbient   -0.55496    0.11286 311.12613  -4.917 1.42e-06 ***
-TreatmentAddition  -0.34783    0.11880 392.43481  -2.928  0.00361 ** 
-C_0.5               0.59901    0.06575 484.69034   9.110  < 2e-16 ***
-plot_mean_ANPP      0.54448    0.06765 444.13391   8.049 7.71e-15 ***
+                    Estimate Std. Error         df t value Pr(>|t|)    
+(Intercept)        -0.507643   0.110081  81.504582  -4.612 1.46e-05 ***
+VWC                 6.941720   0.707642 501.934491   9.810  < 2e-16 ***
+TreatmentAmbient   -0.554958   0.112857 311.126130  -4.917 1.42e-06 ***
+TreatmentAddition  -0.347833   0.118803 392.434806  -2.928  0.00361 ** 
+C_0.5               0.367853   0.040377 484.690342   9.110  < 2e-16 ***
+plot_mean_ANPP      0.009908   0.001231 444.133913   8.049 7.71e-15 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Correlation of Fixed Effects:
             (Intr) VWC    TrtmntAm TrtmntAd C_0.5 
-VWC          0.072                                
-TrtmntAmbnt -0.646 -0.092                         
-TrtmntAddtn -0.659 -0.094  0.537                  
-C_0.5       -0.193 -0.286  0.147    0.321         
-plt_mn_ANPP  0.283 -0.063 -0.227   -0.429   -0.703
+VWC         -0.310                                
+TrtmntAmbnt -0.410 -0.092                         
+TrtmntAddtn -0.398 -0.094  0.537                  
+C_0.5       -0.241 -0.286  0.147    0.321         
+plt_mn_ANPP  0.027 -0.063 -0.227   -0.429   -0.703
 
 
 === Marginal and Conditional R2 ===

@@ -1,0 +1,3 @@
+"Final_Model","AICc","Marginal_R2","Conditional_R2"
+"Efflux_norm ~ C_0.5 + plot_mean_ANPP + Site + Tsoil_C + VWC + ",796.361659587425,0.729650308637277,NA
+"    (1 | Plot)",796.361659587425,0.729650308637277,NA

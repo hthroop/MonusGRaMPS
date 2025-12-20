@@ -1,0 +1,7 @@
+"Model_ID","Formula","df","AICc","Delta_AICc","weight"
+1,"Efflux_norm ~ C_0.5 + plot_mean_ANPP + Site + Tsoil_C + VWC + + (1 | Plot)",11,796.361659587425,0,0.147928985214804
+2,"Efflux_norm ~ C_0.5 + plot_mean_ANPP + Site + Treatment + Tsoil_C + VWC + + (1 | Plot)",13,796.746122753184,0.384463165758689,0.122058537605904
+3,"Efflux_norm ~ plot_mean_ANPP + Site + Treatment + Tsoil_C + VWC + + (1 | Plot)",12,797.711894201372,1.35023461394724,0.0753101576912061
+4,"Efflux_norm ~ C_0.5 + plot_mean_ANPP + Root_mass_gm2 + Site + Treatment + Tsoil_C + VWC + + (1 | Plot)",14,797.822978336532,1.46131874910736,0.0712413176675246
+5,"Efflux_norm ~ C_0.5 + plot_mean_ANPP + Root_mass_gm2 + Site + Tsoil_C + VWC + + (1 | Plot)",12,798.048890747217,1.68723115979253,0.0636320165836299
+6,"Efflux_norm ~ C_0.5 + Site + Treatment + Tsoil_C + VWC + + (1 | Plot)",12,798.171231965799,1.8095723783739,0.0598562670892368
