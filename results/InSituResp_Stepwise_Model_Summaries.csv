@@ -1,11 +1,11 @@
 "Site","Final_Model","AIC","Marginal_R2","Conditional_R2"
-"Desert Scrub","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",230.342023356751,0.566114816962298,0.69345994386543
-"Desert Scrub","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",230.342023356751,0.566114816962298,0.69345994386543
-"Desert Grassland","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",244.256216114744,0.388508231762877,NA
-"Desert Grassland","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",244.256216114744,0.388508231762877,NA
+"Desert Scrub","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",228.402591040054,0.574715870252089,0.703701528868315
+"Desert Scrub","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",228.402591040054,0.574715870252089,0.703701528868315
+"Desert Grassland","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",230.774500604392,0.468242256842382,NA
+"Desert Grassland","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",230.774500604392,0.468242256842382,NA
 "Juniper Savanna","Efflux ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + plot_mean_ANPP + ",184.406846942591,0.196310140649002,NA
 "Juniper Savanna","    Root_mass_gm2 + (1 | Plot)",184.406846942591,0.196310140649002,NA
-"Ponderosa Pine Meadow","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",291.213129505441,0.287177691213919,NA
-"Ponderosa Pine Meadow","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",291.213129505441,0.287177691213919,NA
+"Ponderosa Pine Meadow","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",293.398098677567,0.27251052688784,NA
+"Ponderosa Pine Meadow","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",293.398098677567,0.27251052688784,NA
 "Mixed Conifer Meadow","Efflux_norm ~ VWC + Treatment + Tsoil_C + C_0.5 + Microsite + ",273.356693936946,0.383036583415951,NA
 "Mixed Conifer Meadow","    plot_mean_ANPP + Root_mass_gm2 + (1 | Plot)",273.356693936946,0.383036583415951,NA

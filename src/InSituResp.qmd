@@ -1046,15 +1046,51 @@ message("Rows before dropping NAs: ", pre_rows,
 shapiro_p <- shapiro.test(InSituResp_clean$Efflux)$p.value
 
 if (shapiro_p < 0.05) {
-  message("Efflux not normal (p = ", round(shapiro_p, 3), "). Applying bestNormalize...")
-  bn_obj <- bestNormalize(InSituResp_clean$Efflux)
+
+  bn_obj <- bestNormalize(
+    InSituResp_clean$Efflux,
+    allow_orderNorm = FALSE
+  )
+
+  transform_name <- class(bn_obj$chosen_transform)[1]
+
+  message("bestNormalize selected transformation: ", transform_name)
+
   InSituResp_clean <- InSituResp_clean |>
     mutate(Efflux_norm = predict(bn_obj))
+
   response_var <- "Efflux_norm"
+
 } else {
-  message("Efflux approximately normal (p = ", round(shapiro_p, 3), "). No transformation needed.")
+
+  message("Efflux approximately normal. No transformation applied.")
   response_var <- "Efflux"
 }
+
+
+# visual check of the transformation
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+
+hist(
+  InSituResp_clean$Efflux,
+  breaks = 30,
+  main = "Raw Efflux",
+  xlab = "Efflux",
+  col = "grey80",
+  border = "white"
+)
+
+hist(
+  InSituResp_clean$Efflux_norm,
+  breaks = 30,
+  main = "Transformed Efflux (Efflux_norm)",
+  xlab = "Efflux_norm",
+  col = "grey80",
+  border = "white"
+)
+
+par(mfrow = c(1, 1))
+
 
 ```
 
