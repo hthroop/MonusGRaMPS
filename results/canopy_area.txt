@@ -1,5 +1,5 @@
 === Canopy Area Analysis Report ===
-Date/Time of analysis: 2025-10-13 09:26:30 
+Date/Time of analysis: 2026-01-05 15:29:20 
 ============================================================
 
 === Normality Check and Transformation ===
@@ -15,15 +15,15 @@ W = 0.88348, p-value = 3.464e-05
 Data not normal (p < 0.05). Applying bestNormalize...
 Best Normalizing transformation with 60 Observations
  Estimated Normality Statistics (Pearson P / df, lower => more normal):
- - arcsinh(x): 1.35
- - Box-Cox: 1.3333
- - Center+scale: 1.85
- - Double Reversed Log_b(x+a): 2.3267
- - Exp(x): 6.4367
- - Log_b(x+a): 1.35
- - orderNorm (ORQ): 1.4833
- - sqrt(x + a): 1.6333
- - Yeo-Johnson: 1.35
+ - arcsinh(x): 1.2667
+ - Box-Cox: 1.2167
+ - Center+scale: 1.7667
+ - Double Reversed Log_b(x+a): 2.7333
+ - Exp(x): 6.6633
+ - Log_b(x+a): 1.2667
+ - orderNorm (ORQ): 1.45
+ - sqrt(x + a): 1.2667
+ - Yeo-Johnson: 1.25
 Estimation method: Out-of-sample via CV with 10 folds and 5 repeats
  
 Based off these, bestNormalize chose:
